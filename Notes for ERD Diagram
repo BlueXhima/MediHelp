@@ -1,0 +1,17 @@
+MediHelp:
+Patient
+- First Name
+- Middle Name
+- Last Name
+
+Illness Info
+- Contigious (Boolean)
+- Severity
+- Category
+
+Voice Interaction
+- Response Type (Text or Voice)
+
+MediHelp 2:
+Audit Log
+- Status (Success or Failed)
