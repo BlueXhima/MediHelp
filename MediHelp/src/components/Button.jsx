@@ -30,7 +30,7 @@ const Button = ({ variant, iconName, iconPosition, children, fullWidth, iconColo
                 variant === 'primary' && 'bg-primary text-md text-white hover:bg-primary/90',
                 fullWidth && 'w-full'
             )}
-            {...restProps}
+            {...restProps} // Pass only valid props to the DOM
         >
             {iconPosition === 'left' && IconComponent && (
                 <IconComponent className="mr-2" size={16} color={iconColor || 'currentColor'} />

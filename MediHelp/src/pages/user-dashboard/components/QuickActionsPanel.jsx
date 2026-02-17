@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mic, User, BookOpen, Phone, Calendar, FileText, MapPin, Settings } from 'lucide-react';
 import Icon from './Icon';
 import Button from './Button';
+import { redirectToNearbyHospitals } from '../../../lib/locationUtils';
+import GoogleMapEmbed from '../../../components/GoogleMapEmbed';
 
 const QuickActionsPanel = () => {
     const quickActions = [
@@ -49,6 +51,54 @@ const QuickActionsPanel = () => {
         alert("Emergency services: 911\nPoison Control: 1-800-222-1222\nMental Health Crisis: 988");
     };
 
+    const [showMap, setShowMap] = React.useState(false);
+    const [userLocation, setUserLocation] = React.useState(null);
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const handleNearbyHospitalClick = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log("User location fetched:", { lat: latitude, lng: longitude });
+                const googleMapsUrl = `https://www.google.com/maps/search/hospitals/@${latitude},${longitude},15z`;
+                alert("Redirecting to Google Maps to show nearby hospitals."); // Feedback
+                window.open(googleMapsUrl, "_blank"); // Redirect to Google Maps
+            },
+            (error) => {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert("Location permission denied. Please enable location permissions in your browser settings.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert("Location information is unavailable. Please check your device settings.");
+                        break;
+                    case error.TIMEOUT:
+                        alert("The request to get your location timed out. Please try again.");
+                        break;
+                    default:
+                        alert("An unknown error occurred while fetching your location. Please try again later.");
+            }
+            console.error("Geolocation error:", error);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 } // Ensure high accuracy for location
+        );
+    };
+
+    // Debugging logs
+    console.log("User location:", userLocation);
+    console.log("Show map state:", showMap);
+
+    if (!window.google) {
+        console.error("Google Maps JavaScript API is not loaded. Check your API key and script tag in index.html.");
+    } else {
+        console.log("Google Maps JavaScript API loaded successfully.");
+    }
+
     return (
         <div className="bg-card dark:bg-card border-t border-b border-border/50 dark:border-border/30 rounded-lg p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
@@ -56,7 +106,7 @@ const QuickActionsPanel = () => {
                     <Icon name="Zap" size={24} color="var(--color-accent)" className="mr-3" />
                     Quick Actions
                 </h3>
-                <span className="text-sm text-text-secondary">Get help fast</span>
+                <span className="text-sm text-muted-foreground">Get help fast</span>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {quickActions.map((action) => (
@@ -97,19 +147,35 @@ const QuickActionsPanel = () => {
             </div>
             <div className="mt-6 pt-4 border-t border-gray-100">
                 <div className="flex flex-wrap gap-2 justify-center">
-                    <Button variant="ghost" size="sm" className="text-xs">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs cursor-pointer bg-transparent border text-black px-4 py-2 rounded-sm hover:bg-blue-600 hover:text-white"
+                        onClick={redirectToNearbyHospitals}
+                    >
                         <MapPin size={14} className="mr-1" />
                         Nearby Hospital
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-xs">
+
+                    {showMap && userLocation && (
+                        <div className="mt-4">
+                            <GoogleMapEmbed
+                                apiKey="YOUR_VALID_GOOGLE_MAPS_API_KEY"
+                                center={userLocation}
+                                zoom={15}
+                            />
+                        </div>
+                    )}
+
+                    <Button variant="ghost" size="sm" className="text-xs cursor-pointer bg-transparent border text-black px-4 py-2 rounded-sm hover:bg-blue-600 hover:text-white">
                         <FileText size={14} className="mr-1" />
                         Medical Records
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-xs">
+                    <Button variant="ghost" size="sm" className="text-xs cursor-pointer bg-transparent border text-black px-4 py-2 rounded-sm hover:bg-blue-600 hover:text-white">
                         <MapPin size={14} className="mr-1" />
                         Find Doctors
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-xs">
+                    <Button variant="ghost" size="sm" className="text-xs cursor-pointer bg-transparent border text-black px-4 py-2 rounded-sm hover:bg-blue-600 hover:text-white">
                         <Settings size={14} className="mr-1" />
                         Preferences
                     </Button>
