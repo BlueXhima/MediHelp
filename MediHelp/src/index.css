@@ -163,3 +163,14 @@
   padding: 0;
   text-align: center;
 }
+
+/* Specific styles for POSITION_UNAVAILABLE links */
+.toast.error a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.toast.error a:hover {
+  text-decoration: underline;
+  color: #FFD700;
+}

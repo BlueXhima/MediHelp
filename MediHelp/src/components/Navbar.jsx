@@ -5,6 +5,7 @@ import { ThemeToggle } from "./ThemeToggle"
 import { AuthModal } from "./AuthModal"
 import { AuthContext } from "../context/AuthContext.jsx"
 import { Link, useNavigate } from "react-router-dom"
+import LogoutModal from "./LogoutModal"
 
 const navItems = [
     { name: 'Home', to: '/' },
@@ -58,6 +59,11 @@ export const Navbar = () => {
             return user.email.charAt(0).toUpperCase();
         }
         return 'U';
+    };
+
+    const handleLogoutClick = () => {
+        setIsDropdownOpen(false); // Close the dropdown
+        setIsLogoutModalOpen(true); // Open the logout modal
     };
 
     return (
@@ -215,7 +221,7 @@ export const Navbar = () => {
                                                 <span>Help & Support</span>
                                             </button>
                                             <button
-                                                onClick={openLogoutModal}
+                                                onClick={handleLogoutClick}
                                                 className="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-500/10 transition cursor-pointer border-t border-border"
                                             >
                                                 <LogOut size={18} />
@@ -290,28 +296,11 @@ export const Navbar = () => {
             <AuthModal />
 
             {/* Logout Modal */}
-            {isLogoutModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fadeIn">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-80 transform scale-95 hover:scale-100 transition-transform duration-300">
-                        <h2 className="text-xl font-bold text-gray-800 mb-4">Confirm Logout</h2>
-                        <p className="text-sm text-gray-600 mb-6">Are you sure you want to log out? This action will end your session.</p>
-                        <div className="flex justify-center space-x-4">
-                            <button
-                                className="px-4 py-2 cursor-pointer rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 shadow-sm hover:shadow-md transition-all"
-                                onClick={() => setIsLogoutModalOpen(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="px-4 py-2 cursor-pointer rounded-md bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow-md transition-all"
-                                onClick={handleLogout}
-                            >
-                                Logout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <LogoutModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onLogout={handleLogout}
+            />
         </>
     )
 };

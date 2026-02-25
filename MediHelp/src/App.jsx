@@ -19,6 +19,7 @@ import { VoiceAssistantInteraction } from './pages/voice-assistant-interaction/i
 import { HealthProfile } from './pages/health-profile/index.jsx';
 import { GuidanceLibrary } from './pages/guidance-library/index.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
+import LearnHow from './pages/user-dashboard/components/LearnHow.jsx';
 
 function AppRoutes() {
   const { user } = useContext(AuthContext);
@@ -50,6 +51,7 @@ function AppRoutes() {
           <Route path="/voice-assistant" element={<VoiceAssistantInteraction />} />
           <Route path="/health-profile" element={<HealthProfile />} />
           <Route path="/guidance-library" element={<GuidanceLibrary />} />
+          <Route path="/learn-how" element={<LearnHow />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <AuthModal />

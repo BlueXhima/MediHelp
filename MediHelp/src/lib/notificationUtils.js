@@ -4,7 +4,7 @@
 export function showNotification(message, type = "info") {
     const notification = document.createElement("div");
     notification.className = `toast ${type}`; // Add classes for styling
-    notification.innerText = message;
+    notification.innerHTML = message; // Use innerHTML to support HTML content
 
     // Style the toast
     Object.assign(notification.style, {
@@ -15,7 +15,6 @@ export function showNotification(message, type = "info") {
         color: "white",
         padding: "10px 20px",
         borderRadius: "5px",
-        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
         zIndex: 1000,
         fontSize: "14px",
         fontWeight: "bold",
