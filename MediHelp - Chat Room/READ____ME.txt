@@ -1,0 +1,22 @@
+Herosection.jsx
+
+import { GreetingVoice  } from '../components/voice-assistant-widgets/GreetingVoice.jsx'
+
+
+// Determine greeting text dynamically
+  const greetingText = user?.username
+    ? `Welcome back ${user.username}!`
+    : 'Welcome to the MediHelp your voice-assistant healthcare information system.';
+
+
+return {
+
+    <GreetingVoice text={greetingText} />
+
+}
+
+
+
+
+//voice-assistant-widgets/GreetingVoice
+
