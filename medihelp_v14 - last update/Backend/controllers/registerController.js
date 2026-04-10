@@ -44,8 +44,8 @@ router.post(
 
             // Insert user into the database with the RoleID for 'user'
             await dbconnection.query(
-                'INSERT INTO users (FirstName, LastName, Email, Password, RoleID, Created_AT) VALUES (?, ?, ?, ?, ?, ?)',
-                [FirstName, LastName, Email, hashedPassword, roleID, new Date()]
+                'INSERT INTO users (FirstName, LastName, Email, Password, RoleID, created_date, created_time, updated_date, updated_time) VALUES (?, ?, ?, ?, ?, CURDATE(), CURTIME(), NULL, NULL)',
+                [FirstName, LastName, Email, hashedPassword, roleID]
             );
 
             // Generate OTP
