@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Corrected navigate import
 import { cn } from "../lib/utils";
@@ -6,7 +7,7 @@ import { Stethoscope, Menu, X } from "lucide-react";
 import DefaultAvatar from "../assets/default-avatar.png";
 import { Settings, Clipboard, HelpCircle, Shield, Sliders, LogOut } from "lucide-react";
 import axios from "axios";
-import LogoutModal from "./logoutmodal"; // Import the LogoutModal component
+import LogoutModal from "./logoutmodal";
 
 const navItems = [
     { name: "Home", path: "/" },
@@ -19,8 +20,8 @@ const navItems = [
 const userNavItems = [
     { name: "Dashboard", path: "/dashboard" },
     { name: "Voice Assistant", path: "/dashboard/voice-assistant" },
-    { name: "Health Profile", path: "/health-profile" },
-    { name: "Guidance Library", path: "/guidance-library" },
+    { name: "Health Profile", path: "/dashboard/health-profile" },
+    { name: "Guidance Library", path: "/dashboard/guidance-library" },
 ];
 
 const Navbar = () => {
@@ -33,6 +34,7 @@ const Navbar = () => {
     const navigate = useNavigate(); // Corrected navigate import
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false); // Define state for logout modal
     const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown visibility
+    const [user, setUser] = useState(null); // State to hold user data
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -78,9 +80,22 @@ const Navbar = () => {
                     const response = await axios.get('http://localhost:5000/api/user-details', {
                         params: { email },
                     });
-                    const { firstName, lastName } = response.data;
+
+                    // 1. Idinagdag ang profile_picture sa pag-destructure
+                    const { firstName, lastName, profile_picture } = response.data;
                     const fullName = `${firstName} ${lastName}`;
+                    
                     setUserName(fullName);
+
+                    // 2. I-set ang user state para kasama ang profile_picture
+                    // Siguraduhin na may [user, setUser] state ka sa taas
+                    setUser({
+                        firstName,
+                        lastName,
+                        profile_picture: profile_picture // Ito yung gagamitin ng <img> tag
+                    });
+
+                    setIsLoggedIn(true);
                 } catch (error) {
                     console.error('Error fetching user details:', error);
                 }
@@ -90,19 +105,29 @@ const Navbar = () => {
         fetchUserName();
     }, []);
 
+    useEffect(() => {
+        console.log("isLoggedIn:", isLoggedIn);
+        console.log("userRole:", userRole);
+    }, [isLoggedIn, userRole]);
+
     const isActive = (path) => {
+        // 1. Para sa Guest Home (/) - Strict match dapat
         if (path === "/") {
             return location.pathname === "/";
         }
-        return location.pathname.startsWith(path);
+
+        // 2. Para sa User Dashboard (/dashboard) - Strict match dapat
+        if (path === "/dashboard") {
+            return location.pathname === "/dashboard";
+        }
+
+        // 3. Para sa lahat ng iba pang links (About, Health Profile, etc.)
+        // Check kung exact match o kung ito ay sub-page ng current path
+        return location.pathname === path;
     };
 
     const handleLogoutClick = () => {
         setIsLogoutModalOpen(true); // Show the modal
-    };
-
-    const handleCancel = () => {
-        setIsLogoutModalOpen(false); // Hide the modal
     };
 
     const handleDropdownItemClick = () => {
@@ -113,14 +138,16 @@ const Navbar = () => {
         <>
             <nav
                 className={cn(
-                    "fixed w-full z-50 transition-all duration-300",
-                    isScrolled ? "py-3 bg-background/80 backdrop-blur-md shadow-xs" : "py-5"
+                    "fixed top-0 left-0 right-0 z-[50] transition-all duration-500",
+                    isScrolled 
+                        ? "py-3 bg-background/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm" 
+                        : "py-5 bg-transparent"
                 )}
             >
                 <div className="container flex items-center justify-between">
                     {/* Left Side: Logo and Navigation Links */}
                     <div className="flex items-center gap-8">
-                        <Link to="/" className="text-2xl font-bold text-primary flex items-center">
+                        <Link to={isLoggedIn ? "/dashboard" : "/"} className="text-2xl font-bold text-primary flex items-center">
                             <span className="relative z-10 flex items-center gap-3">
                                 <span className="flex items-center gap-2">
                                     <Stethoscope size={20} className="text-primary" aria-hidden="true" />
@@ -129,21 +156,37 @@ const Navbar = () => {
                             </span>
                         </Link>
 
-                        <ul className="hidden md:flex items-center space-x-8">
-                            {(isLoggedIn ? userNavItems : navItems).map((item, index) => (
-                                <li key={index}>
-                                    <Link
-                                        to={item.path}
-                                        className={cn(
-                                            "relative text-foreground hover:text-blue-600 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full",
-                                            isActive(item.path) && "text-blue-600 after:w-full"
-                                        )}
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center space-x-8">
+                            <ul className="flex items-center space-x-1">
+                                {(isLoggedIn ? userNavItems : navItems).map((item, index) => {
+                                    const active = isActive(item.path);
+                                    return (
+                                        <li key={index} className="relative list-none">
+                                            <Link
+                                                to={item.path}
+                                                className={cn(
+                                                    "relative px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 z-10",
+                                                    active ? "text-primary" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200"
+                                                )}
+                                            >
+                                                {item.name}
+
+                                                {active && (
+                                                    <motion.div
+                                                        layoutId="active-pill"
+                                                        className="absolute inset-0 bg-primary/10 rounded-xl border border-primary/20"
+                                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                                        whileHover={{ y: -2 }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                    />
+                                                )}
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
                     </div>
 
                     {/* Right Side: Get Started Button or Avatar */}
@@ -151,73 +194,87 @@ const Navbar = () => {
                         {isLoggedIn ? (
                             <div className="relative">
                                 <div
-                                    className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 shadow-md cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200"
+                                    className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 shadow-md cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200"
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 >
                                     <img
-                                        src={localStorage.getItem("avatar") || DefaultAvatar}
+                                        src={user?.profile_picture || DefaultAvatar}
                                         alt="User Avatar"
                                         className="w-full h-full bg-foreground object-cover"
+                                        onError={(e) => { e.target.src = DefaultAvatar; }}
                                     />
                                 </div>
                                 {isDropdownOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-card border border-gray-200 rounded-md shadow-lg">
-                                        <div className="px-4 py-2 border-b border-gray-200">
-                                            <p className="text-sm text-left font-medium text-foreground">{userName || "User"}</p>
+                                    <div className="absolute p-2 right-0 mt-2 w-64 bg-card/95 backdrop-blur-md border border-border/50 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="px-5 py-4 bg-accent/20 text-left border-b border-border/50">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1 italic">Authorized User</p>
+                                            <p className="text-lg font-medium text-foreground">{userName || "User"}</p>
                                         </div>
-                                        <ul className="py-1">
+                                        <ul className="py-1 space-y-2">
                                             <li>
                                                 <Link
                                                     to="/account-settings"
-                                                    className="flex items-center px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground"
+                                                    className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
-                                                    <i className="mr-2"><Settings size={16} /></i> Account Settings
+                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                                        <Settings size={16} />
+                                                    </i> Account Settings
                                                 </Link>
                                             </li>
                                             <li>
                                                 <Link
                                                     to="/health-records"
-                                                    className="flex items-center px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground"
+                                                    className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
-                                                    <i className="mr-2"><Clipboard size={16} /></i> My Health Records
+                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                                        <Clipboard size={16} />
+                                                    </i> My Health Records
                                                 </Link>
                                             </li>
                                             <li>
                                                 <Link
                                                     to="/help-support"
-                                                    className="flex items-center px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground"
+                                                    className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
-                                                    <i className="mr-2"><HelpCircle size={16} /></i> Help / Support
+                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                                        <HelpCircle size={16} />
+                                                    </i> Help / Support
                                                 </Link>
                                             </li>
                                             <li>
                                                 <Link
                                                     to="/terms-privacy"
-                                                    className="flex items-center px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground"
+                                                    className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
-                                                    <i className="mr-2"><Shield size={16} /></i> Terms & Privacy
+                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                                        <Shield size={16} />
+                                                    </i> Terms & Privacy
                                                 </Link>
                                             </li>
                                             <li>
                                                 <Link
                                                     to="/settings"
-                                                    className="flex items-center px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground"
+                                                    className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
-                                                    <i className="mr-2"><Sliders size={16} /></i> Settings
+                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                                        <Sliders size={16} />
+                                                    </i> Settings
                                                 </Link>
                                             </li>
                                             <li>
-                                                <hr className="border-gray-200 my-1" />
+                                                <hr className="border-border my-1" />
                                             </li>
                                             <li>
                                                 <button
-                                                    className="flex items-center w-full text-left px-4 py-2 text-foreground hover:bg-primary hover:text-primary-foreground cursor-pointer"
+                                                    className="group flex items-center w-full text-left px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full cursor-pointer"
                                                     onClick={() => {
                                                         handleDropdownItemClick(); // Close dropdown
                                                         handleLogoutClick(); // Open logout modal
                                                     }}
                                                 >
-                                                    <i className="mr-2"><LogOut size={16} /></i> Logout
+                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                                        <LogOut size={16} />
+                                                    </i> Logout
                                                 </button>
                                             </li>
                                         </ul>

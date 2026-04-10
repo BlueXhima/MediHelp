@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ToastMessage, { showToast } from "../../components/ToastMessage";
-import { ArrowLeft, Stethoscope } from "lucide-react";
+import { ArrowLeft, Stethoscope, ShieldCheck, ArrowRight } from "lucide-react";
 import axios from "axios";
 import BackgroundLoadingState from "../../components/BackgroundLoadingState";
 
@@ -10,7 +10,7 @@ const OTPVerification = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Helper function para sa delay
+    // Logic remains exactly the same as your original file
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     const handleOTPSubmit = async (e) => {
@@ -69,16 +69,11 @@ const OTPVerification = () => {
     };
 
     const handleResendOTP = async () => {
-        setIsLoading(true);
-
-        const email = localStorage.getItem("email"); // Retrieve email from local storage
-
+        const email = localStorage.getItem("email");
         if (!email) {
-            showToast("Email is required. Please register again.", "error");
-            setIsLoading(false);
+            showToast("Email not found.", "error");
             return;
         }
-
         try {
             // Make API call to resend OTP
             const response = await axios.post("http://localhost:5000/api/send-otp", {
@@ -101,131 +96,139 @@ const OTPVerification = () => {
     };
 
     const handleChangeEmail = () => {
-        navigate("/register?changeEmail=true"); // Redirect to Register page with query parameter
+        navigate("/register?changeEmail=true");
     };
 
     return (
-        <div className="flex flex-col justify-between min-h-screen bg-gray-100">
-            <ToastMessage />
+        <>
             <BackgroundLoadingState isLoading={isLoading} />
+            <ToastMessage />
+            
+            <div className="flex flex-col md:flex-row h-screen w-full font-sans bg-background overflow-hidden text-left">
+                
+                {/* --- LEFT SIDE: Sticky Security Branding --- */}
+                <div className="relative hidden md:flex w-full h-full bg-[#0f172a] overflow-hidden items-center justify-center">
+                    
+                    {/* Back Button */}
+                    <button 
+                        onClick={() => navigate(-1)} 
+                        className="absolute top-8 left-8 z-50 flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white font-bold text-sm hover:bg-white/10 hover:-translate-x-1 transition-all cursor-pointer group"
+                    >
+                        <ArrowLeft size={18} className="group-hover:text-primary transition-colors" />
+                        Back
+                    </button>
 
-            {/* Top Icon and Title */}
-            <div className="flex justify-center items-center py-8">
-                <div className="flex items-center space-x-2">
-                    <Stethoscope size={32} className="text-foreground" aria-hidden="true" />
-                    <h1 className="text-3xl font-bold text-foreground">MediHelp</h1>
-                </div>
-            </div>
+                    {/* Animated Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#1e1b4b] to-[#4c1d95]"></div>
+                    <div 
+                        className="absolute inset-0 opacity-20" 
+                        style={{ backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`, backgroundSize: '50px 50px' }}
+                    ></div>
 
-            {/* OTP Verification Card */}
-            <div className="flex items-center justify-center flex-grow">
-                <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-                    <div className="flex items-center justify-start justify-between mb-4">
-                        <button
-                            type="button"
-                            className="flex items-center text-sm text-foreground bg-transparent 
-                                border border-border hover:text-white px-2 py-1 rounded-md 
-                                hover:bg-gray-600 transition cursor-pointer"
-                            onClick={() => navigate("/register")}
-                        >
-                            <ArrowLeft size={18} className="mr-1" /> Back
-                        </button>
+                    {/* Meteor Animation */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <span className="absolute top-1/4 left-1/2 w-[2px] h-[50px] bg-gradient-to-b from-primary to-transparent animate-meteor opacity-0"></span>
+                        <span className="absolute top-1/2 left-1/4 w-[2px] h-[80px] bg-gradient-to-b from-blue-400 to-transparent animate-meteor opacity-0 [animation-delay:2s]"></span>
                     </div>
-                    <h2 className="text-3xl font-bold text-center mb-2">OTP Verification</h2>
-                    <p className="text-sm text-gray-600 text-center mb-6">
-                        Please enter the OTP sent to your registered email address.
-                    </p>
-                    {/* OTP input boxes */}
-                    <form onSubmit={handleOTPSubmit} className="space-y-4">
-                        <div className="flex justify-center space-x-2">
-                            {[...Array(6)].map((_, i) => (
-                                <input
-                                    key={i}
-                                    type="text"
-                                    id={`otp-${i}`}
-                                    maxLength="1"
-                                    className="w-14 h-14 text-center border rounded-md text-2xl font-semibold mb-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        // Mag-focus sa susunod na box kung may laman at hindi pa dulo
-                                        if (value.length === 1 && i < 5) {
-                                            const nextInput = document.getElementById(`otp-${i + 1}`);
-                                            if (nextInput) nextInput.focus();
-                                        }
-                                        const otpArray = otp.split("");
-                                        otpArray[i] = value;
-                                        setOtp(otpArray.join(""));
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Backspace" && e.target.value === "" && i > 0) {
-                                            const prevInput = document.getElementById(`otp-${i - 1}`);
-                                            if (prevInput) prevInput.focus();
-                                        }
-                                    }}
-                                    onPaste={(e) => {
-                                        e.preventDefault();
-                                        const pasteData = e.clipboardData.getData("text").slice(0, 6);
-                                        const otpArray = pasteData.split("");
-                                        otpArray.forEach((char, index) => {
-                                            const input = document.getElementById(`otp-${index}`);
-                                            if (input) {
-                                                input.value = char;
-                                            }
-                                        });
-                                        setOtp(pasteData);
-                                    }}
-                                />
-                            ))}
+
+                    {/* Content Card */}
+                    <div className="relative z-10 px-12 py-10 mx-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-fade-in text-left">
+                        <div className="flex items-center space-x-3 mb-8 text-white">
+                            <div className="p-3 bg-primary/20 rounded-2xl border border-primary/30">
+                                <ShieldCheck size={32} />
+                            </div>
+                            <h2 className="text-4xl font-black tracking-tight">Security</h2>
+                        </div>
+                        <div className="max-w-md space-y-6">
+                            <h1 className="text-5xl font-extrabold text-white leading-tight">
+                                Verify Your <br/>
+                                <span className="text-primary-foreground drop-shadow-[0_0_15px_rgba(167,139,250,0.6)]">Identity.</span>
+                            </h1>
+                            <p className="text-lg text-slate-300/80 leading-relaxed">
+                                We've sent a 6-digit code to your email. This ensures your medical records stay protected and only accessible by you.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Version Label */}
+                    <div className="absolute bottom-10 left-0 right-0 px-12 flex items-center justify-between opacity-50">
+                        <p className="text-xs font-medium text-white/60 tracking-widest uppercase">© 2026 MediHelp Secure</p>
+                        <div className="h-[1px] flex-grow mx-6 bg-gradient-to-r from-white/20 to-transparent"></div>
+                        <p className="text-xs italic text-white/40 font-semibold uppercase tracking-wider">v2.0 Stable Build</p>
+                    </div>
+                </div>
+
+                {/* --- RIGHT SIDE: OTP Form --- */}
+                <div className="flex flex-col w-full h-full bg-slate-50/40 backdrop-blur-md overflow-y-auto">
+                    <div className="w-full max-w-lg mx-auto px-8 md:px-16 pt-24 pb-16 animate-fade-in">
+                        
+                        {/* Header */}
+                        <div className="mb-10">
+                            <h2 className="text-4xl font-black text-foreground tracking-tight">Enter OTP</h2>
+                            <p className="mt-3 text-foreground/60 font-medium italic">
+                                Please check your inbox for the verification code.
+                            </p>
                         </div>
 
-                        <button
-                            type="submit"
-                            className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 
-                                transition font-medium cursor-pointer"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? "Verifying..." : "Verify OTP"}
-                        </button>
-                    </form>
+                        <form onSubmit={handleOTPSubmit} className="space-y-8">
+                            {/* OTP Input Field */}
+                            <div className="space-y-3">
+                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/50 ml-1">Verification Code</label>
+                                <input
+                                    type="text"
+                                    placeholder="000000"
+                                    maxLength="6"
+                                    className="w-full text-center text-3xl tracking-[0.5em] font-black py-5 rounded-2xl border-2 border-slate-200 bg-white focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-200"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-                    {/* Resend link */}
-                    <p className="text-sm text-center text-gray-600 mt-4">
-                        Didn’t receive the email?{" "}
-                        <button 
-                            type="button" 
-                            className="text-primary font-medium hover:underline cursor-pointer"
-                            onClick={handleResendOTP}
-                            disabled={isLoading}
-                        >
-                            Resend
-                        </button>
-                    </p>
+                            {/* Action Buttons */}
+                            <div className="space-y-4">
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full bg-primary text-white py-4 rounded-xl font-black shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2"
+                                >
+                                    <span>{isLoading ? "Verifying..." : "Verify Code"}</span>
+                                    {!isLoading && <ArrowRight size={18} />}
+                                </button>
 
-                    {/* Change email button */}
-                    <div className="mt-4">
-                        <button
-                            type="button"
-                            className="w-full border py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                            onClick={handleChangeEmail}
-                        >
-                            Change Email
-                        </button>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={handleResendOTP}
+                                        disabled={isLoading}
+                                        className="flex-1 border-2 border-slate-200 bg-white py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer"
+                                    >
+                                        Resend Code
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleChangeEmail}
+                                        className="flex-1 border-2 border-slate-200 bg-white py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer"
+                                    >
+                                        Change Email
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Footer Policy */}
+                            <div className="pt-10 border-t border-slate-200">
+                                <p className="text-[11px] text-center text-foreground/50 leading-relaxed max-w-xs mx-auto font-medium">
+                                    By verifying, you agree to our 
+                                    <a href="/terms" className="text-primary font-bold hover:underline mx-1">Terms</a> 
+                                    and 
+                                    <a href="/privacy" className="text-primary font-bold hover:underline mx-1">Privacy Policy</a>.
+                                </p>
+                            </div>
+                        </form>
                     </div>
-
-                    {/* Terms and Privacy */}
-                    <p className="text-xs text-gray-500 text-center mt-6">
-                        By verifying, you agree to our{" "}
-                        <a href="/terms" className="text-primary hover:underline">
-                        Terms and Conditions
-                        </a>{" "}
-                        and{" "}
-                        <a href="/privacy" className="text-primary hover:underline">
-                        Privacy Policy
-                        </a>.
-                    </p>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

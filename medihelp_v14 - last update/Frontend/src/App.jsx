@@ -13,6 +13,12 @@ import PrivacyPolicy from './pages/privacy';
 import AdminDashboard from './Admin/admin';
 import Dashboard from './Users/user-dashboard/dashboard';
 import VoiceAssistantInteraction from './Users/voice-interaction/assistant.jsx';
+import HealthProfile from './Users/health-profile/profile.jsx';
+import GuidanceLibrary from './Users/guidance-library/library.jsx';
+import AllArticles from './Users/guidance-library/library-compo/AllArticles.jsx';
+import LearnHow from './pages/learnhow.jsx';
+import ArticlePage from './Users/guidance-library/library-compo/ArticlePage';
+import ArticleNotFound from './pages/error/ArticleNotFound';
 
 // Ito yung main file ng frontend, 
 // dito siya magrurun, 
@@ -37,6 +43,7 @@ function App() {
         
         <Route path="/terms" element={<TermsAndCondition />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/learn-how" element={<LearnHow />} />
 
         {/* Protected or Private Routes */}
         <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']} />}>
@@ -47,6 +54,11 @@ function App() {
         <Route path="/dashboard/*" element={<ProtectedRoute allowedRoles={['user']} />}>
           <Route path="" element={<Dashboard />} />
           <Route path="voice-assistant" element={<VoiceAssistantInteraction />} />
+          <Route path="health-profile" element={<HealthProfile />} /> 
+          <Route path="guidance-library" element={<GuidanceLibrary />} />
+          <Route path="guidance-library/all-articles" element={<AllArticles />} />
+          <Route path="guidance-library/article/:id" element={<ArticlePage />} />
+          <Route path="*" element={<ArticleNotFound />} />
         </Route>
 
       </Routes>

@@ -7,6 +7,7 @@ import QuickStatsBar from './dash-compo/statsbar';
 import VoiceAssistantWidget from './dash-compo/voicewidget';
 import RecentGuidanceCard from './dash-compo/guidance';
 import HealthHubCard from './dash-compo/health';
+import QuickActionPanel from './dash-compo/quickaction';
 
 const Dashboard = () => {
 
@@ -45,6 +46,9 @@ const Dashboard = () => {
                     
                     {/* Voice Assistant Widget */}
                     <VoiceAssistantWidget />
+
+                    {/* Quick Action Panel */}
+                    <QuickActionPanel />
                     
                     {/* Dashboard Cards Grid */}
                     <div className="grid lg:grid-cols-2 gap-12">

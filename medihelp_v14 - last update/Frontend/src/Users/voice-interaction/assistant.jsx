@@ -14,27 +14,76 @@ export const VoiceAssistantInteraction = () => {
     const [connectionQuality, setConnectionQuality] = useState('excellent');
     const [sessionDuration, setSessionDuration] = useState(0);
     const [audioLevels, setAudioLevels] = useState(new Array(12).fill(0));
+
     const [conversations, setConversations] = useState([
         {
             id: 1,
             userMessage: "What are the common symptoms of seasonal allergies?",
-            aiResponse: `Seasonal allergies commonly present with sneezing, runny or stuffy nose, itchy and watery eyes, and scratchy throat. You might also experience fatigue and headaches.\n\nThese symptoms typically occur during specific seasons when allergens like pollen are high. Consider tracking your symptoms and consulting with an allergist for proper testing and treatment options.`,
+            aiResponse: `Seasonal allergies, also known as hay fever, occur when your immune system overreacts to outdoor allergens like pollen.\n\nCommon indicators include:\n• Persistent sneezing and nasal congestion\n• Itchy, watery, or red eyes (allergic conjunctivitis)\n• An itchy throat or inside of the ears\n• Postnasal drip which may cause a mild cough.`,
             timestamp: "2:45 PM",
-            category: "Allergies"
+            category: "Allergies",
+            recommendations: [
+                "Keep windows closed during high pollen counts (usually morning)",
+                "Use an air purifier with a HEPA filter in your bedroom",
+                "Shower and change clothes after spending time outdoors"
+            ],
+            articles: [
+                {
+                    title: "Understanding Pollen Counts & Your Health",
+                    source: "MediHelp Library",
+                    readTime: "5 min read",
+                    url: "#"
+                },
+                {
+                    title: "Natural vs Medical Allergy Treatments",
+                    source: "Health Insights",
+                    readTime: "8 min read",
+                    url: "https://www.healthline.com/health/natural-allergy-treatments"
+                }
+            ],
+            warning: "Note: If you experience wheezing or shortness of breath, this may indicate allergic asthma and requires medical evaluation."
         },
         {
             id: 2,
             userMessage: "How can I manage stress naturally?",
-            aiResponse: `Natural stress management techniques include deep breathing exercises, regular physical activity, adequate sleep (7-9 hours), and mindfulness meditation.\n\nOther effective methods are maintaining a balanced diet, staying hydrated, limiting caffeine, and engaging in hobbies you enjoy. If stress persists or affects daily life, consider speaking with a mental health professional.`,
+            aiResponse: `Managing stress naturally involves activating your body's 'relaxation response' to counter the effects of cortisol.\n\nEffective techniques include:\n• Mindful Meditation: Focus on your breath for 5-10 minutes daily.\n• Physical Activity: Even a 15-minute walk can boost endorphins.\n• Proper Sleep Hygiene: Aim for 7-9 hours of rest to allow your nervous system to recover.\n• Limiting Stimulants: Reduce caffeine intake, especially in the afternoon.`,
             timestamp: "2:38 PM",
-            category: "Mental Health"
+            category: "Mental Health",
+            recommendations: [
+                "Practice the 4-7-8 breathing technique twice a day",
+                "Maintain a consistent sleep-wake cycle",
+                "Consider journaling to process daily stressors"
+            ],
+            articles: [
+                {
+                    title: "Stress Management Techniques for Daily Life",
+                    source: "Health Insights",
+                    readTime: "6 min read",
+                    url: "https://www.healthline.com/health/stress-management-techniques"
+                }
+            ],
+            warning: "Important: If stress feels overwhelming or leads to persistent anxiety, please reach out to a mental health professional."
         },
         {
             id: 3,
-            userMessage: "Is it safe to take vitamin D supplements daily?",
-            aiResponse: `Vitamin D supplements are generally safe for most adults when taken within recommended doses (600-800 IU daily for most adults).\n\nHowever, dosage needs can vary based on factors like sun exposure, diet, skin color, and geographic location. It's best to have your vitamin D blood level tested and consult with your healthcare provider for personalized dosing recommendations.`,
+            userMessage: "What are some tips for improving sleep quality?",
+            aiResponse: `Improving sleep quality can significantly enhance your overall health and well-being.\n\nHere are some evidence-based tips:\n• Establish a Consistent Sleep Schedule: Go to bed and wake up at the same time every day, even on weekends.\n• Create a Relaxing Bedtime Routine: Engage in calming activities like reading or taking a warm bath 30 minutes before bed.\n• Optimize Your Sleep Environment: Keep your bedroom cool, dark, and quiet. Consider blackout curtains and white noise machines if needed.\n• Limit Screen Time Before Bed: The blue light emitted by phones and computers can interfere with melatonin production. Try to avoid screens at least an hour before bedtime.`,
             timestamp: "2:30 PM",
-            category: "Nutrition"
+            category: "Wellness",
+            recommendations: [
+                "Maintain a consistent sleep schedule",
+                "Create a relaxing bedtime routine",
+                "Keep your bedroom cool and dark"
+            ],
+            articles: [
+                {
+                    title: "Understanding Pollen Counts and Allergy Weather",
+                    source: "AAFA (Asthma and Allergy Foundation)",
+                    readTime: "6 min read",
+                    url: "https://aafa.org/allergies/allergy-symptoms/pollen-count/"
+                }
+            ],
+            warning: "Note: If you continue to have trouble sleeping, consider speaking with a healthcare provider."
         }
     ]);
 
@@ -51,21 +100,34 @@ export const VoiceAssistantInteraction = () => {
 
     const handleToggleListening = () => {
         if (isListening) {
-        setIsListening(false);
-        setIsProcessing(true);
-        // Simulate processing time
-        setTimeout(() => {
-            setIsProcessing(false);
-            // Add mock response to conversation
-            const newConversation = {
-                id: conversations?.length + 1,
-                userMessage: "How much water should I drink daily?",
-                aiResponse: `The general recommendation is about 8 glasses (64 ounces) of water per day, but individual needs vary based on activity level, climate, and overall health.\n\nFactors like exercise, hot weather, pregnancy, or certain medical conditions may increase your fluid needs. Listen to your body's thirst cues and monitor urine color as indicators of hydration status.`,
-                timestamp: new Date()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                category: "Wellness"
-            };
-            setConversations(prev => [newConversation, ...prev]);
-        }, 3000);
+            setIsListening(false);
+            setIsProcessing(true);
+            
+            setTimeout(() => {
+                setIsProcessing(false);
+                const newConversation = {
+                    id: Date.now(),
+                    userMessage: "How much water should I drink daily?",
+                    aiResponse: `Proper hydration is essential for maintaining energy levels, supporting digestion, and keeping your skin healthy.\n\nGeneral guidelines for daily intake:\n• Men: Approximately 3.7 liters (15.5 cups)\n• Women: Approximately 2.7 liters (11.5 cups)\n\nNote: This includes water from other beverages and food (which usually accounts for 20% of your daily intake).`,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    recommendations: [
+                        "Drink a glass of water immediately after waking up",
+                        "Carry a reusable water bottle to track your intake",
+                        "Eat water-rich foods like cucumbers, watermelon, and oranges"
+                    ],
+                    articles: [
+                        {
+                            title: "Understanding Pollen Counts and Allergy Weather",
+                            source: "AAFA (Asthma and Allergy Foundation)",
+                            readTime: "6 min read",
+                            url: "https://aafa.org/allergies/allergy-symptoms/pollen-count/"
+                        }
+                    ],
+                    warning: "Important: Factors like intense physical activity, hot weather, and certain medical conditions or medications can increase your hydration needs.", 
+                    category: "Wellness"
+                };
+                setConversations(prev => [...prev, newConversation]);
+            }, 3000);
         } else {
             setIsListening(true);
         }
@@ -77,33 +139,59 @@ export const VoiceAssistantInteraction = () => {
     };
 
     const handleQuickAction = (actionId, title) => {
-        const quickResponses = {
-            'symptoms': `I can help you understand common symptoms, but remember that symptom checking tools are for informational purposes only.\n\nFor accurate diagnosis and treatment, please consult with a healthcare professional. Would you like to describe your specific symptoms?`,
-            'medications': `I can provide general information about medications, including common uses and side effects.\n\nHowever, always consult your pharmacist or doctor before starting, stopping, or changing any medications. What medication would you like to know about?`,
-            'wellness': `I'm here to share evidence-based wellness tips for maintaining good health.\n\nThis includes advice on nutrition, exercise, sleep, and stress management. What aspect of wellness interests you most?`,
-            'nutrition': `Good nutrition is fundamental to health. I can provide information about balanced diets, nutrients, and healthy eating patterns.\n\nFor personalized nutrition plans, especially if you have medical conditions, consult with a registered dietitian. What nutrition topic can I help with?`,
-            'exercise': `Regular physical activity is crucial for health. I can suggest general exercise guidelines and safe practices.\n\nBefore starting any new exercise program, especially if you have health conditions, consult your healthcare provider. What type of exercise guidance do you need?`,
-            'mental-health': `Mental health is as important as physical health. I can share strategies for stress management, mood improvement, and general mental wellness.\n\nFor clinical mental health concerns, please reach out to a mental health professional. How can I support your mental wellness today?`,
-            'emergency': `For medical emergencies, call 911 immediately. I can provide general first aid information, but emergency situations require immediate professional medical attention.\n\nWhat type of emergency guidance do you need?`,
-            'find-doctor': `I can help you understand different types of healthcare providers and when to see them.\n\nFor finding specific doctors in your area, use your insurance provider's directory or healthcare facility websites. What type of healthcare provider are you looking for?`
+        setIsProcessing(true);
+
+        const detailedResponses = {
+            'symptoms': `I can help you analyze your symptoms. To give you the best guidance, please describe:\n1. When did the symptoms start?\n2. What makes them feel better or worse?\n3. Are you experiencing any pain or discomfort?`,
+            'nutrition': `Proper nutrition is the foundation of recovery and energy. A balanced plate typically consists of:\n• 50% Vegetables and Fruits\n• 25% Lean Protein\n• 25% Whole Grains\n\nWould you like to know about specific meal plans for your health goals?`,
+            'emergency': `If you are experiencing a life-threatening situation, please do not wait.\n\nWarning signs include:\n• Sudden numbness or weakness (especially on one side)\n• Severe chest pain spreading to the arms or jaw\n• Major bleeding that won't stop\n• Loss of consciousness.`
         };
 
-        const response = quickResponses?.[actionId] || `Let me help you with "${title}". Please provide more specific details about what you'd like to know.`;
-        
+        const response = detailedResponses[actionId] || `I'm ready to assist you with ${title}. This module provides evidence-based information to help you make informed health decisions.`;
+
         const newConversation = {
-            id: conversations?.length + 1,
+            id: Date.now(),
             userMessage: title,
             aiResponse: response,
-            timestamp: new Date()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            category: title?.includes('Emergency') ? 'Emergency' : 'General Health'
+            recommendations: actionId === 'emergency' 
+                ? ["Call emergency services immediately", "Unlock your front door for responders", "Do not drive yourself to the hospital"]
+                : ["Document your symptoms in a health log", "Stay hydrated and rest", "Follow up if symptoms persist"],
+            warning: actionId === 'emergency' 
+                ? "CRITICAL: Do not delay professional medical help for emergency symptoms." 
+                : "Reminder: This AI guidance is for informational purposes and does not replace professional medical advice.",
+            articles: [
+                {
+                    title: "Pollen Count: What It Is and How It Affects You",
+                    source: "Mayo Clinic",
+                    readTime: "5 min read",
+                    url: "https://www.mayoclinic.org/diseases-conditions/hay-fever/in-depth/seasonal-allergies/art-20048343"
+                }
+            ],
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            category: "Health Guidance"
         };
-        
-        setConversations(prev => [newConversation, ...prev]);
+
+        setTimeout(() => {
+            setConversations(prev => [...prev, newConversation]);
+            setIsProcessing(false);
+        }, 1500);
+    };
+
+    const handleDeleteMessage = (id) => {
+        setConversations(prev => prev.filter(chat => chat.id !== id));
     };
 
     const handleReplay = (text) => {
-        // Mock audio playback
-        console.log('Playing audio:', text);
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        const savedVoice = localStorage.getItem("assistantVoice") || "Arial"; 
+        const savedPitch = localStorage.getItem("assistantPitch") || (savedVoice === "Arial" ? 1.2 : 0.8);
+
+        utterance.pitch = parseFloat(savedPitch);
+        utterance.rate = 0.9; // Professional speed
+        
+        window.speechSynthesis.speak(utterance);
     };
 
     const handleSaveSession = () => {
@@ -120,6 +208,27 @@ export const VoiceAssistantInteraction = () => {
 
     const handleSaveConversation = () => {
         console.log('Exporting conversation history');
+    };
+
+    const handleSendMessage = (text, editingId = null) => {
+        if (!text.trim()) return;
+
+        if (editingId) {
+            // EDIT MODE: I-update ang message sa array
+            setConversations(prev => prev.map(chat => 
+                chat.id === editingId 
+                    ? { ...chat, userMessage: text } 
+                    : chat
+            ));
+        } else {
+            const newMessage = {
+                id: Date.now(), // Mas safe gamitin ang timestamp as ID
+                userMessage: text,
+                aiResponse: "Thinking...",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            };
+            setConversations(prev => [...prev, newMessage]);
+        }
     };
 
     return (
@@ -144,7 +253,7 @@ export const VoiceAssistantInteraction = () => {
                                     Back to Dashboard
                                 </button>
                             </Link>
-                            <Link to="/guidance-library">
+                            <Link to="/dashboard/guidance-library">
                                 <button
                                     className="px-4 py-2 rounded-md text-sm font-medium bg-primary
                                     text-primary-foreground hover:bg-primary/80 transition-colors
@@ -210,6 +319,9 @@ export const VoiceAssistantInteraction = () => {
                             conversations={conversations}
                             onReplay={handleReplay}
                             onSave={handleSaveConversation}
+                            isProcessing={isProcessing}
+                            onDelete={handleDeleteMessage}
+                            onSendMessage={handleSendMessage}
                         />
                     </div>
 

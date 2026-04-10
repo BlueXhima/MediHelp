@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Stethoscope, ArrowRight, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import heroimg2 from "../../assets/login-photo.webp";
 import buttonlogo from "../../assets/google.png";
 import BackgroundLoadingState from "../../components/BackgroundLoadingState";
@@ -88,41 +88,84 @@ const Login = () => {
         <>
             <BackgroundLoadingState isLoading={isLoading} />
             <ToastMessage />
-            
             <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
                 {/* Left Side */}
-                <div className="relative w-full min-h-[100vh] bg-gradient-to-br from-[#1e3a8a] via-[#6d28d9] to-[#4c1d95] overflow-hidden">
-                    <div className="absolute inset-0 bg-black/40"></div>
-                    <div className="absolute top-6 left-6 text-card flex items-center space-x-2">
-                        <Stethoscope size={24} className="text-card" aria-hidden="true" />
-                        <h2 className="text-3xl font-bold">MediHelp</h2>
+                <div className="relative hidden md:flex w-full min-h-screen bg-[#0f172a] overflow-hidden items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#1e1b4b] to-[#4c1d95]"></div>
+                    
+                    <button 
+                        onClick={() => navigate(-1)}
+                        className="absolute top-8 left-8 z-50 flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white font-bold text-sm hover:bg-white/10 hover:-translate-x-1 transition-all cursor-pointer group"
+                    >
+                        <ArrowLeft size={18} className="group-hover:text-primary transition-colors" />
+                        Back to Home
+                    </button>
+
+                    <div 
+                        className="absolute inset-0 opacity-20" 
+                        style={{ 
+                            backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
+                            backgroundSize: '50px 50px' 
+                        }}
+                    ></div>
+
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <span className="absolute top-1/4 left-1/2 w-[2px] h-[50px] bg-gradient-to-b from-primary to-transparent animate-meteor opacity-0"></span>
+                        <span className="absolute top-10 left-1/3 w-[2px] h-[80px] bg-gradient-to-b from-blue-400 to-transparent animate-meteor opacity-0 [animation-delay:1.5s]"></span>
+                        <span className="absolute top-2/3 left-1/4 w-[2px] h-[60px] bg-gradient-to-b from-purple-400 to-transparent animate-meteor opacity-0 [animation-delay:3s]"></span>
                     </div>
-                    <div className="absolute bottom-6 left-6 text-card text-left max-w-lg">
-                        <blockquote className="text-4xl font-bold leading-tight">
-                            “Empowering Healthcare with Trust and Compassion.”
-                        </blockquote>
-                        <p className="mt-2 text-md text-foreground/80">
-                            Join our mission to make healthcare accessible, transparent, and meaningful 
-                            for everyone, everywhere.
-                        </p>
+
+                    <div className="relative z-10 px-12 py-10 mx-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-fade-in">
+                        <div className="flex items-center space-x-3 mb-8">
+                            <div className="p-3 bg-primary/20 rounded-2xl border border-primary/30">
+                                <Stethoscope size={32} className="text-white" />
+                            </div>
+                            <h2 className="text-4xl font-black text-white tracking-tight">MediHelp</h2>
+                        </div>
+                        <div className="max-w-md space-y-6">
+                            <h1 className="text-5xl font-extrabold text-white leading-tight">
+                                Smart Care, <br/>
+                                <span className="text-primary-foreground drop-shadow-[0_0_15px_rgba(167,139,250,0.6)]">Better Life.</span>
+                            </h1>
+                            <p className="text-lg text-slate-300/80 leading-relaxed">
+                                Simplify your medical journey with our secure and intuitive healthcare platform.
+                            </p>
+                        </div>
+
+                        {/* Feature Tags with Glow */}
+                        <div className="mt-10 flex flex-wrap gap-3">
+                            {['Cloud Security', 'Real-time Sync', 'Smart Insights'].map((tag) => (
+                                <span key={tag} className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary-foreground uppercase tracking-widest shadow-[0_0_10px_rgba(167,139,250,0.1)]">
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Bottom Footer Quote */}
+                    <div className="absolute bottom-10 left-0 right-0 px-12 flex items-center justify-between opacity-50">
+                        <p className="text-xs font-medium text-white/60 tracking-widest uppercase">© 2026 MediHelp Platform</p>
+                        <div className="h-[1px] flex-grow mx-6 bg-gradient-to-r from-white/20 to-transparent"></div>
+                        <p className="text-xs italic text-white/40">v2.0 Stable Build</p>
                     </div>
                 </div>
 
                 {/* Right Side */}
-                <div className="flex flex-col justify-center px-8 py-12 relative">
-                    {/* Form content */}
-                    <div className="w-full max-w-md items-center mx-auto mt-auto mb-auto">
-                        <div className="text-center">
-                            <h2 className="text-4xl font-bold text-foreground">Login to Your Account</h2>
-                            <p className="mt-2 text-sm text-foreground/70 leading-relaxed">
-                                Welcome back! Please enter your credentials to continue your healthcare journey.
+                <div className="flex flex-col justify-center px-8 md:px-16 py-4 bg-background backdrop-blur-md relative">
+                    <div className="w-full max-w-md mx-auto animate-fade-in">
+                        {/* Header section with better spacing */}
+                        <div className="text-left mb-6">
+                            <h2 className="text-4xl font-extrabold text-foreground tracking-tight">Welcome Back</h2>
+                            <p className="mt-3 text-foreground/60 font-medium">
+                                Please enter your details to access your MediHelp account.
                             </p>
                         </div>
-                        <form onSubmit={handleLogin} className="mt-6 space-y-4">
-                            {/* Email */}
-                            <div className="flex flex-col text-left">
-                                <label className="text-sm font-medium text-foreground mb-1">
-                                    Email<span className="text-foreground"> *</span>
+
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            {/* Email Field with focus-ring effect */}
+                            <div className="space-y-1.5 flex flex-col text-left">
+                                <label className="text-xs font-bold uppercase tracking-widest mb-2 text-foreground/50 ml-1">
+                                    Email Address
                                 </label>
                                 <input 
                                     type="email" 
@@ -130,97 +173,84 @@ const Login = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter your email" 
                                     required
-                                    className="w-full border px-4 py-2 rounded-md" 
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200" 
                                 />
                             </div>
-                            {/* Password */}
-                            <div className="flex flex-col text-left">
-                                <label className="text-sm font-medium text-foreground mb-1">
-                                    Password<span className="text-foreground"> *</span>
+
+                            {/* Password Field with cleaner toggle icon */}
+                            <div className="space-y-1.5 flex flex-col text-left">
+                                <label className="text-xs font-bold uppercase tracking-widest mb-2 text-foreground/50 ml-1">
+                                    Password
                                 </label>
-                                <div className="flex w-full">
+                                <div className="relative group">
                                     <input 
                                         type={showPassword ? "text" : "password"} 
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter your password" 
                                         required
-                                        autoComplete="new-password"
-                                        autoCorrect="off"
-                                        className="flex-grow border border-r-0 px-4 py-2 rounded-l-md" 
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200" 
                                     />
                                     <button 
                                         type="button"
                                         onClick={togglePasswordVisibility}
-                                        className="border border-l-0 px-3 py-2 bg-gray-100 hover:bg-gray-200 
-                                                rounded-r-md text-gray-600 flex items-center justify-center
-                                                cursor-pointer"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-primary transition-colors cursor-pointer"
                                     >
-                                        {showPassword ? (
-                                            <EyeOff size={18} aria-hidden="true" />
-                                        ) : (
-                                            <Eye size={18} aria-hidden="true" />
-                                        )}
+                                        {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                                     </button>
                                 </div>
                             </div>
-                            {/* Remember me + Forgot password */}
-                            <div className="flex items-center justify-between mt-2 text-sm">
-                                <label className="flex items-center">
-                                    <input type="checkbox" className="mr-2" />
-                                    Remember me
+
+                            {/* Remember & Forgot in one line */}
+                            <div className="flex items-center justify-between text-sm font-medium">
+                                <label className="flex items-center space-x-2 cursor-pointer group">
+                                    <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" />
+                                    <span className="text-foreground/70 group-hover:text-foreground transition-colors">Remember me</span>
                                 </label>
-                                <a 
-                                    href="/forgot-password" 
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        navigate('/forgot-password');
-                                    }} 
-                                    className="text-primary font-semibold hover:underline"
+                                <button 
+                                    type="button"
+                                    onClick={() => navigate('/forgot-password')}
+                                    className="text-primary font-bold hover:text-primary/80 transition-colors"
                                 >
                                     Forgot password?
-                                </a>
+                                </button>
                             </div>
 
-                            {/* Login button */}
+                            {/* Primary Action Button with shadow and hover lift */}
                             <button 
                                 type="submit" 
-                                className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90
-                                                transition font-medium cursor-pointer"
-                                onClick={isLoading ? undefined : handleLogin} // Fix onClick listener
+                                disabled={isLoading}
+                                className="w-full bg-primary text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center space-x-2"
                             >
-                                Login
+                                <span>{isLoading ? "Signing in..." : "Sign In"}</span>
+                                {!isLoading && <ArrowRight size={18} />}
                             </button>
-                            {/* Divider */}
-                            <div className="flex items-center">
-                                <hr className="flex-grow border-gray-300" />
-                                <span className="px-2 text-sm text-gray-500">OR</span>
-                                <hr className="flex-grow border-gray-300" />
+
+                            {/* Minimalist Divider */}
+                            <div className="flex items-center my-6">
+                                <div className="flex-grow border-t border-slate-200"></div>
+                                <span className="px-4 text-xs font-bold text-slate-400 uppercase tracking-widest">or</span>
+                                <div className="flex-grow border-t border-slate-200"></div>
                             </div>
-                            {/* Google button */}
-                            <button className="w-full border py-2 rounded-md flex items-center justify-center 
-                                            hover:bg-gray-100 transition cursor-pointer">
-                                <img src={buttonlogo} alt="Google" className="w-5 h-5 mr-2" />
+
+                            {/* Google Button with cleaner border */}
+                            <button className="w-full border-2 border-slate-100 bg-white py-3 rounded-xl flex items-center justify-center 
+                                            hover:bg-slate-50 hover:border-slate-200 transition-all cursor-pointer font-bold text-slate-700">
+                                <img src={buttonlogo} alt="Google" className="w-5 h-5 mr-3" />
                                 Continue with Google
                             </button>
-                            {/* Disclaimer */}
-                            <p className="mt-2 text-xs text-center text-foreground/70 leading-relaxed">
-                                By logging in, you agree to our 
-                                <a href="/terms" className="text-primary font-medium underline-offset-2 hover:underline ml-1 mr-1">
-                                    Terms & Conditions
-                                </a> 
-                                and 
-                                <a href="/privacy" className="text-primary font-medium underline-offset-2 hover:underline ml-1">
-                                    Privacy Policy
-                                </a>.
-                            </p>
-                            {/* Top-right link */}
-                            <div className="flex items-center justify-center text-sm text-foreground/80 font-semibold">
-                                Don't have an account? 
-                                <a href="/register" className="inline-flex items-center text-foreground font-semibold border-b-2 border-transparent hover:text-primary hover:border-primary ml-1">
-                                    Register here
-                                    <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
-                                </a>
+
+                            {/* Bottom Navigation Link */}
+                            <div className="pt-4 text-center">
+                                <p className="text-sm text-foreground/60 font-medium">
+                                    Don't have an account? 
+                                    <button 
+                                        onClick={() => navigate('/register')}
+                                        className="ml-1 text-primary font-bold hover:underline underline-offset-4"
+                                    >
+                                        Register for free
+                                    </button>
+                                </p>
                             </div>
                         </form>
                     </div>

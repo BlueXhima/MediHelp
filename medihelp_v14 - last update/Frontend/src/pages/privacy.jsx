@@ -338,7 +338,7 @@ export const PrivacyPolicy = () => {
             <aside className="w-80 bg-white p-6 border-r border-gray-200 shadow-md sticky top-0 h-screen overflow-y-auto">
                 <button
                     className="flex items-center text-gray-600 hover:text-blue-600 mb-6 cursor-pointer"
-                    onClick={handleBack}
+                    onClick={() => navigate(-1)}
                 >
                     <ChevronLeft className="mr-2" size={20} /> Back
                 </button>

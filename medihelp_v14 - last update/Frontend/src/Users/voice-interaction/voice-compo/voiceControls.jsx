@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Loader2, MicOff, Mic, Wifi } from 'lucide-react';
 import VoiceVisualization from './voiceVisualization';
+import VoiceSettingsModal from './voiceSettingsModal';
 
 const VoiceControls = ({ 
     isListening, 
@@ -15,6 +16,7 @@ const VoiceControls = ({
     const analyserRef = useRef(null);
     const dataArrayRef = useRef(null);
     const animationFrameRef = useRef(null);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false); // Define state for settings modal
 
     useEffect(() => {
         if (isListening) {
@@ -81,75 +83,90 @@ const VoiceControls = ({
         }
     };
 
+    const handleSettingsClick = () => {
+        setIsSettingsModalOpen(true); // Show the modal
+    };
+
     return (
-        <div className="bg-white rounded-xl shadow-medical border border-gray-200 p-6 flex flex-col items-stretch justify-center">
-            <div className="text-center">
-                {/* Main Voice Button */}
-                <div className="mb-6 flex items-center justify-center">
-                    <button
-                        onClick={onToggleListening}
-                        disabled={isProcessing}
-                        className={`w-24 h-24 cursor-pointer rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out transform hover:scale-110 ${
-                            isListening ? 'voice-pulse animate-pulse bg-red-500 text-white' : 'bg-blue-500 text-white'
-                        } ${isProcessing ? 'animate-spin bg-gray-300' : ''}`}
-                    >
-                        {isProcessing ? (
-                            <Loader2 size={32} className="animate-pulse text-gray-700" />
-                        ) : isListening ? (
-                            <MicOff size={32} />
-                        ) : (
-                            <Mic size={32} />
-                        )}
-                    </button>
-                </div>
+        <div>
+            <div className="bg-card dark:bg-card border-t border-b border-border/50 dark:border-border/30
+                p-6 flex flex-col items-stretch justify-center"
+            >
+                <div className="text-center">
+                    {/* Main Voice Button */}
+                    <div className="mb-6 flex items-center justify-center">
+                        <button
+                            onClick={onToggleListening}
+                            disabled={isProcessing}
+                            className={`w-24 h-24 cursor-pointer rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out transform hover:scale-110 ${
+                                isListening ? 'voice-pulse animate-pulse bg-red-500 text-white' : 'bg-blue-500 text-white'
+                            } ${isProcessing ? 'animate-spin bg-gray-300' : ''}`}
+                        >
+                            {isProcessing ? (
+                                <Loader2 size={32} className="animate-pulse text-gray-700" />
+                            ) : isListening ? (
+                                <MicOff size={32} />
+                            ) : (
+                                <Mic size={32} />
+                            )}
+                        </button>
+                    </div>
 
-                {/* Status Text */}
-                <div className="mb-6">
-                    <p className="text-lg font-medium text-gray-800 mb-2">
-                        {isProcessing 
-                            ? "Processing your question..." 
-                        : isListening 
-                            ? "Listening... Speak now" :"Click to start speaking"
-                        }
-                    </p>
-                    
-                    {/* Connection Quality */}
-                    <div className="flex items-center justify-center space-x-2">
-                        <Wifi size={16} className={getConnectionColor()} />
-                        <span className={`text-sm ${getConnectionColor()}`}>
-                            Connection: {connectionQuality}
-                        </span>
+                    {/* Status Text */}
+                    <div className="mb-6">
+                        <p className="text-lg font-medium text-gray-800 mb-2">
+                            {isProcessing 
+                                ? "Processing your question..." 
+                            : isListening 
+                                ? "Listening... Speak now" :"Click to start speaking"
+                            }
+                        </p>
+                        
+                        {/* Connection Quality */}
+                        <div className="flex items-center justify-center space-x-2">
+                            <Wifi size={16} className={getConnectionColor()} />
+                            <span className={`text-sm ${getConnectionColor()}`}>
+                                Connection: {connectionQuality}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Control Buttons */}
+                    <div className="flex items-center justify-center space-x-4">
+                        <button
+                            onClick={onClearConversation}
+                            className="px-3 py-2 rounded-md border border-gray-300 text-sm 
+                            font-medium text-gray-700 hover:text-primary hover:border-primary 
+                            transition-colors cursor-pointer"
+                        >
+                            Clear Chat
+                        </button>
+                        
+                        <button
+                            className="px-3 py-2 rounded-md text-sm font-medium text-primary-foreground 
+                            transition-colors cursor-pointer bg-primary hover:bg-primary/90"
+                            onClick={() => {
+                                handleSettingsClick(); // Open Settings modal
+                            }}
+                        >
+                            Settings
+                        </button>
+                    </div>
+
+                    {/* Voice Commands Help */}
+                    <div className="mt-6 p-4 bg-gray-100 rounded-lg w-full max-w-none">
+                        <h4 className="text-sm font-medium text-gray-800 mb-2">Voice Commands:</h4>
+                        <div className="text-xs text-gray-600 space-y-1">
+                            <p>"Stop listening" - End voice input</p>
+                            <p>"Repeat that" - Replay last response</p>
+                            <p>"Clear conversation" - Start new session</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Control Buttons */}
-                <div className="flex items-center justify-center space-x-4">
-                    <button
-                        onClick={onClearConversation}
-                        className="px-3 py-2 rounded-md border border-gray-300 text-sm 
-                        font-medium text-gray-700 hover:text-primary hover:border-primary 
-                        transition-colors cursor-pointer"
-                    >
-                        Clear Chat
-                    </button>
-                    
-                    <button
-                        className="px-3 py-2 rounded-md text-sm font-medium text-primary-foreground 
-                        transition-colors cursor-pointer bg-primary hover:bg-primary/90"
-                    >
-                        Settings
-                    </button>
-                </div>
-
-                {/* Voice Commands Help */}
-                <div className="mt-6 p-4 bg-gray-100 rounded-lg w-full max-w-none">
-                    <h4 className="text-sm font-medium text-gray-800 mb-2">Voice Commands:</h4>
-                    <div className="text-xs text-gray-600 space-y-1">
-                        <p>"Stop listening" - End voice input</p>
-                        <p>"Repeat that" - Replay last response</p>
-                        <p>"Clear conversation" - Start new session</p>
-                    </div>
-                </div>
+                {isSettingsModalOpen && (
+                    <VoiceSettingsModal onClose={() => setIsSettingsModalOpen(false)} />
+                )}
             </div>
         </div>
     );

@@ -24,6 +24,7 @@
     --animate-fade-in-delay-4: fade-in 0.7s ease-out 0.8s forwards;
     --animate-meteor: meteor 5s linear infinite;
     --animate-pop-up: pop-up 0.5s ease-out forwards;
+    --animate-pop-down: pop-down 0.5s ease-in forwards;
 
     @keyframes float {
         0%, 100% {
@@ -66,12 +67,22 @@
     }
     @keyframes pop-up {
         0% {
-        transform: scale(0.5);
+        transform: scale(0.8);
         opacity: 0;
         }
         100% {
         transform: scale(1);
         opacity: 1;
+        }
+    }
+    @keyframes pop-down {
+        0% {
+        transform: scale(1);
+        opacity: 1;
+        }
+        100% {
+        transform: scale(0.8);
+        opacity: 0;
         }
     }
 }
@@ -198,4 +209,48 @@ input[type="password"].hide {
 .custom-toast-container .Toastify__toast {
     color: black;
     text-align: left;
+}
+
+.animate-pop-up {
+    animation: pop-up 0.3s ease-out forwards;
+}
+
+.animate-pop-down {
+    animation: pop-down 0.3s ease-out forwards;
+}
+
+/* Container focus for smooth scrolling experience */
+.scroll-smooth {
+    scroll-behavior: smooth;
+}
+
+/* Base styling for the scrollbar */
+.scrollbar-custom::-webkit-scrollbar {
+    width: 8px; /* Tamang kapal lang para sa modern look */
+}
+
+/* Ang track o yung background ng scrollbar */
+.scrollbar-custom::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-block: 10px; /* Space sa taas at baba ng track */
+}
+
+/* Ang thumb o yung gumagalaw na part */
+.scrollbar-custom::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #4F46E5, #818CF8); /* Primary color gradient */
+    border-radius: 10px;
+    border: 2px solid #f8fafc; /* Adds a padding effect around the thumb */
+    transition: all 0.3s ease;
+}
+
+/* Hover effect para sa scrollbar thumb */
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #4338CA; /* Darker primary color on hover */
+}
+
+/* Firefox support */
+.scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: #4F46E5 #f8fafc;
 }

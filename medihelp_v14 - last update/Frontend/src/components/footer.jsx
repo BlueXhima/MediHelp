@@ -1,116 +1,84 @@
 import React from 'react';
-import { Mail, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, Send, Stethoscope, Mail } from 'lucide-react';
 
 const Footer = () => {
     return (
-        <footer className="bg-card md:py-0">
-            <div className="max-w-7xl mx-auto px-6 space-y-14">
-                {/* MediHelp + Newsletter - 2 Columns */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start pt-8">
-                    {/* Left Side */}
-                    <div className="text-center md:text-left flex flex-col justify-start">
-                        <h3 className="text-6xl font-bold text-primary">MediHelp</h3>
-                        <p className="mt-2 text-sm text-foreground/80 max-w-md">
-                            Empowering healthcare through innovation and trusted guidance.
-                        </p>
-                    </div>
-                    {/* Right Side - Newsletter */}
-                    <div className="flex justify-end md:pb-0">
-                        <div className="text-left w-full max-w-sm flex flex-col justify-start">
-                        <h4 className="font-semibold text-foreground mb-3">
-                            Subscribe to our Newsletter
-                        </h4>
-                        <div className="flex items-center border rounded-lg overflow-hidden">
-                            <input
-                            type="email"
-                            placeholder="Enter your email"
-                            className="flex-grow px-4 py-2 text-sm text-foreground 
-                                        placeholder-gray-400 focus:outline-none"
-                            />
-                            <button className="px-4 py-3 bg-primary text-white 
-                                            hover:bg-primary/90 transition cursor-pointer">
-                            <Mail className="h-5 w-5" />
+        // bg-card and border-border are used for Semantic Theme support
+        <footer className="bg-card border-t border-border transition-colors duration-500">
+            <div className="max-w-7xl mx-auto px-6 pt-4 md:pt-14">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+                    {/* Brand & Main CTA Column (Inspire by Left side of image) */}
+                    <div className="md:col-span-1 lg:col-span-6 space-y-7 md:space-y-8 text-center md:text-left">
+                        <div className="flex items-center justify-center md:justify-start gap-2.5 text-primary">
+                            <Stethoscope size={28} strokeWidth={2.5} className="md:scale-125" />
+                            <h3 className="text-3xl font-extrabold tracking-tighter text-foreground">
+                                MediHelp
+                            </h3>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-extrabold leading-[1.1] text-foreground tracking-tight max-w-sm mx-auto md:mx-0">
+                            Empowering Your <br className='hidden md:block'/> Health Decisions.
+                        </h2>
+                        <div className="pt-2">
+                            <button className="group relative px-7 py-3.5 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:shadow-lg hover:shadow-primary/30 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2 overflow-hidden mx-auto md:mx-0">
+                                <Mail size={16} className="relative z-10" />
+                                <span className="relative z-10">Contact Support</span>
+                                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                             </button>
                         </div>
-                        <p className="mt-2 text-xs text-foreground/80 leading-relaxed">
-                            By submitting this form, I agree to receive logistics news and marketing updates
-                            from MediHelp via email. I understand I can unsubscribe at any time by clicking
-                            the unsubscribe link in the email. For more information on how we handle your data, 
-                            please see our <a href="#" className="text-primary font-semibold hover:font-bold hover:underline">Privacy Policy</a>.
-                        </p>
+                    </div>
+
+                    {/* Navigation Columns (Inspire by Right side of image) */}
+                    <div className="md:col-span-1 lg:col-span-6 grid grid-cols-2 gap-x-8 gap-y-10 text-center md:text-left lg:pt-0 lg:pl-10">
+                        {/* Column 1 */}
+                        <div>
+                            <h4 className="font-extrabold text-foreground text-xs uppercase tracking-[0.2em] mb-7">Platform</h4>
+                            <ul className="space-y-5 text-md text-foreground/70 font-medium leading-relaxed">
+                                {['Symptom Checker', 'Health Resources', 'Community Forum'].map((item) => (
+                                    <li key={item} className="group flex items-center gap-2 justify-center md:justify-start">
+                                        {/* Subtle Arrow on hover */}
+                                        <span className="text-primary w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300">→</span>
+                                        <a href="#" className="hover:text-primary transition-colors">
+                                            {item}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        {/* Column 2 */}
+                        <div>
+                            <h4 className="font-extrabold text-foreground text-xs uppercase tracking-[0.2em] mb-7">Information</h4>
+                            <ul className="space-y-5 text-md text-foreground/70 font-medium leading-relaxed">
+                                {['Help Center', 'Privacy Policy', 'Terms of Service', 'Security'].map((item) => (
+                                    <li key={item} className="group flex items-center gap-2 justify-center md:justify-start">
+                                        <span className="text-primary w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300">→</span>
+                                        <a href="#" className="hover:text-primary transition-colors">
+                                            {item}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
                 </div>
 
-                {/* Navigation Links - 5 Columns */}
-                <div className="pt-6 grid grid-cols-2 md:grid-cols-5 gap-6 text-sm text-foreground/80 border-t border-gray-200">
-                    <div className="text-left">
-                        <h4 className="font-semibold text-foreground mb-3">About</h4>
-                        <ul className="space-y-2">
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Our Mission</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Programs</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Community</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Careers</a></li>
-                        </ul>
-                    </div>
-                    <div className="text-left">
-                        <h4 className="font-semibold text-foreground mb-3">Resources</h4>
-                        <ul className="space-y-2">
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Articles</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Brochures</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">FAQs</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Guides</a></li>
-                        </ul>
-                    </div>
-                    <div className="text-left">
-                        <h4 className="font-semibold text-foreground mb-3">Support</h4>
-                        <ul className="space-y-2">
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Help Center</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Contact Us</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Feedback</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Accessibility</a></li>
-                        </ul>
-                    </div>
-                    <div className="text-left">
-                        <h4 className="font-semibold text-foreground mb-3">Legal</h4>
-                        <ul className="space-y-2">
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Privacy Policy</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Terms & Conditions</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Disclaimer</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Cookie Policy</a></li>
-                        </ul>
-                    </div>
-                    <div className='text-left'>
-                        <h4 className="font-semibold text-foreground mb-3">Services</h4>
-                        <ul className="space-y-2">
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Symptom Checker</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Health Tips</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Medication Guide</a></li>
-                            <li className='text-gray-500 hover:text-primary hover:font-semibold'><a href="#">Emergency Resources</a></li>
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Bottom Bar - 2 Columns */}
-                <div className="border-t border-gray-200 py-4 flex flex-col md:flex-row items-center justify-between text-sm text-foreground/80">
-                    {/* Left Side */}
-                    <p className="mt-2 md:mt-0">
-                        &copy; {new Date().getFullYear()} MediHelp. All rights reserved.
+                {/* Bottom Bar - Clean and Balanced */}
+                <div className="mt-10 py-6 border-t border-border flex flex-col-reverse md:flex-row items-center justify-between gap-6">
+                    <p className="text-xs md:text-sm text-foreground/50 font-medium">
+                        &copy; {new Date().getFullYear()} MediHelp. AI Healthcare Guidance Tool.
                     </p>
-                    {/* Right Side - Social Links */}
-                    <div className="flex space-x-4 mt-2 md:mt-0">
-                        <a href="#" className="w-10 h-10 flex items-center justify-center bg-transparent border-2 hover:bg-primary hover:text-white rounded-lg">
-                            <Twitter className="h-6 w-6" />
-                        </a>
-                        <a href="#" className="w-10 h-10 flex items-center justify-center bg-transparent border-2 hover:bg-primary hover:text-white rounded-lg">
-                            <Facebook className="h-6 w-6" />
-                        </a>
-                        <a href="#" className="w-10 h-10 flex items-center justify-center bg-transparent border-2 hover:bg-primary hover:text-white rounded-lg">
-                            <Instagram className="h-6 w-6" />
-                        </a>
-                        <a href="#" className="w-10 h-10 flex items-center justify-center bg-transparent border-2 hover:bg-primary hover:text-white rounded-lg">
-                            <Linkedin className="h-6 w-6" />
-                        </a>
+                    
+                    {/* Social Icons - Balanced with Glassmorphism effect */}
+                    <div className="flex items-center gap-4">
+                        {[Facebook, Twitter, Instagram, Linkedin].map((Icon, idx) => (
+                            <a 
+                                key={idx} 
+                                href="#" 
+                                aria-label={`Follow us on ${Icon.name}`}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-card border border-border text-foreground/40 hover:bg-primary/5 hover:border-primary/20 hover:text-primary hover:-translate-y-1 transition-all duration-300 shadow-sm"
+                            >
+                                <Icon size={19} />
+                            </a>
+                        ))}
                     </div>
                 </div>
             </div>
