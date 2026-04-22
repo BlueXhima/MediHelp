@@ -1,6 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, X } from 'lucide-react';
+import { motion, AnimatePresence } from "framer-motion";
 
 const LibraryHero = ({ onSearch, searchQuery }) => {
+    const [isListening, setIsListening] = useState(false);
+
+    // Ginagamit ang useRef para ma-access ang recognition instance sa kahit anong render
+    const recognitionRef = useRef(null);
+
+    useEffect(() => {
+        // Setup Speech Recognition once
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognitionRef.current = new SpeechRecognition();
+            recognitionRef.current.continuous = true; // Para hindi agad namamatay habang nagsasalita
+            recognitionRef.current.interimResults = true;
+            recognitionRef.current.lang = 'en-US';
+
+            recognitionRef.current.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0])
+                    .map(result => result.transcript)
+                    .join('');
+                
+                onSearch(transcript); // Live update sa search bar
+            };
+
+            recognitionRef.current.onend = () => {
+                setIsListening(false);
+            };
+
+            recognitionRef.current.onerror = (event) => {
+                console.error("Speech Recognition Error:", event.error);
+                setIsListening(false);
+            };
+        }
+    }, [onSearch]);
+
+    const handleVoiceSearch = () => {
+        if (!recognitionRef.current) {
+            alert("Your browser does not support voice recognition.");
+            return;
+        }
+
+        if (isListening) {
+            // STOP LOGIC: Kapag pinindot ulit habang active
+            recognitionRef.current.stop();
+            setIsListening(false);
+        } else {
+            // START LOGIC: Kapag pinindot habang idle
+            recognitionRef.current.start();
+            setIsListening(true);
+        }
+    };
+
+    // Function para i-clear ang input
+    const handleClear = () => {
+        onSearch(''); // I-reset ang search query sa empty string
+    };
+
     return (
         <section className="relative w-full py-10 px-6 rounded-[2.5rem] overflow-hidden bg-card border border-border shadow-xl animate-fade-in">
             {/* Background Decorative Elements using your index.css colors */}
@@ -19,10 +77,32 @@ const LibraryHero = ({ onSearch, searchQuery }) => {
                 </h1>
 
                 {/* Short Description */}
-                <p className="text-lg text-slate-500 dark:text-slate-400 mb-10 leading-relaxed animate-fade-in-delay-3">
+                <p className="text-lg text-slate-500 dark:text-slate-400 mb-6 leading-relaxed animate-fade-in-delay-3">
                     Explore our comprehensive collection of verified medical documentation, 
                     proactive wellness guides, and emergency first-aid protocols.
                 </p>
+
+                {/* --- STATUS INDICATOR --- */}
+                <div className="h-4 mb-4 flex justify-center items-center">
+                    <AnimatePresence>
+                        {isListening && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full"
+                            >
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                                </span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-primary">
+                                    System is Listening...
+                                </span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
 
                 {/* Search Bar Section (The Integrated Search Card) */}
                 <div className="relative group max-w-3xl mx-auto animate-fade-in-delay-4">
@@ -46,23 +126,56 @@ const LibraryHero = ({ onSearch, searchQuery }) => {
                             value={searchQuery}
                         />
 
-                        <div className="flex items-center gap-2 pr-1">
-                            {/* Voice Search Button */}
+                        {/* Icons Container sa Right */}
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                            
+                            {/* CLEAR BUTTON (X) - Lalabas lang kapag may text */}
+                            {searchQuery && (
+                                <button
+                                    onClick={handleClear}
+                                    className="text-muted-foreground hover:text-red-500 transition-all duration-200 active:scale-90 cursor-pointer p-1"
+                                    title="Clear search"
+                                >
+                                    <X size={20} />
+                                </button>
+                            )}
+
+                            {/* Vertical Divider (Optional: para mas malinis tignan) */}
+                            {searchQuery && <div className="w-[1px] h-6 bg-border" />}
+
+                            {/* MIC ICON / VOICE SEARCH */}
                             <button 
                                 type="button"
+                                onClick={handleVoiceSearch}
                                 title="Voice Search"
-                                className="p-2.5 rounded-xl text-slate-500 hover:text-primary hover:bg-primary/10 transition-all active:scale-90 group/mic"
+                                className={`relative p-2.5 rounded-xl transition-all active:scale-90 group/mic ${
+                                    isListening 
+                                    ? 'text-primary bg-primary/10 shadow-[0_0_15px_rgba(59,130,246,0.5)]' 
+                                    : 'text-slate-500 hover:text-primary hover:bg-primary/10'
+                                }`}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                {/* SVG na may Dynamic Classes */}
+                                <svg 
+                                    xmlns="http://www.w3.org/2000/svg" 
+                                    width="22" height="22" 
+                                    fill="none" viewBox="0 0 24 24" 
+                                    stroke="currentColor" 
+                                    strokeWidth="2"
+                                    className={isListening ? "animate-pulse" : ""}
+                                >
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 10v2a7 7 0 01-14 0v-2m14 0a1 1 0 00-2 0v2a5 5 0 01-10 0v-2a1 1 0 00-2 0v2a7 7 0 007 7h2a7 7 0 007-7v-2z" />
                                     <line x1="12" y1="19" x2="12" y2="23" strokeLinecap="round" />
                                     <line x1="8" y1="23" x2="16" y2="23" strokeLinecap="round" />
                                 </svg>
-                                
-                                {/* Tooltip or Pulse effect (Optional) */}
-                                <span className="absolute -top-10 left-1/2 mt-2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/mic:opacity-100 transition-opacity pointer-events-none">
-                                    Voice Search
+
+                                {/* Ping Animation kapag nakikinig */}
+                                {isListening && (
+                                    <span className="absolute inset-0 rounded-xl bg-primary/20 animate-ping pointer-events-none" />
+                                )}
+
+                                <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/mic:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                    {isListening ? "Listening..." : "Voice Search"}
                                 </span>
                             </button>
                         </div>

@@ -61,9 +61,9 @@ const ArticlePage = () => {
                     }
                 });
 
-                // References check
-                if (res.data.references_list) {
-                    dynamicSections.push({ id: 'references', label: 'References' });
+                // External links check
+                if (res.data.external_link) {
+                    dynamicSections.push({ id: 'external-link', label: 'External Links' });
                 }
 
                 // FINAL STEP: Overwrite ang buong sections state
@@ -190,7 +190,7 @@ const ArticlePage = () => {
 
     const textSizeMap = {
         small: 'text-sm',
-        standard: 'text-base',
+        standard: 'text-md',
         large: 'text-lg',
         extraLarge: 'text-xl'
     };
@@ -219,7 +219,7 @@ const ArticlePage = () => {
                 {/* Background Engine */}
                 <div className="absolute inset-0 z-0">
                     <img 
-                        src={articleData.image} 
+                        src={articleData.image_url} 
                         alt="Background" 
                         className="w-full h-full object-cover opacity-60 scale-105 animate-slow-zoom"
                     />
@@ -316,7 +316,7 @@ const ArticlePage = () => {
             <main className="max-w-[1440px] mx-auto px-6 py-8 lg:py-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                 
                 {/* COLUMN 1: LEFT SIDEBAR (Sticky Table Of Contents) - Span 2 */}
-                <aside className="hidden lg:block lg:col-span-2 sticky top-24 group/toc">
+                <aside className="hidden lg:block lg:col-span-2 sticky top-20 group/toc">
                     <div className="space-y-4">
                         {/* Header with Hide Button */}
                         <div 
@@ -401,7 +401,7 @@ const ArticlePage = () => {
                 </article>
 
                 {/* COLUMN 3: RIGHT SIDEBAR (Appearance & Tools) */}
-                <aside className="lg:col-span-2 sticky top-24 group/right">
+                <aside className="lg:col-span-2 sticky top-20 group/right">
                     <div className="space-y-4 text-left">
                         
                         {/* APPEARANCE SECTION */}

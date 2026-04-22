@@ -1,85 +1,126 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Languages, History, Eye, BookOpen } from 'lucide-react';
 
 const ArticleContent = ({ data, textSizeClass }) => {
+    const contentRef = useRef(null);
+
+    useEffect(() => {
+        if (contentRef.current) {
+            // Hanapin lahat ng 'a' tags sa loob ng component
+            const links = contentRef.current.querySelectorAll('a');
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+                
+                // Optional: Dagdagan ng class para sa styling
+                link.classList.add('text-blue-600', 'hover:underline');
+            });
+        }
+    }, [data]); // Re-run kapag nagbago ang data
+
     return (
-        <div className="w-full max-w-3xl mx-auto pb-12">
+        <div className="w-full max-w-3xl mx-auto pb-12" ref={contentRef}>
             {/* ARTICLE HEADER AREA */}
-            <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col gap-3 mb-2"> {/* Binalik sa gap-3 at mb-4 para mas dikit */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                    {/* Left: Title */}
-                    <h1 className="text-4xl md:text-5xl font-serif text-foreground font-bold tracking-tight">
+                    <h1 className="text-4xl md:text-5xl font-serif text-foreground font-bold tracking-tight leading-[1.1]">
                         {data?.title}
                     </h1>
                     
-                    {/* Right: Language Button */}
-                    <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition-all shrink-0 h-fit mb-1">
-                        <Languages size={18} />
-                        <span className="text-sm font-medium">128 languages</span>
+                    <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition-all shrink-0 h-fit mb-1">
+                        <Languages size={16} />
+                        <span className="text-[12px] font-bold uppercase tracking-wider">128 languages</span>
                     </button>
                 </div>
 
-                {/* Metadata Row (Parang Wikipedia feels) */}
-                <div className="flex flex-wrap items-center gap-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2">
-                    <div className="flex items-center gap-2">
-                        <History size={14} />
+                {/* Metadata Row */}
+                <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mt-1">
+                    <div className="flex items-center gap-1.5">
+                        <History size={13} className="text-primary/60" />
                         <span>Last edited 2 days ago</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Eye size={14} />
-                        <span>{data.view_count} views</span>
+                    <div className="flex items-center gap-1.5">
+                        <Eye size={13} className="text-primary/60" />
+                        <span>{data.view_count?.toLocaleString()} views</span>
                     </div>
                 </div>
             </div>
 
-            <hr className="border-slate-100 mb-10" />
+            <hr className="border-slate-100 mb-8" />
 
             <div 
-                className={`text-foreground font-serif text-justify whitespace-pre-line transition-all duration-300
+                className={`text-foreground font-serif text-justify transition-all duration-300
                     ${textSizeClass} 
-
-                    /* 1. LINE HEIGHT - Mula relaxed ginawa nating normal/snug */
-                    leading-snug md:leading-normal
-
-                    /* 2. PARAGRAPHS - Sobrang liit na margin-bottom */
-                    [&>p]:mb-2 [&>p]:mt-0 [&>p]:text-slate-400 [&>p]:first:mt-0 [&>p]:last:mb-0
-                    [&>p]:leading-relaxed
-
-                    /* 3. HEADERS (H3) - Dikit na sa taas at baba */
-                    [&>h3]:text-foreground [&>h3]:font-bold [&>h3]:mt-4 [&>h3]:mb-1 
-                    [&>h3]:border-b [&>h3]:border-slate-100 [&>h3]:pb-0.5 [&>h3]:font-sans
                     
-                    /* Dynamic size para sa H3 */
-                    ${textSizeClass === 'text-sm' ? '[&>h3]:text-xl' : 
-                    textSizeClass === 'text-xl' ? '[&>h3]:text-3xl' : '[&>h3]:text-3xl'}
+                    /* 1. LINE HEIGHT */
+                    leading-normal md:leading-[1.7]
 
-                    /* 4. LISTS - Halos walang gap sa pagitan ng items */
-                    [&>ul]:list-disc [&>ul]:ml-5 [&>ul]:mb-2 [&>ul]:space-y-0.5
-                    [&>ol]:list-decimal [&>ol]:ml-5 [&>ol]:mb-2 [&>ol]:space-y-0.5
-                    [&>ul>li]:text-slate-400
+                    /* 2. PARAGRAPHS - Eksaktong spacing para hindi sobrang layo */
+                    [&_p]:mb-4 [&_p]:mt-0 [&_p]:text-foreground/90 
                     
-                    /* 5. MANUAL BR TAGS - Ginawang 4px na lang ang height */
-                    [&>br]:block [&>br]:content-[''] [&>br]:h-1`}
+                    /* 3. SECTION HEADERS (H3) */
+                    [&_h3]:text-xl [&_h3]:md:text-xl [&_h3]:text-foreground [&_h3]:font-bold 
+                    [&_h3]:font-sans [&_h3]:tracking-widest
+                    [&_h3]:mt-4 [&_h3]:mb-4 [&_h3]:pt-4 [&_h3]:border-b [&_h3]:border-slate-100
+                    [&_h3:first-of-type]:mt-0 [&_h3:first-of-type]:pt-0 [&_h3:first-of-type]:border-b-2
+                    
+                    /* 4. LISTS - Support para sa Nested Lists */
+                    [&_ul]:list-disc [&_ol]:list-decimal
+                    [&_ul]:ml-6 [&_ol]:ml-6 
+                    [&_ul]:mb-4 [&_ol]:mb-4
+                    [&_li]:mb-1.5 [&_li]:pl-1
+                    /* Styling para sa mga a tags */
+                    [&_ul>li>a]:hover:text-blue-600 [&_ul>li>a]:hover:underline
+                    /* Styling para sa listahan sa loob ng listahan (Nested) */
+                    [&_ul_ul]:mt-2 [&_ul_ul]:mb-0 [&_ul_ul]:list-[circle]
+                    [&_ol_ol]:mt-2 [&_ol_ol]:mb-0
+                    
+                    /* 5. EMPHASIS */
+                    [&_b]:text-foreground [&_b]:font-bold 
+                    
+                    /* 6. WHITESPACE & OVERFLOW */
+                    whitespace-normal overflow-hidden
+
+                    /* 7. TABLES - Encyclopedia Style */
+                    [&_table]:w-full [&_table]:my-8 [&_table]:border-collapse [&_table]:text-[0.9em] [&_table]:font-sans
+                    [&_table_th]:bg-slate-50 [&_table_th]:border [&_table_th]:border-slate-200 [&_table_th]:p-3 [&_table_th]:text-left
+                    [&_table_td]:border [&_table_td]:border-slate-200 [&_table_td]:p-3 [&_table_td]:align-top
+                    [&_table_tr:nth-child(even)]:bg-slate-50/50
+
+                    /* 8. VIDEO & IFRAME */
+                    [&_video]:w-full [&_video]:my-8 [&_video]:rounded-xl [&_video]:border [&_video]:border-slate-200
+                    [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:my-8 [&_iframe]:rounded-xl [&_iframe]:border-0
+
+                    /* 9. IMAGES - Encyclopedia & Medical Style */
+                    [&_img]:max-w-full [&_img]:h-auto [&_img]:my-8 [&_img]:rounded-2xl 
+                    [&_img]:border [&_img]:border-slate-100 [&_img]:shadow-lg [&_img]:shadow-slate-200/50
+                    [&_img]:mx-auto hover:opacity-95 transition-opacity
+                `}
                 dangerouslySetInnerHTML={{ __html: data?.full_content }} 
             />
 
             {/* References Section */}
-            {data?.references_list && (
-                <section id="references" className={`mt-12 py-10 border-t-2 border-border scroll-mt-32`}>
-                    {/* Pwede mo rin i-apply ang textSizeClass dito kung gusto mo magbago rin ang references */}
-                    <div className="flex items-center gap-3 mb-8">
-                        <BookOpen className="text-primary" size={24} />
-                        <h2 className="text-2xl font-black text-foreground tracking-[0.1em]">
-                            References & Citations
+            {data?.external_link && (
+                <section 
+                    id="external-link" 
+                    className="mt-8 pt-8 scroll-mt-32"
+                >
+                    <div className="flex items-center gap-2 mb-4 border-b-2 border-slate-100 pb-2">
+                        <BookOpen className="text-primary" size={18} />
+                        <h2 className="text-xl font-bold text-foreground tracking-[0.2em]">
+                            External Links
                         </h2>
                     </div>
                     <div 
-                        className={`text-slate-500 font-sans leading-relaxed
-                            [&>ul]:list-disc [&>ul]:list-outside [&>ul]:ml-5 [&>ul]:space-y-4 
-                            [&>ul>li]:pl-2 [&>ul>li]:text-justify
-                            [&>ul>li]:font-serif 
-                            ${textSizeClass}`} // Apply din dito
-                        dangerouslySetInnerHTML={{ __html: data?.references_list }}
+                        className={`text-foreground font-sans leading-snug
+                            [&>ul]:list-disc [&>ul]:space-y-2 [&>ul]:ml-5 [&>ul]:mb-5
+                            [&>ul>li]:text-lg [&>ul>li]:pl-0
+                            [&>ul>li]:text-foreground
+                            [&>ul>li]:transition-colors [&>ul>li]:duration-200
+                            [&>ul>li>a]:hover:text-blue-600
+                            [&>ul>li>a]:hover:underline [&>ul>li:hover]:underline-offset-4
+                            ${textSizeClass}`}
+                        dangerouslySetInnerHTML={{ __html: data?.external_link }}
                     />
                 </section>
             )}
