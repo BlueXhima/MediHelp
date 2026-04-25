@@ -5,7 +5,7 @@ import { cn } from "../lib/utils";
 import { ThemeToggle } from "../ThemeToggle/themetoggle";
 import { Stethoscope, Menu, X } from "lucide-react";
 import DefaultAvatar from "../assets/default-avatar.png";
-import { Settings, Clipboard, HelpCircle, Shield, Sliders, LogOut } from "lucide-react";
+import { Settings, Clipboard, HelpCircle, Shield, Sliders, LogOut, Bookmark } from "lucide-react";
 import axios from "axios";
 import LogoutModal from "./logoutmodal";
 
@@ -140,8 +140,8 @@ const Navbar = () => {
                 className={cn(
                     "fixed top-0 left-0 right-0 z-[50] transition-all duration-500",
                     isScrolled 
-                        ? "py-3 bg-background/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm" 
-                        : "py-5 bg-transparent"
+                        ? "py-2 bg-background/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm" 
+                        : "py-4 bg-transparent"
                 )}
             >
                 <div className="container flex items-center justify-between">
@@ -213,7 +213,7 @@ const Navbar = () => {
                                         <ul className="py-1 space-y-2">
                                             <li>
                                                 <Link
-                                                    to="/account-settings"
+                                                    to="/dashboard/health-profile"
                                                     className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
                                                     <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
@@ -223,7 +223,7 @@ const Navbar = () => {
                                             </li>
                                             <li>
                                                 <Link
-                                                    to="/health-records"
+                                                    to="/dashboard/health-profile/records"
                                                     className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
                                                     <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
@@ -233,7 +233,19 @@ const Navbar = () => {
                                             </li>
                                             <li>
                                                 <Link
-                                                    to="/help-support"
+                                                    to="/dashboard/guidance-library/save-library"
+                                                    className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
+                                                >
+                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+                                                        <Bookmark size={16} />
+                                                    </i> 
+                                                    Saved Library
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    to="/dashboard/help-support"
+                                                    state={{ fromPage: "Dashboard" }}
                                                     className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
                                                 >
                                                     <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
@@ -242,14 +254,28 @@ const Navbar = () => {
                                                 </Link>
                                             </li>
                                             <li>
-                                                <Link
-                                                    to="/terms-privacy"
-                                                    className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full"
-                                                >
-                                                    <i className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
-                                                        <Shield size={16} />
-                                                    </i> Terms & Privacy
-                                                </Link>
+                                                <div className="group flex items-center px-5 py-3 text-sm font-bold text-muted-foreground transition-all duration-300 hover:bg-primary/5 hover:rounded-full">
+                                                    {/* Icon Part */}
+                                                    <div className="mr-3 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:text-primary">
+                                                        <Shield size={18} />
+                                                    </div>
+                                                    {/* Links Part */}
+                                                    <div className="flex items-center gap-2">
+                                                        <Link 
+                                                            to="/terms" 
+                                                            className="hover:text-primary transition-colors cursor-pointer"
+                                                        >
+                                                            Terms
+                                                        </Link>
+                                                        <span className="text-gray-300 font-normal">/</span>
+                                                        <Link 
+                                                            to="/privacy" 
+                                                            className="hover:text-primary transition-colors cursor-pointer"
+                                                        >
+                                                            Privacy
+                                                        </Link>
+                                                    </div>
+                                                </div>
                                             </li>
                                             <li>
                                                 <Link
@@ -266,7 +292,7 @@ const Navbar = () => {
                                             </li>
                                             <li>
                                                 <button
-                                                    className="group flex items-center w-full text-left px-5 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all duration-300 hover:bg-primary/5 hover:rounded-full cursor-pointer"
+                                                    className="group flex items-center w-full text-left px-5 py-3 text-sm font-bold text-muted-foreground hover:text-red-600 transition-all duration-300 hover:bg-primary/5 hover:rounded-full cursor-pointer"
                                                     onClick={() => {
                                                         handleDropdownItemClick(); // Close dropdown
                                                         handleLogoutClick(); // Open logout modal
