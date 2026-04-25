@@ -29,7 +29,7 @@ const HealthMetrics = ({ isLoading }) => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-6">
+            <div className="flex items-center justify-between border-b border-border pb-6">
                 <div className="flex items-center gap-3 text-left">
                     <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-sm">
                         <Activity size={24} />

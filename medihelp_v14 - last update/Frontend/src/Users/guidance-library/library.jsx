@@ -16,6 +16,7 @@ const GuidanceLibrary = () => {
     const [selectedCatId, setSelectedCatId] = useState('all');
     const [loading, setLoading] = useState(true);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [isArchivedOpen, setIsArchivedOpen] = useState(false);
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -69,10 +70,30 @@ const GuidanceLibrary = () => {
         return matchesCategory;
     });
     
-    const handleArticleClick = (articleId) => {
-        // I-navigate ang user sa ArticlePage gamit ang ID
-        // Dito pa lang, wala pa tayong idea kung may "full_content" ba sa DB
-        navigate(`/dashboard/guidance-library/article/${articleId}`); 
+    const handleArticleClick = async (articleId) => {
+        try {
+            const userData = JSON.parse(localStorage.getItem('user'));
+            console.log("FULL USER OBJECT:", userData); // Tingnan mo ito sa Console
+    
+            // Subukan nating i-check kung 'id', 'UserID', o 'id_user' ang tawag
+            const userId = userData?.UserID || userData?.id || userData?.userID;
+
+            // Debug log para makita mo sa Console (F12) kung may laman ba talaga
+            console.log("UserID:", userId, "ArticleID:", articleId);
+
+            if (userId && articleId) {
+                // Siguraduhin na ang second argument ng axios.post ay ang object data
+                await axios.post('http://localhost:5000/api/articles/record-visit', {
+                    userId: userId,
+                    articleId: articleId
+                });
+            }
+
+            navigate(`/dashboard/guidance-library/article/${articleId}`);
+        } catch (error) {
+            console.error("Tracking Error:", error);
+            navigate(`/dashboard/guidance-library/article/${articleId}`);
+        }
     };
 
     return (

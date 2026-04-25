@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
+import MediAvatar from '../../../assets/mediAvatar.png';
 
 const LibraryHero = ({ onSearch, searchQuery }) => {
     const [isListening, setIsListening] = useState(false);
@@ -18,12 +19,18 @@ const LibraryHero = ({ onSearch, searchQuery }) => {
             recognitionRef.current.lang = 'en-US';
 
             recognitionRef.current.onresult = (event) => {
-                const transcript = Array.from(event.results)
-                    .map(result => result[0])
-                    .map(result => result.transcript)
-                    .join('');
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
                 
-                onSearch(transcript); // Live update sa search bar
+                // Only update if we have a final transcript to prevent 
+                // the "jumping" text effect or accumulation
+                if (finalTranscript) {
+                    onSearch(finalTranscript); 
+                }
             };
 
             recognitionRef.current.onend = () => {
@@ -55,8 +62,14 @@ const LibraryHero = ({ onSearch, searchQuery }) => {
     };
 
     // Function para i-clear ang input
-    const handleClear = () => {
-        onSearch(''); // I-reset ang search query sa empty string
+    const handleClearSearch = () => {
+        onSearch(""); // Clear the text field
+        
+        // Stop the voice engine if it's running
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        }
     };
 
     return (
@@ -67,7 +80,7 @@ const LibraryHero = ({ onSearch, searchQuery }) => {
 
             <div className="relative z-10 max-w-3xl mx-auto text-center">
                 {/* Badge/Tag */}
-                <span className="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-wider uppercase text-primary bg-primary/10 rounded-full animate-fade-in-delay-1">
+                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-wider uppercase text-primary bg-primary/10 rounded-full animate-fade-in-delay-1">
                     Knowledge Base
                 </span>
 
@@ -83,21 +96,31 @@ const LibraryHero = ({ onSearch, searchQuery }) => {
                 </p>
 
                 {/* --- STATUS INDICATOR --- */}
-                <div className="h-4 mb-4 flex justify-center items-center">
+                <div className="h-4 mb-6 flex justify-center items-center">
                     <AnimatePresence>
                         {isListening && (
                             <motion.div 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 10 }}
-                                className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full"
+                                className="flex items-center gap-2.5 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full shadow-lg shadow-primary/5"
                             >
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                                </span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-primary">
-                                    System is Listening...
+                                {/* Medi Avatar Part */}
+                                <div className="relative">
+                                    <img 
+                                        src={MediAvatar} 
+                                        alt="Medi Assistant" 
+                                        className="w-7 h-7 rounded-full border border-primary/30"
+                                    />
+                                    {/* Live Dot on Avatar */}
+                                    <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary border border-white"></span>
+                                    </span>
+                                </div>
+                                
+                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-primary whitespace-nowrap">
+                                    Medi is Listening...
                                 </span>
                             </motion.div>
                         )}
@@ -132,7 +155,7 @@ const LibraryHero = ({ onSearch, searchQuery }) => {
                             {/* CLEAR BUTTON (X) - Lalabas lang kapag may text */}
                             {searchQuery && (
                                 <button
-                                    onClick={handleClear}
+                                    onClick={handleClearSearch}
                                     className="text-muted-foreground hover:text-red-500 transition-all duration-200 active:scale-90 cursor-pointer p-1"
                                     title="Clear search"
                                 >

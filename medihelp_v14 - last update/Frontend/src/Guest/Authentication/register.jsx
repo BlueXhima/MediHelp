@@ -51,21 +51,17 @@ const Register = () => {
     };
 
     const evaluatePasswordStrength = (password) => {
-        if (password.length < 8) {
-            return "Weak";
-        }
+        if (password.length === 0) return "None"; // Bagong state para sa default
+        if (password.length < 8) return "Weak";
+        
         const hasNumbers = /\d/.test(password);
         const hasLowercase = /[a-z]/.test(password);
         const hasUppercase = /[A-Z]/.test(password);
         const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-        if (hasNumbers && hasLowercase && hasUppercase && hasSpecialChar) {
-            return "Strong";
-        } else if ((hasNumbers && hasLowercase) || (hasLowercase && hasUppercase)) {
-            return "Medium";
-        } else {
-            return "Weak";
-        }
+        if (hasNumbers && hasLowercase && hasUppercase && hasSpecialChar) return "Strong";
+        if ((hasNumbers && hasLowercase) || (hasLowercase && hasUppercase)) return "Medium";
+        return "Weak";
     };
 
     const handlePasswordChange = (e) => {
@@ -208,7 +204,7 @@ const Register = () => {
                     <div className="absolute bottom-10 left-0 right-0 px-12 flex items-center justify-between opacity-50">
                         <p className="text-xs font-medium text-white/60 tracking-widest uppercase">© 2026 MediHelp Platform</p>
                         <div className="h-[1px] flex-grow mx-6 bg-gradient-to-r from-white/20 to-transparent"></div>
-                        <p className="text-xs italic text-white/40 font-semibold uppercase tracking-wider">v2.0 Stable Build</p>
+                        <p className="text-xs italic text-white/40 font-semibold uppercase tracking-wider">v1.0 Stable Build</p>
                     </div>
                 </div>
 
@@ -263,6 +259,7 @@ const Register = () => {
                             </div>
 
                             {/* Password Field */}
+                            {/* Password Field */}
                             <div className="space-y-1.5 text-left">
                                 <label className="text-xs font-bold uppercase tracking-widest text-foreground/50 ml-1">Password</label>
                                 <div className="relative">
@@ -279,44 +276,58 @@ const Register = () => {
                                     </button>
                                 </div>
 
-                                {/* Password Strength & Requirements UX */}
-                                {password.length > 0 && (
-                                    <div className="mt-3 px-1 animate-pop-up space-y-3">
-                                        {/* Strength Bar */}
-                                        <div>
-                                            <div className="flex justify-between items-center mb-1.5">
-                                                <span className="text-[10px] font-black uppercase tracking-tighter text-slate-400">
-                                                    Security Level: <span className={passwordStrength === 'Weak' ? 'text-red-500' : passwordStrength === 'Medium' ? 'text-yellow-500' : 'text-green-600'}>{passwordStrength}</span>
+                                {/* Default/Live Password Strength & Requirements */}
+                                <div className="mt-4 px-1 space-y-3">
+                                    {/* Strength Bar */}
+                                    <div>
+                                        <div className="flex justify-between items-center mb-1.5">
+                                            <span className="text-[12px] font-black uppercase tracking-tighter text-slate-400">
+                                                Security Level: 
+                                                <span className={`ml-1 ${
+                                                    passwordStrength === 'Weak' ? 'text-red-500' : 
+                                                    passwordStrength === 'Medium' ? 'text-yellow-500' : 
+                                                    passwordStrength === 'Strong' ? 'text-green-600' : 'text-slate-300'
+                                                }`}>
+                                                    {passwordStrength || "Waiting for input..."}
                                                 </span>
-                                            </div>
-                                            <div className="flex gap-1.5 h-1.5">
-                                                <div className={`h-full flex-1 rounded-full transition-all duration-500 ${passwordStrength ? (passwordStrength === 'Weak' ? 'bg-red-400' : (passwordStrength === 'Medium' ? 'bg-yellow-400' : 'bg-green-500')) : 'bg-slate-200'}`} />
-                                                <div className={`h-full flex-1 rounded-full transition-all duration-500 ${passwordStrength === 'Medium' || passwordStrength === 'Strong' ? (passwordStrength === 'Medium' ? 'bg-yellow-400' : 'bg-green-500') : 'bg-slate-200'}`} />
-                                                <div className={`h-full flex-1 rounded-full transition-all duration-500 ${passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-200'}`} />
-                                            </div>
+                                            </span>
                                         </div>
-
-                                        {/* --- Password Requirements Checklist --- */}
-                                        <div className="grid grid-cols-2 gap-y-2 pb-2">
-                                            <div className="flex items-center space-x-2">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${password.length >= 8 ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                                <span className={`text-[10px] font-medium ${password.length >= 8 ? 'text-foreground' : 'text-slate-400'}`}>8+ Characters</span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${/[A-Z]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                                <span className={`text-[10px] font-medium ${/[A-Z]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Uppercase Letter</span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${/[0-9]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                                <span className={`text-[10px] font-medium ${/[0-9]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Number Included</span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${/[!@#$%^&*]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                                <span className={`text-[10px] font-medium ${/[!@#$%^&*]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Special Character</span>
-                                            </div>
+                                        <div className="flex gap-1.5 h-1.5">
+                                            <div className={`h-full flex-1 rounded-full transition-all duration-500 ${
+                                                passwordStrength === 'Weak' ? 'bg-red-400' : 
+                                                passwordStrength === 'Medium' ? 'bg-yellow-400' : 
+                                                passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-100'
+                                            }`} />
+                                            <div className={`h-full flex-1 rounded-full transition-all duration-500 ${
+                                                passwordStrength === 'Medium' ? 'bg-yellow-400' : 
+                                                passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-100'
+                                            }`} />
+                                            <div className={`h-full flex-1 rounded-full transition-all duration-500 ${
+                                                passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-100'
+                                            }`} />
                                         </div>
                                     </div>
-                                )}
+
+                                    {/* Requirements Checklist - Laging Visible */}
+                                    <div className="grid grid-cols-2 gap-y-2 pb-2">
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${password.length >= 8 ? 'bg-green-500' : 'bg-slate-300'}`} />
+                                            <span className={`text-[11px] font-semibold transition-colors ${password.length >= 8 ? 'text-foreground' : 'text-slate-400'}`}>8+ Characters</span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${/[A-Z]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
+                                            <span className={`text-[11px] font-semibold transition-colors ${/[A-Z]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Uppercase Letter</span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${/[0-9]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
+                                            <span className={`text-[11px] font-semibold transition-colors ${/[0-9]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Number Included</span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${/[!@#$%^&*]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
+                                            <span className={`text-[11px] font-semibold transition-colors ${/[!@#$%^&*]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Special Character</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Register Button */}

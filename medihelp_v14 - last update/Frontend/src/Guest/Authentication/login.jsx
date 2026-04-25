@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, ArrowRight, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Stethoscope, ArrowRight, Eye, EyeOff, ArrowLeft, MessageSquareWarning } from 'lucide-react';
 import heroimg2 from "../../assets/login-photo.webp";
 import buttonlogo from "../../assets/google.png";
 import BackgroundLoadingState from "../../components/BackgroundLoadingState";
 import ToastMessage, { showToast } from "../../components/ToastMessage";
+import axios from 'axios';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -14,6 +15,12 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // State for background loading
+    const [failedAttempts, setFailedAttempts] = useState(0);
+    // Kunin ang huling duration, kung wala pa, default sa 30000 (30s)
+    const [cooldownDuration, setCooldownDuration] = useState(() => {
+        const savedDuration = localStorage.getItem("nextCooldownDuration");
+        return savedDuration ? parseInt(savedDuration) : 30000;
+    });
 
     // Static admin credentials
     const adminCredentials = {
@@ -21,68 +28,159 @@ const Login = () => {
         password: "admin123"
     };
 
+    // Kunin ang lock data mula sa localStorage sa simula
+    const [lockUntil, setLockUntil] = useState(() => {
+        const savedLock = localStorage.getItem("loginLockUntil");
+        return savedLock ? parseInt(savedLock) : null;
+    });
+
+    const [isSilentLock, setIsSilentLock] = useState(() => {
+        return localStorage.getItem("isSilentLock") === "true";
+    });
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
-        setIsLoading(true); // Show loading state
+
+        // 1. Countdown Lock Check (Visible timer)
+        if (lockUntil && Date.now() < lockUntil && !isSilentLock) {
+            const remainingTime = Math.ceil((lockUntil - Date.now()) / 1000);
+            setError(`Too many failed attempts. Try again in ${remainingTime}s.`);
+            return;
+        }
+
+        // 2. SilentLock Logic (5 mins)
+        if (isSilentLock && lockUntil && Date.now() < lockUntil) {
+            showToast("Login temporarily unavailable. Please try again shortly.", "error");
+            return;
+        }
+
+        if (!email || !password) {
+            setError("Please fill in all fields.");
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
-            console.log("Sending login request...");
-            const response = await fetch("http://localhost:5000/api/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ Email: email, Password: password }),
+            const response = await axios.post("http://localhost:5000/api/login", {
+                email,
+                password,
             });
 
-            console.log("Response received:", response);
-            const data = await response.json();
-            console.log("Response data:", data);
-
-            if (response.ok && data.success) {
-                setEmail("");
-                setPassword("");
-                setError("");
-
-                // Normalize role to lowercase for consistency
-                const normalizedRole = data.role.toLowerCase();
-                localStorage.setItem("userRole", normalizedRole);
+            if (response.data && response.data.success) {
+                // --- SUCCESS FLOW: Save data to LocalStorage ---
+                localStorage.setItem("token", response.data.token || "temp-token");
+                localStorage.setItem("userRole", response.data.role);
                 localStorage.setItem("email", email);
+                if (response.data.user) {
+                    localStorage.setItem("user", JSON.stringify(response.data.user));
+                }
 
-                // Show success toast message
-                showToast("Login successful! Redirecting to your dashboard...", "success");
+                // Reset all security states
+                setFailedAttempts(0);
+                setLockUntil(null);
+                setIsSilentLock(false);
+                setCooldownDuration(30000); // Back to 30s
 
-                // Extend delay to close loading state
+                localStorage.removeItem("loginLockUntil");
+                localStorage.removeItem("isSilentLock");
+                localStorage.removeItem("nextCooldownDuration"); // Reset escalation
+
+                showToast("Login Successful!", "success");
                 setTimeout(() => {
-                    setTimeout(() => {
-                        const redirectPath = normalizedRole === "admin" ? "/admin" : "/dashboard";
-                        console.log(`Navigating to ${redirectPath}`);
-                        navigate(redirectPath);
-                    }, 500); // Additional delay before navigation
-                }, 1000); // 1-second delay to close loading state
-            } else {
-                // Handle login failure
-                console.error("Login failed:", data.error);
-                setError(data.error || "Invalid email or password.");
-                showToast(data.error || "Invalid email or password.", "error");
-                setIsLoading(false); // Hide loading state
+                    navigate(response.data.role === 'admin' ? "/admin" : "/dashboard");
+                }, 1500);
             }
         } catch (err) {
-            // Handle network or unexpected errors
-            console.error("Error during login:", err);
-            setError("An error occurred. Please try again later.");
-            showToast("An error occurred. Please try again later.", "error");
+            console.error("Login Error:", err);
+            
+            const newAttempts = failedAttempts + 1;
+            setFailedAttempts(newAttempts);
+
+            if (newAttempts >= 3) {
+                // TRIGGER LOCKOUT & SEND ALERT
+                const currentLockDuration = cooldownDuration;
+                const lockTime = Date.now() + cooldownDuration;
+
+                setLockUntil(lockTime);
+                setIsSilentLock(false);
+                setFailedAttempts(0);
+                
+                localStorage.setItem("loginLockUntil", lockTime.toString());
+                localStorage.setItem("isSilentLock", "false");
+
+                // API Call para sa Security Alert Email
+                try {
+                    await axios.post("http://localhost:5000/api/send-security-alert", {
+                        Email: email,
+                        Device: navigator.userAgent,
+                        Time: new Date().toLocaleString()
+                    });
+                } catch (mailErr) {
+                    console.error("Security alert email failed to send.");
+                }
+
+                // --- ESCALATION LOGIC ---
+                // Dagdagan ng 30s ang duration para sa SUSUNOD na lockout
+                const nextDuration = cooldownDuration + 30000; 
+                setCooldownDuration(nextDuration);
+                localStorage.setItem("nextCooldownDuration", nextDuration.toString());
+                
+                setError(`Too many failed attempts. Account locked for ${cooldownDuration/1000}s.`);
+                showToast("Security alert sent to your email.", "error");
+            } else {
+                setError("Invalid Email or Password.");
+                showToast("Invalid credentials.", "error");
+            }
         } finally {
-            // Ensure loading state is cleared
             setIsLoading(false);
-            console.log("Login process completed.");
         }
     };
 
     const togglePasswordVisibility = () => {
         setShowPassword((prev) => !prev);
     };
+
+    // Effect para i-handle ang cooldown timer at silent lock
+    useEffect(() => {
+        let interval;
+        if (lockUntil) {
+            interval = setInterval(() => {
+                const timeLeft = lockUntil - Date.now();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    
+                    if (!isSilentLock) {
+                        // Transition: Countdown (30s/60s) -> SilentLock (5 mins)
+                        showToast("Cooldown finished. Access will be restored shortly.", "success");
+                        setError(""); // Nililinis ang error box pagtapos ng countdown
+                        
+                        const silentLockTime = Date.now() + (5 * 60 * 1000);
+                        setLockUntil(silentLockTime);
+                        setIsSilentLock(true);
+                        localStorage.setItem("isSilentLock", "true");
+                        localStorage.setItem("loginLockUntil", silentLockTime.toString());
+                    } else {
+                        // Tapos na ang SilentLock
+                        setLockUntil(null);
+                        setIsSilentLock(false);
+                        setFailedAttempts(0); // I-reset ang counter sa 0
+                        localStorage.removeItem("loginLockUntil");
+                        localStorage.removeItem("isSilentLock");
+                    }
+                } else {
+                    // LIVE UPDATE: Dito nag-uupdate ang countdown sa UI
+                    if (!isSilentLock) {
+                        const seconds = Math.ceil(timeLeft / 1000);
+                        setError(`Too many failed attempts. Account locked for ${seconds}s.`);
+                    }
+                }
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [lockUntil, isSilentLock]);
 
     return (
         <>
@@ -146,7 +244,7 @@ const Login = () => {
                     <div className="absolute bottom-10 left-0 right-0 px-12 flex items-center justify-between opacity-50">
                         <p className="text-xs font-medium text-white/60 tracking-widest uppercase">© 2026 MediHelp Platform</p>
                         <div className="h-[1px] flex-grow mx-6 bg-gradient-to-r from-white/20 to-transparent"></div>
-                        <p className="text-xs italic text-white/40">v2.0 Stable Build</p>
+                        <p className="text-xs italic text-white/40 font-semibold uppercase tracking-wider">v1.0 Stable Build</p>
                     </div>
                 </div>
 
@@ -160,6 +258,23 @@ const Login = () => {
                                 Please enter your details to access your MediHelp account.
                             </p>
                         </div>
+
+                        {/* --- Error Message Display --- */}
+                        {error && (
+                            <div className="mb-6 p-4 rounded-xl bg-red-50/50 backdrop-blur-sm border border-red-200 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <div className="shrink-0 p-1.5 bg-red-100 rounded-lg">
+                                    <MessageSquareWarning size={18} className="text-red-600" />
+                                </div>
+                                <div className="flex flex-col gap-0.5 text-left">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.1em] text-red-500/80">
+                                        Security Alert
+                                    </span>
+                                    <p className="text-sm font-semibold text-red-700 leading-tight">
+                                        {error}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
 
                         <form onSubmit={handleLogin} className="space-y-4">
                             {/* Email Field with focus-ring effect */}
@@ -219,11 +334,41 @@ const Login = () => {
                             {/* Primary Action Button with shadow and hover lift */}
                             <button 
                                 type="submit" 
-                                disabled={isLoading}
-                                className="w-full bg-primary text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center space-x-2"
+                                disabled={isLoading || (lockUntil && Date.now() < lockUntil && !isSilentLock)}
+                                className={`
+                                    relative overflow-hidden w-full py-4 rounded-xl cursor-pointer font-bold transition-all duration-300 
+                                    flex items-center justify-center gap-2 group
+                                    ${lockUntil && Date.now() < lockUntil && !isSilentLock 
+                                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed opacity-80' 
+                                        : 'bg-primary text-white shadow-[0_10px_20px_-10px_rgba(var(--primary-rgb),0.4)] active:scale-[0.98] hover:shadow-[0_15px_25px_-10px_rgba(var(--primary-rgb),0.5)] hover:-translate-y-1 active:scale-[0.98]'
+                                    }
+                                `}
                             >
-                                <span>{isLoading ? "Signing in..." : "Sign In"}</span>
-                                {!isLoading && <ArrowRight size={18} />}
+                                {/* Shimmer Effect kapag hindi locked */}
+                                {!(lockUntil && Date.now() < lockUntil && !isSilentLock) && !isLoading && (
+                                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] transition-transform" />
+                                )}
+
+                                <span className="relative z-10 flex items-center gap-2">
+                                    {isLoading ? (
+                                        <>
+                                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <span>Signing in...</span>
+                                        </>
+                                    ) : (lockUntil && Date.now() < lockUntil && !isSilentLock) ? (
+                                        <>
+                                            <span className="opacity-60">Account Locked</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Sign In</span>
+                                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
+                                </span>
                             </button>
 
                             {/* Minimalist Divider */}

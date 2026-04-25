@@ -1,25 +1,95 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { 
     ArrowLeft, Clock, Calendar, User, Share2, Bookmark, 
     MessageCircle, ChevronDown, ChevronRight, FileSearch, Home, Download
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios'
+import { motion, AnimatePresence } from 'framer-motion';
+import ToastMessage, { showToast } from '../../../components/ToastMessage';
+// import html2pdf from 'html2pdf.js';
+
 import Navbar from '../../../components/navbar';
 import ArticleContent from './ArticleContent';
 import MediHelpAvatar from '../../../assets/mediAvatar.png';
 import ArticleNotFound from '../../../pages/error/ArticleNotFound';
+import ScrollToTop from '../../../components/ScrollTop';
 
 const ArticlePage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    // Dito mai-store ang listahan ng tabs para sa TOC
+    const [sections, setSections] = useState([]);
+
     const [articleData, setArticleData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('introduction');
     const [textSize, setTextSize] = useState('standard'); // default text size
 
-    // Dito mai-store ang listahan ng tabs para sa TOC
-    const [sections, setSections] = useState([]);
+    // --- NEW: Scroll Progress States ---
+    const [maxScroll, setMaxScroll] = useState(0);
+    const scrollRef = useRef(0); // Gagamit ng Ref para ma-access ang latest value sa cleanup
+
+    // --- Language State ---
+    const [translatedData, setTranslatedData] = useState(null);
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [displayTitle, setDisplayTitle] = useState("");
+    const [displayContent, setDisplayContent] = useState("");
+    const [displayExternal, setDisplayExternal] = useState("");
+
+    const [isSaved, setIsSaved] = useState(false);
+
+    const [currentLang, setCurrentLang] = useState(() => {
+        const saved = localStorage.getItem('medihelp_lang');
+        return saved ? JSON.parse(saved) : { name: 'English', code: 'en', flag: '🇺🇸' };
+    });
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const winScroll = window.scrollY;
+            const height = document.documentElement.scrollHeight - window.innerHeight;
+            
+            if (height > 0) {
+                const scrolled = Math.round((winScroll / height) * 100);
+                
+                // Siguraduhin na hindi lalampas sa 100 at laging pataas lang ang record
+                if (scrolled > scrollRef.current) {
+                    const cappedScroll = Math.min(scrolled, 100);
+                    scrollRef.current = cappedScroll;
+                    setMaxScroll(cappedScroll);
+                }
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        // CLEANUP: Ito ang tatakbo kapag umalis ang user sa page
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            
+            const userData = JSON.parse(localStorage.getItem('user'));
+            const userId = userData?.UserID;
+            const currentProgress = scrollRef.current;
+
+            // I-save lang kung may progress (kahit 1% lang)
+            if (userId && id && currentProgress > 0) {
+                // Gagamit tayo ng navigator.sendBeacon o standard axios
+                // sendBeacon ay mas reliable para sa "page hide/unload" events
+                const data = JSON.stringify({
+                    userId: userId,
+                    articleId: id,
+                    progress: currentProgress
+                });
+                
+                // Option A: Axios (Standard)
+                axios.post('http://localhost:5000/api/articles/update-progress', {
+                    userId: userId,
+                    articleId: id,
+                    progress: currentProgress
+                }).catch(err => console.error("Progress save failed:", err));
+            }
+        };
+    }, [id]); // Re-run lang kapag nag-change ang article ID
 
     useEffect(() => {
         const fetchFullArticle = async () => {
@@ -165,6 +235,66 @@ const ArticlePage = () => {
         };
     }, []);
 
+    /* ---------------- SAVED LIBRARY FRONTEND INTEGRATION ----------------- */
+    useEffect(() => {
+        const checkSaveStatus = async () => {
+            const userData = JSON.parse(localStorage.getItem('user'));
+            // Gamitin ang 'id' mula sa useParams()
+            if (userData?.UserID && id) {
+                try {
+                    const response = await axios.get(`http://localhost:5000/api/articles/save-status/${userData.UserID}/${id}`);
+                    setIsSaved(response.data.isSaved);
+                } catch (err) {
+                    console.error("Error checking save status:", err);
+                }
+            }
+        };
+        checkSaveStatus();
+    }, [id]);
+
+    const handleSaveToLibrary = async () => {
+        const userData = JSON.parse(localStorage.getItem('user'));
+        const userId = userData?.UserID;
+
+        if (!userId) {
+            showToast("Please login to save articles", "info");
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/articles/save-toggle', {
+                userId: userId,
+                articleId: id
+            });
+
+            const isNowSaved = response.data.saved;
+            setIsSaved(isNowSaved);
+
+            if (isNowSaved) {
+                // Success Feedback with Link instruction
+                showToast(
+                    <span>
+                        Saved to library! View it in your 
+                        <button 
+                            onClick={() => navigate('/dashboard/guidance-library/save-library')}
+                            className="ml-1 underline font-bold hover:text-emerald-500"
+                        >
+                            Saved Library
+                        </button>.
+                    </span>, 
+                    "success"
+                );
+            } else {
+                showToast("Removed from library", "info");
+            }
+
+        } catch (err) {
+            console.error("Error toggling save:", err);
+            showToast("Failed to update library", "error");
+        }
+    };
+    /* ------------------------------------------------------------------------------------------------------ */
+
     const getFormattedDate = (dateString) => {
         if (!dateString) return "Date not available";
         const date = new Date(dateString);
@@ -173,6 +303,100 @@ const ArticlePage = () => {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    // Global Translation Function
+    // Fetch original article data
+    const fetchTranslation = async (langCode) => {
+        try {
+            setIsTranslating(true);
+            const res = await axios.get(`http://localhost:5000/api/translate/${id}?lang=${langCode}`);
+            setTranslatedData(res.data);
+        } catch (error) {
+            console.error("Translation error:", error);
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
+    useEffect(() => {
+        if (id && currentLang.code !== 'en') {
+            fetchTranslation(currentLang.code);
+        }
+    }, [id]);
+
+    const handleLanguageChange = async (lang) => {
+        setCurrentLang(lang);
+        localStorage.setItem('medihelp_lang', JSON.stringify(lang));
+
+        if (lang.code === 'en') {
+            setTranslatedData(null);
+            return;
+        }
+
+        try {
+            setIsTranslating(true);
+            // FIX: Pass lang.code explicitly in params to match backend req.query.lang
+            const response = await axios.get(`http://localhost:5000/api/translate/${id}`, {
+                params: { lang: lang.code } 
+            });
+
+            if (response.data) {
+                // Update the display states and the translated data object
+                setDisplayTitle(response.data.title);
+                setDisplayContent(response.data.full_content);
+                setDisplayExternal(response.data.external_link);
+                setTranslatedData(response.data);
+            }
+        } catch (error) {
+            console.error("Translation error:", error);
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
+    // ----- Share Article Function -----
+    const handleShare = async () => {
+        const shareData = {
+            title: articleData?.title,
+            text: `Check out this health guidance: ${articleData?.title}`,
+            url: window.location.href,
+        };
+
+        if (navigator.share) {
+            try {
+                // 1. Toast appear (Process Started)
+                showToast("Opening share options...", "info");
+                
+                // 2. Share display (Waiting for user to close)
+                await navigator.share(shareData);
+                
+            } catch (err) {
+                // Kapag kinancel ng user (pinindot yung 'X' o labas ng window)
+                if (err.name === 'AbortError') {
+                    showToast("Share cancelled.", "info");
+                } else {
+                    showToast("Something went wrong while sharing.", "error");
+                }
+            }
+        } else {
+            // Fallback for Desktop browsers (Firefox etc.)
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                showToast("Link copied to clipboard!", "success");
+            } catch (err) {
+                showToast("Failed to copy link.", "error");
+            }
+        }
+    };
+
+    // ----- Download PDF functions -----
+    const handleDownload = () => {
+        // Konting delay para makita ang toast
+        setTimeout(() => {
+            window.print();
+            showToast("Download process finished!", "success");
+        }, 800);
     };
 
     if (loading) return (
@@ -198,6 +422,10 @@ const ArticlePage = () => {
     return (
         <div className="min-h-screen bg-background">
             <Navbar />
+
+            <ScrollToTop progress={maxScroll} />
+
+            <ToastMessage />
 
             {/* 2. HERO SECTION */}
             <header className="relative w-full min-h-[100vh] flex items-center justify-center overflow-hidden bg-slate-950">
@@ -230,21 +458,33 @@ const ArticlePage = () => {
 
                 {/* Content Container */}
                 <div className="relative z-10 max-w-4xl mx-auto px-6 text-center mt-16">
+                    <div className="fixed top-[64px] left-0 w-full h-1 z-[50]">
+                        <div 
+                            className="h-full bg-primary transition-all duration-150 shadow-[0_0_10px_rgba(var(--primary),0.5)]" 
+                            style={{ width: `${maxScroll}%` }}
+                        />
+                    </div>
+                    
                     {/* Floating Category Badge */}
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8 animate-fade-in-up">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
                         <span className="text-[10px] font-black text-white uppercase tracking-[0.25em]">
-                            {articleData.category_name}
+                            {translatedData?.category_name || articleData?.category_name}
                         </span>
                     </div>
 
                     {/* Main Headline: Bigger, Tighter, Stronger */}
                     <h1 className="text-4xl md:text-7xl font-black text-white leading-[1.05] tracking-[-0.04em] mb-10 drop-shadow-2xl">
-                        {articleData.title.split(':').map((part, i) => (
-                            <span key={i} className={i === 1 ? "text-slate-400 block md:inline" : "block"}>
-                                {i === 1 ? `: ${part}` : part}
-                            </span>
-                        ))}
+                        {(() => {
+                            const displayTitle = translatedData?.title || articleData?.title || "";
+
+                            // I-apply ang split logic sa kung ano mang text ang active
+                            return displayTitle.split(':').map((part, i) => (
+                                <span key={i} className={i === 1 ? "text-slate-400 block md:inline" : "block"}>
+                                    {i === 1 ? `: ${part}` : part}
+                                </span>
+                            ));
+                        })()}
                     </h1>
                     
                     {/* Premium Meta Row */}
@@ -323,7 +563,7 @@ const ArticlePage = () => {
                             className="flex items-center text-left justify-between pr-4"
                         >
                             <h4 className="text-[14px] font-extrabold text-foreground tracking-[0.2em]">
-                                Table of Contents
+                                {translatedData?.ui?.toc || "Table of Contents"}
                             </h4>
                             <button className="opacity-0 group-hover/toc:opacity-100 transition-opacity p-1 hover:bg-primary rounded-md text-foreground hover:text-primary-foreground" title="Hide Menu">
                                 <ChevronDown size={16} className="rotate-90" />
@@ -391,12 +631,55 @@ const ArticlePage = () => {
                 </aside>
 
                 {/* COLUMN 2: MAIN CONTENT */}
-                <article className="lg:col-span-8 text-left">
+                <article id="article-pdf-area" className="lg:col-span-8 text-left">
                     <div id="introduction" className="max-w-3xl mx-auto scroll-mt-28">
                         <ArticleContent 
-                            data={articleData}
-                            textSizeClass={textSizeMap[textSize]} 
+                            data={currentLang.code !== 'en' && translatedData ? translatedData : articleData}
+                            isTranslating={isTranslating}
+                            currentLang={currentLang}
+                            onLangChange={handleLanguageChange}
+                            textSizeClass={textSizeMap}
+                            // Siguraduhin na ang mga display props ay nanggagaling din sa tamang source
+                            displayTitle={translatedData?.title || articleData?.title}
+                            displayContent={translatedData?.full_content || articleData?.full_content}
+                            displayExternal={translatedData?.external_link || articleData?.external_link}
                         />
+
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="mt-4 mb-4"
+                        >
+                            <div className="bg-card rounded-[2.5rem] p-8 md:p-12 text-center group relative overflow-hidden">
+                                {/* Decorative Glow */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/5 blur-[80px] rounded-full group-hover:bg-primary/10 transition-colors duration-700" />
+                                
+                                <div className="relative z-10 space-y-6">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-12 h-12 rounded-2xl bg-white shadow-xl flex items-center justify-center text-primary group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                                            <Home size={24} />
+                                        </div>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+                                            Finished Reading?
+                                        </p>
+                                    </div>
+
+                                    <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
+                                        Explore more health <br /> 
+                                        <span className="text-primary italic">insights & guidance.</span>
+                                    </h2>
+
+                                    <button 
+                                        onClick={() => navigate('/dashboard/guidance-library')} // I-adjust ang path kung kailangan
+                                        className="inline-flex cursor-pointer items-center gap-3 px-8 py-4 bg-slate-950 text-white rounded-2xl font-black text-[13px] uppercase tracking-widest hover:bg-primary transition-all duration-300 shadow-2xl shadow-black/20 active:scale-95"
+                                    >
+                                        Return to Guidance Library
+                                        <ArrowLeft size={18} className="rotate-180" />
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </article>
 
@@ -408,7 +691,7 @@ const ArticlePage = () => {
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between pr-4">
                                 <h4 className="text-[14px] font-extrabold text-foreground tracking-[0.2em]">
-                                    Appearance
+                                    {translatedData?.ui?.related || "Appearance"}
                                 </h4>
                                 <button className="opacity-0 group-hover/right:opacity-100 transition-all p-1 hover:bg-primary rounded-md text-foreground hover:text-primary-foreground" title="Hide Menu">
                                     <ChevronDown size={16} className="-rotate-90" />
@@ -420,7 +703,9 @@ const ArticlePage = () => {
                             {/* Text Size */}
                             <div className="space-y-2">
                                 <div className="space-y-2">
-                                    <p className="text-[12px] font-bold text-foreground">Text Size</p>
+                                    <p className="text-[12px] font-bold text-foreground">
+                                        {translatedData?.ui?.size || "Text Size"}
+                                    </p>
                                     <hr className="border-slate-100" />
                                 </div>
                                 <div className="flex flex-col gap-3">
@@ -475,23 +760,40 @@ const ArticlePage = () => {
                         {/* TOOLS SECTION */}
                         <div className="space-y-2">
                             <h4 className="text-[12px] font-bold text-foreground tracking-widest">
-                                Tools
+                                {translatedData?.ui?.tool || "Tools"}
                             </h4>
                             <hr className="border-slate-100" />
                             <div className="flex flex-col gap-1.5 px-1">
                                 {[
-                                    { icon: <Share2 size={15} />, label: 'Share Article', color: 'hover:text-blue-900' },
-                                    { icon: <Bookmark size={15} />, label: 'Save to Library', color: 'hover:text-emerald-900' },
-                                    { icon: <Download size={15} />, label: 'Download PDF', color: 'hover:text-amber-900' }
+                                    { 
+                                        icon: <Share2 size={15} />, 
+                                        label: 'Share Article', 
+                                        color: 'hover:text-blue-900',
+                                        action: handleShare 
+
+                                    },
+                                    { 
+                                        icon: <Bookmark size={15} />, 
+                                        label: 'Save to Library', 
+                                        color: 'hover:text-emerald-900',
+                                        action: handleSaveToLibrary
+                                    },
+                                    { 
+                                        icon: <Download size={15} />, 
+                                        label: 'Download PDF', 
+                                        color: 'hover:text-amber-900',
+                                        action: handleDownload 
+                                    }
                                 ].map((tool, i) => (
                                     <button 
-                                        key={i} 
+                                        key={i}
+                                        onClick={tool.action} 
                                         className={`
                                             group flex items-center gap-3 w-full py-2.5 px-3 rounded-xl
                                             text-slate-500 font-extrabold text-[12px] tracking-tight
                                             border border-transparent hover:text-color
                                             hover:bg-white hover:border-slate-100 hover:shadow-sm
-                                            active:scale-95 transition-all duration-200
+                                            active:scale-95 transition-all duration-200 cursor-pointer
                                             ${tool.color}
                                         `}
                                     >

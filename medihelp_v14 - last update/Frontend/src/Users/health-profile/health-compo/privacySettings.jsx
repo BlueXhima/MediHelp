@@ -24,7 +24,7 @@ const PrivacySettings = ({ isLoading }) => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header Section */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-6 text-left">
+            <div className="flex items-center justify-between border-b border-border pb-6 text-left">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm">
                         <Shield size={24} />

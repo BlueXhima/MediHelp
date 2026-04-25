@@ -3,8 +3,10 @@ import {
     FileText, Activity, AlertTriangle, Scissors, 
     Trash2, Plus, Edit, X, Check, Calendar, Hospital
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const MedicalRecord = ({ isLoading }) => {
+    const navigate = useNavigate(); // Initialize navigate
     const [isEditing, setIsEditing] = useState(false);
 
     // Main States for Array Management
@@ -51,7 +53,7 @@ const MedicalRecord = ({ isLoading }) => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-6">
+            <div className="flex items-center justify-between border-b border-border pb-6">
                 <div className="flex items-center gap-3 text-left">
                     <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500">
                         <FileText size={24} />
@@ -62,6 +64,13 @@ const MedicalRecord = ({ isLoading }) => {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <button 
+                        onClick={() => navigate('/dashboard/health-profile/records')}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-all shadow-md active:scale-95"
+                    >
+                        <FileText size={16} className="text-blue-400" />
+                        View Full Page
+                    </button>
                     {isEditing ? (
                         <>
                             <button 

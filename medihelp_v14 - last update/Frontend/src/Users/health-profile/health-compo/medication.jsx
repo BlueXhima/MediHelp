@@ -51,7 +51,7 @@ const Medication = ({ isLoading }) => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header Section */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-6">
+            <div className="flex items-center justify-between border-b border-border pb-6">
                 <div className="flex items-center gap-3 text-left">
                     <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm">
                         <Pill size={24} />

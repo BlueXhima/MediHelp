@@ -153,7 +153,7 @@ const PersonalInfo = ({ userData, isLoading }) => {
             <div className="space-y-6 animate-in fade-in duration-500">
                 
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-6">
+                <div className="flex items-center justify-between mb-8 border-b border-border pb-6">
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                             <User size={24} />

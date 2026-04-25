@@ -89,41 +89,40 @@ const VoiceControls = ({
 
     return (
         <div>
-            <div className="bg-card dark:bg-card border-t border-b border-border/50 dark:border-border/30
-                p-6 flex flex-col items-stretch justify-center"
+            <div 
+                className="bg-white/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] 
+                rounded-[2rem] p-6"
             >
                 <div className="text-center">
                     {/* Main Voice Button */}
-                    <div className="mb-6 flex items-center justify-center">
+                    <div className="relative flex flex-col items-center justify-center mb-6">
                         <button
                             onClick={onToggleListening}
                             disabled={isProcessing}
-                            className={`w-24 h-24 cursor-pointer rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out transform hover:scale-110 ${
-                                isListening ? 'voice-pulse animate-pulse bg-red-500 text-white' : 'bg-blue-500 text-white'
+                            className={`relative z-10 w-24 h-24 cursor-pointer rounded-full flex items-center justify-center transition-all duration-500 ${
+                                isListening 
+                                ? 'bg-red-500 shadow-2xl shadow-red-200 scale-110' 
+                                : 'bg-primary shadow-xl shadow-primary/30 hover:scale-105 active:scale-95'
                             } ${isProcessing ? 'animate-spin bg-gray-300' : ''}`}
                         >
                             {isProcessing ? (
-                                <Loader2 size={32} className="animate-pulse text-gray-700" />
+                                <Loader2 size={32} className="animate-pulse text-gray-400" />
                             ) : isListening ? (
-                                <MicOff size={32} />
+                                <MicOff size={36} className="text-white animate-pulse" />
                             ) : (
-                                <Mic size={32} />
+                                <Mic size={36} className="text-white" />
                             )}
                         </button>
                     </div>
 
                     {/* Status Text */}
-                    <div className="mb-6">
-                        <p className="text-lg font-medium text-gray-800 mb-2">
-                            {isProcessing 
-                                ? "Processing your question..." 
-                            : isListening 
-                                ? "Listening... Speak now" :"Click to start speaking"
-                            }
+                    <div className="mb-6 text-center">
+                        <p className={`font-bold text-sm tracking-wide uppercase ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400'}`}>
+                            {isListening ? 'Listening to you...' : isProcessing ? 'Medi is thinking...' : 'Tap to speak'}
                         </p>
                         
                         {/* Connection Quality */}
-                        <div className="flex items-center justify-center space-x-2">
+                        <div className="flex items-center justify-center space-x-2 mt-2">
                             <Wifi size={16} className={getConnectionColor()} />
                             <span className={`text-sm ${getConnectionColor()}`}>
                                 Connection: {connectionQuality}

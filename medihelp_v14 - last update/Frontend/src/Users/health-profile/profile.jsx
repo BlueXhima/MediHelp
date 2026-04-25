@@ -161,7 +161,7 @@ const HealthProfile = () => {
             </div>
 
             <main className="max-w-5xl mx-auto px-6 mt-10">
-                <div className="bg-card border border-slate-200 rounded-[40px] shadow-sm p-8 md:p-12 min-h-[500px] animate-fade-in relative overflow-hidden">
+                <div className="bg-card border border-border rounded-[40px] shadow-sm p-8 md:p-12 min-h-[500px] animate-fade-in relative overflow-hidden">
                     
                     <div className="relative z-10">
                         {activeTab === 'personal' && (

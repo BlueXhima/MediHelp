@@ -1,7 +1,10 @@
 import React from 'react';
-import { BookOpen, Clock, User, History, ArrowRight } from 'lucide-react';
+import { BookOpen, Clock, User, History, ArrowRight, Archive } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ArticleList = ({ articles, categoryName, loading, onOpenHistory, onArticleClick }) => {
+    const navigate = useNavigate();
+
     // Skeleton Loading State
     if (loading) {
         return (
@@ -26,13 +29,30 @@ const ArticleList = ({ articles, categoryName, loading, onOpenHistory, onArticle
                     </p>
                 </div>
 
-                <button 
-                    onClick={onOpenHistory}
-                    className="flex items-center gap-2 px-4 py-2 bg-secondary/50 hover:bg-primary hover:text-white border border-border rounded-xl transition-all group active:scale-95"
-                >
-                    <History size={16} className="group-hover:rotate-[-30deg] transition-transform" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">History</span>
-                </button>
+                <div className="flex items-center gap-2"> {/* Container para magkatabi sila */}
+                    {/* Archive Button */}
+                    <button 
+                        onClick={() => navigate('/dashboard/guidance-library/archives')}
+                        className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-secondary/50 hover:bg-amber-500 hover:text-white border border-border rounded-xl transition-all group active:scale-95"
+                        title="View Archived History"
+                    >
+                        <Archive size={18} className="group-hover:rotate-12 transition-transform" />
+                        <span className="hidden md:block text-xs font-black uppercase tracking-widest">Archives</span>
+                    </button>
+
+                    {/* History Button */}
+                    <button 
+                        onClick={onOpenHistory}
+                        className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-secondary/50 hover:bg-primary hover:text-white border border-border rounded-xl transition-all group active:scale-95"
+                        title="View Reading History"
+                    >
+                        <History 
+                            size={18} 
+                            className="transition-transform duration-500 group-hover:[-webkit-transform:rotate(-360deg)] group-hover:rotate-[-360deg]" 
+                        />
+                        <span className="hidden md:block text-xs font-black uppercase tracking-widest">History</span>
+                    </button>
+                </div>
             </div>
 
             {/* Articles Grid/List */}

@@ -39,7 +39,7 @@ const QuickActionsPanel = () => {
             title: "Guidance Library",
             description: "Browse resources",
             icon: <BookOpen size={24} />,
-            path: "/guidance-library",
+            path: "/dashboard/guidance-library",
             colorClass: "bg-emerald-600 hover:bg-emerald-700"
         },
         {
@@ -124,12 +124,18 @@ const QuickActionsPanel = () => {
 
                 {/* Bottom Utility Row */}
                 <div className="flex flex-wrap gap-3 justify-center pt-6 border-t border-slate-100 dark:border-slate-800">
+                    {/* Nearby Hospitals Button */}
                     <button 
                         onClick={() => handleNearbyHospitalClick(setIsLoading)}
-                        className="flex items-center px-4 py-2 cursor-pointer text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary/80 transition-colors"
+                        className="relative cursor-pointer overflow-hidden group px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent hover:border-primary transition-colors"
+                        aria-label="Find Nearby Hospitals"
                     >
-                        <MapPin size={14} className="mr-2" />
-                        Nearby Hospitals
+                        <div className="flex items-center gap-3 relative z-10">
+                            <MapPin size={15} className="text-slate-400 group-hover:text-primary transition-colors" />
+                            <span className="text-[11px] font-bold text-slate-600">Nearby Hospitals</span>
+                        </div>
+                        {/* Subtle hover background sweep */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
                     </button>
 
                     {showMap && userLocation && (
@@ -142,19 +148,40 @@ const QuickActionsPanel = () => {
                         </div>
                     )}
                     
-                    <button className="flex items-center px-4 py-2 cursor-pointer text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary/80 transition-colors">
-                        <FileText size={14} className="mr-2" />
-                        Medical Records
+                    {/* Medical Records Button */}
+                    <button 
+                        className="relative cursor-pointer overflow-hidden group px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent hover:border-primary transition-colors"
+                    >
+                        <div className="flex items-center gap-3 relative z-10">
+                            <FileText size={15} className="text-slate-400 group-hover:text-primary transition-colors" />
+                            <span className="text-[11px] font-bold text-slate-600">Medical Records</span>
+                        </div>
+                        {/* Subtle hover background sweep */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
                     </button>
 
-                    <button className="flex items-center px-4 py-2 cursor-pointer text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary/80 transition-colors">
-                        <MapPin size={14} className="mr-2" />
-                        Find Doctors
+                    {/* Find Doctors Button */}
+                    <button 
+                        className="relative cursor-pointer overflow-hidden group px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent hover:border-primary transition-colors"
+                    >
+                        <div className="flex items-center gap-3 relative z-10">
+                            <User size={15} className="text-slate-400 group-hover:text-primary transition-colors" />
+                            <span className="text-[11px] font-bold text-slate-600">Find Doctors</span>
+                        </div>
+                        {/* Subtle hover background sweep */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
                     </button>
 
-                    <button className="flex items-center px-4 py-2 cursor-pointer text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary/80 transition-colors">
-                        <Settings size={14} className="mr-2" />
-                        Preferences
+                    {/* Preferences Button */}
+                    <button 
+                        className="relative cursor-pointer overflow-hidden group px-5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent hover:border-primary transition-colors"
+                    >
+                        <div className="flex items-center gap-3 relative z-10">
+                            <Settings size={15} className="text-slate-400 group-hover:text-primary transition-colors" />
+                            <span className="text-[11px] font-bold text-slate-600">Preferences</span>
+                        </div>
+                        {/* Subtle hover background sweep */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
                     </button>
                 </div>
             </div>

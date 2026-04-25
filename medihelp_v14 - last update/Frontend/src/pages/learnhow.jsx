@@ -1,116 +1,190 @@
-import React, { useState } from "react";
+import React from "react";
 import Navbar from '../components/navbar';
-import { Link } from 'react-router-dom';
-import { Book, Dumbbell, Smile, Pill } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+    Mic, LayoutDashboard, HeartPulse, 
+    Search, PlayCircle, ArrowRight, ArrowLeft,
+    ShieldCheck, Smartphone, MousePointer2,
+    LocateFixedIcon
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LearnHow = () => {
-    const [isOpen, setIsOpen] = useState(true);
+    const navigate = useNavigate();
 
-    const handleSetupInfo = () => {
-        console.log("Redirecting to personal information setup page...");
-        // Add navigation logic here, e.g.,
-        // navigate("/setup-personal-info");
-        setIsOpen(false);
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { staggerChildren: 0.05 } }
     };
 
+    const itemVariants = {
+        hidden: { opacity: 0, y: 15 },
+        show: { opacity: 1, y: 0 }
+    };
+
+    const steps = [
+        { 
+            icon: <LayoutDashboard />, 
+            title: "Explore Dashboard", 
+            desc: "Understand your health overview and navigation shortcuts.", 
+        },
+        { 
+            icon: <Mic />, 
+            title: "Voice Assistant", 
+            desc: "Learn voice commands for hands-free health consultation." 
+        },
+        { 
+            icon: <HeartPulse />, 
+            title: "Manage Records", 
+            desc: "How to securely access and update your medical history." 
+        },
+        { 
+            icon: <ShieldCheck />, 
+            title: "Privacy & Safety", 
+            desc: "How we protect your data with end-to-end encryption." 
+        },
+        {
+            icon: <LocateFixedIcon />,
+            title: "Nearby Hospitals",
+            desc: "Find the closest healthcare facilities in an emergency using real-time GPS tracking and navigation."
+        }
+    ];
+
     return (
-        <>
+        <div className="min-h-screen bg-background">
             <Navbar />
-            <div className="learn-how-page pt-20">
-                {/* Hero Banner / Intro */}
-                <section className="hero-banner bg-gradient-to-r from-indigo-500 to-teal-600 text-white text-center py-16">
-                    <h1 className="text-5xl font-extrabold tracking-tight">Take Charge of Your Health</h1>
-                    <p className="mt-6 text-xl font-light">Discover actionable guides to improve your well-being.</p>
-                    <div className="mt-8 flex justify-center items-center">
-                        <input
-                            type="text"
-                            placeholder="Search topics..."
-                            className="p-4 rounded-l-md w-1/2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
-                        />
-                        <button className="px-6 py-4 bg-teal-700 text-white rounded-r-md hover:bg-teal-800 transition-all">Search</button>
+
+            <div className="max-w-7xl mx-auto px-6 pt-24">
+                <button 
+                    onClick={() => navigate(-1)}
+                    className="group flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                >
+                    <div className="p-2 rounded-xl bg-secondary/50 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                        <ArrowLeft size={18} />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-[0.2em]">Go Back</span>
+                </button>
+            </div>
+            
+            {/* Hero Section - Compressed Padding */}
+            <section className="relative pt-8 pb-10 px-6">
+                <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-4xl mx-auto text-center space-y-4"
+                >
+                    <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-primary/20">
+                        System Guide
+                    </span>
+                    <h1 className="text-4xl mt-4 md:text-5xl font-black text-foreground tracking-tighter leading-none uppercase italic">
+                        Mastering <span className="text-primary">MediHelp.</span>
+                    </h1>
+                    <p className="text-muted-foreground text-sm max-w-lg mx-auto font-medium">
+                        New here? Let’s walk through the features designed to make your healthcare management seamless.
+                    </p>
+                </motion.div>
+            </section>
+
+            <main className="max-w-6xl mx-auto px-4 pb-16 space-y-16">
+                {/* Steps */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {steps.map((step, idx) => (
+                        <motion.div 
+                            key={idx}
+                            whileHover={{ x: 5 }}
+                            onClick={() => {
+                                const slug = step.title.toLowerCase().replace(/\s+/g, '-');
+                                navigate(`/learn-how/system-guide-detail/${slug}`);
+                            }}
+                            className="flex items-start text-left gap-5 p-6 bg-card/50 border border-border rounded-[24px] hover:border-primary/30 transition-all group"
+                        >
+                            <div className="w-12 h-12 shrink-0 bg-primary/10 text-primary rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                                {React.cloneElement(step.icon, { size: 22 })}
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-black uppercase italic tracking-tight">{step.title}</h3>
+                                <p className="text-muted-foreground text-xs leading-relaxed font-medium">{step.desc}</p>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Video Resources Section - Tighter Headers */}
+                <section className="space-y-6">
+                    <div className="flex p-2 items-center justify-between border-b border-border">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-red-500 rounded-lg text-white">
+                                <PlayCircle size={20} />
+                            </div>
+                            <h2 className="text-xl font-black uppercase italic tracking-tighter">Visual Guides</h2>
+                        </div>
+                        <Link to="/guides" className="text-[11px] font-black text-primary uppercase tracking-widest">View All</Link>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                            { title: "Mental Health Basics", tag: "Wellness" },
+                            { title: "Healthy Eating Tips", tag: "Nutrition" }
+                        ].map((video, idx) => (
+                            <motion.div 
+                                key={idx}
+                                className="group relative bg-card rounded-[24px] overflow-hidden aspect-[16/9] shadow-lg"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-6 flex flex-col justify-end">
+                                    <span className="text-primary text-[9px] font-black uppercase tracking-[0.2em] mb-1">{video.tag}</span>
+                                    <h3 className="text-white text-lg font-bold">{video.title}</h3>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
                 </section>
 
-                {/* Sidebar Navigation and Main Content */}
-                <div className="flex">
-                    {/* Sidebar Navigation */}
-                    <aside className="w-1/4 bg-gray-50 p-6 shadow-sm sticky top-20 h-80">
-                        <h2 className="text-2xl text-left font-semibold mb-6">Categories</h2>
-                        <div className="space-y-4">
-                            <button onClick={() => document.getElementById('nutrition').scrollIntoView({ behavior: 'smooth' })} className="flex items-center w-full text-left text-indigo-600 bg-indigo-100 hover:bg-indigo-200 rounded-md px-4 py-2 transition-all">
-                                <Book className="w-5 h-5 mr-2" /> Nutrition
-                            </button>
-                            <button onClick={() => document.getElementById('fitness').scrollIntoView({ behavior: 'smooth' })} className="flex items-center w-full text-left text-indigo-600 bg-indigo-100 hover:bg-indigo-200 rounded-md px-4 py-2 transition-all">
-                                <Dumbbell className="w-5 h-5 mr-2" /> Fitness
-                            </button>
-                            <button onClick={() => document.getElementById('mental-health').scrollIntoView({ behavior: 'smooth' })} className="flex items-center w-full text-left text-indigo-600 bg-indigo-100 hover:bg-indigo-200 rounded-md px-4 py-2 transition-all">
-                                <Smile className="w-5 h-5 mr-2" /> Mental Health
-                            </button>
-                            <button onClick={() => document.getElementById('medication-guides').scrollIntoView({ behavior: 'smooth' })} className="flex items-center w-full text-left text-indigo-600 bg-indigo-100 hover:bg-indigo-200 rounded-md px-4 py-2 transition-all">
-                                <Pill className="w-5 h-5 mr-2" /> Medication Guides
-                            </button>
+                {/* Support CTA - Compact Banner */}
+                <motion.section 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="relative rounded-[40px] p-10 text-center overflow-hidden border border-border/50 shadow-2xl shadow-primary/5 group"
+                >
+                    {/* Animated Mesh Background */}
+                    <div className="absolute inset-0 bg-card -z-10" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb),0.08),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    {/* Floating Decorative Elements */}
+                    <div className="absolute -top-12 -right-12 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-500" />
+                    <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-secondary/20 rounded-full blur-3xl group-hover:bg-primary/5 transition-colors duration-500" />
+                    <div className="relative z-10 space-y-6">
+                        {/* Subtle Badge */}
+                        <div className="flex justify-center">
+                            <span className="px-4 py-1 bg-primary/10 text-primary text-[9px] font-black uppercase tracking-[0.3em] rounded-full border border-primary/20">
+                                Support Center
+                            </span>
                         </div>
-                    </aside>
-
-                    {/* Main Content */}
-                    <main className="w-3/4 p-8">
-                        {/* Card-based Grid */}
-                        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            <div id="nutrition" className="card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                                <h3 className="text-xl font-bold mb-4">Nutrition</h3>
-                                <p className="text-gray-600">Learn about balanced diets and healthy eating habits.</p>
-                                <button className="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all">Learn More</button>
-                            </div>
-                            <div id="fitness" className="card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                                <h3 className="text-xl font-bold mb-4">Fitness</h3>
-                                <p className="text-gray-600">Discover exercises and routines to stay fit.</p>
-                                <button className="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all">Learn More</button>
-                            </div>
-                            <div id="mental-health" className="card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                                <h3 className="text-xl font-bold mb-4">Mental Health</h3>
-                                <p className="text-gray-600">Tips and resources for mental well-being.</p>
-                                <button className="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all">Learn More</button>
-                            </div>
-                            <div id="medication-guides" className="card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                                <h3 className="text-xl font-bold mb-4">Medication Guides</h3>
-                                <p className="text-gray-600">Step-by-step guides for managing your medications.</p>
-                                <button className="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all">Learn More</button>
-                            </div>
-                        </section>
-
-                        {/* Visual Aids */}
-                        <section className="mt-12">
-                            <h2 className="text-3xl font-bold mb-6">Visual Aids</h2>
-                            <p className="text-gray-600 mb-8">Explore infographics, icons, and video tutorials to make learning easier.</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                <div className="video-tutorial bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                                    <h3 className="text-xl font-bold mb-4">How to Use the App</h3>
-                                    <video controls className="w-full h-48 rounded-md">
-                                        <source src="/videos/how-to-use.mp4" type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </div>
-                                <div className="infographic bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                                    <h3 className="text-xl font-bold mb-4">Healthy Eating Tips</h3>
-                                    <video controls className="w-full h-48 rounded-md">
-                                        <source src="/videos/healthy-eating-tips.mp4" type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </div>
-                            </div>
-                        </section>
-                    </main>
-                </div>
-
-                {/* Call-to-action Footer */}
-                <footer className="text-center py-8">
-                    <div className="flex justify-center space-x-4">
-                        <p className="text-gray-600">Need more help? <Link to="/support" className="text-indigo-600 hover:underline">Contact Support</Link></p>
-                        <p className="text-gray-600">Explore more guides in our <Link to="/guides" className="text-indigo-600 hover:underline">Guidance Library</Link>.</p>
+                        <div className="space-y-2">
+                            <h2 className="text-3xl md:text-4xl font-black text-foreground uppercase italic tracking-tighter leading-none">
+                                Still have <span className="text-primary">questions?</span>
+                            </h2>
+                            <p className="text-muted-foreground text-sm max-w-sm mx-auto font-medium leading-relaxed">
+                                Our team is here to support your academic and health journey. Let’s make your well-being a priority.
+                            </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                            <Link 
+                                to="/support" 
+                                className="w-full sm:w-auto px-8 py-4 bg-primary text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-lg shadow-primary/25 hover:scale-105 active:scale-95 transition-all"
+                            >
+                                Contact Support
+                            </Link>
+                            <Link 
+                                to="/dashboard/guidance-library" 
+                                className="w-full sm:w-auto px-8 py-4 bg-secondary/50 text-foreground border border-border/50 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-secondary transition-all flex items-center justify-center gap-2 group/btn"
+                            >
+                                Open Library
+                                <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                            </Link>
+                        </div>
                     </div>
-                </footer>
-            </div>
-        </>
+                </motion.section>
+            </main>
+        </div>
     );
 };
 

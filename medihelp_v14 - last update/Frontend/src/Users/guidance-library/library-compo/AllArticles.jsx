@@ -35,23 +35,28 @@ const AllArticles = () => {
         return matchesSearch && matchesCategory;
     });
 
-    useEffect(() => {
-        const grid = gridRef.current;
-        if (!grid) return;
+    const handleArticleClick = async (articleId) => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const currentUserId = user?.UserID || user?.id;
 
-        const handleGridScroll = () => {
-            if (filteredArticles.length >= 12) { // Hindi na ito mag-eerror
-                const scrollAmount = grid.scrollTop;
-                window.scrollTo({
-                    top: scrollAmount,
-                    behavior: 'auto' 
+            if (currentUserId && articleId) {
+                // Siguraduhin na ang URL ay tama: http://localhost:5000/api/articles/history
+                await axios.post('http://localhost:5000/api/articles/record-visit', {
+                    userId: currentUserId,
+                    articleId: articleId
                 });
+                console.log("History saved successfully!");
             }
-        };
+        } catch (err) {
+            // Ang HTML error na nakita mo ay lalabas dito
+            console.error("Error saving history:", err.response?.data || err.message);
+        } finally {
+            navigate(`/dashboard/guidance-library/article/${articleId}`);
+        }
+    };
 
-        grid.addEventListener('scroll', handleGridScroll);
-        return () => grid.removeEventListener('scroll', handleGridScroll);
-    }, [filteredArticles]); // Isama ito sa dependency array
+    const isScrollable = filteredArticles.length >= 12;
 
     return (
         <div className="min-h-screen bg-background flex flex-col relative overflow-hidden text-left">
@@ -148,10 +153,15 @@ const AllArticles = () => {
                     ref={gridRef}
                     className={`
                         p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left pr-4
-                        ${filteredArticles.length >= 12 ? 'max-h-[1590px] overflow-y-auto scrollbar-custom scroll-smooth' : ''}
+                        transition-all duration-500 ease-in-out
+                        ${isScrollable 
+                            ? 'max-h-[1030px] overflow-y-auto scrollbar-custom' 
+                            : 'h-auto overflow-visible'}
                     `}
                     style={{
-                        scrollbarWidth: filteredArticles.length >= 12 ? 'thin' : 'none',
+                        // Gumamit ng scrollbarGutter para hindi gumagalaw ang layout kapag lumabas ang scrollbar
+                        scrollbarGutter: isScrollable ? 'stable' : 'auto',
+                        scrollbarWidth: isScrollable ? 'thin' : 'none',
                         scrollbarColor: '#4F46E5 #f1f5f9',
                         scrollBehavior: 'smooth'
                     }}
@@ -182,7 +192,7 @@ const AllArticles = () => {
                             </div>
 
                             {/* Content Section */}
-                            <div className="p-8 flex flex-col flex-grow relative">
+                            <div className="p-7 flex flex-col flex-grow relative">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                 <h3 className="text-xl font-black mb-3 leading-tight text-foreground group-hover:text-primary transition-colors duration-300 italic">
@@ -199,7 +209,7 @@ const AllArticles = () => {
                                     </div>
                                     
                                     <button
-                                        onClick={() => navigate(`/dashboard/guidance-library/article/${res.article_id}`)}
+                                        onClick={() => handleArticleClick(res.article_id)}
                                         className="flex items-center gap-2 text-primary text-[10px] 
                                         font-black uppercase tracking-[0.15em] group/btn cursor-pointer"
                                     >

@@ -1,324 +1,230 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import HeroBanner from '../components/herobanner';
 import PageEnd from '../components/footer';
-import { Mic, Check, TriangleAlert, UtensilsCrossed, Dumbbell, 
-    AlarmClock, Leaf, Ribbon, HeartPlus, Brain, CheckCircle2, X, ShieldCheck } from "lucide-react";
+import { Check, TriangleAlert, UtensilsCrossed, Dumbbell, 
+    AlarmClock, Leaf, Ribbon, HeartPlus, Brain, CheckCircle2, X, ShieldCheck,
+    Mic, Sparkles, Terminal, Stethoscope, Settings, Activity } from "lucide-react";
 import { cn } from '../lib/utils';
 import HIPAACert from '../assets/HIPAACert.jpg';
-import ChatModal from '../components/chats/chatModal';
 import { useChatMessages } from '../hooks/useChatMessage';
-
-// ------------------------------
-// 🔹 VoiceWidget Component
-// ------------------------------
-function VoiceWidget() {
-    const [isListening, setIsListening] = useState(false);
-    const [transcript, setTranscript] = useState('');
-    const [chatOpen, setChatOpen] = useState(false);
-    const recognitionRef = useRef(null);
-    const stoppedRef = useRef(false);
-    const { messages, addMessage, setChatMessages } = useChatMessages();
-
-    function initRecognition() {
-        if (recognitionRef.current) return recognitionRef.current;
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            alert('Speech Recognition API not supported in this browser.');
-            return null;
-        }
-
-        const recog = new SpeechRecognition();
-        recog.lang = 'en-US';
-        recog.interimResults = true;
-        recog.maxAlternatives = 1;
-
-        recog.onresult = (event) => {
-            if (stoppedRef.current) return;
-
-            let interim = '';
-            let final = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const res = event.results[i];
-                if (res.isFinal) final += res[0].transcript;
-                else interim += res[0].transcript;
-            }
-
-            const current = final || interim;
-            setTranscript(current);
-
-            if (final) {
-                // Add user message
-                addMessage('user', final);
-                setChatOpen(true);
-
-                // Compute bot reply
-                const intent = parseIntent(final);
-                const reply = intentToReply(intent);
-
-                // Add bot reply directly and mark isTyping false
-                addMessage('assistant', reply);
-
-                // Speak bot reply immediately
-                speakReply(reply);
-            }
-        };
-
-        recog.onend = () => {
-            setIsListening(false);
-        };
-
-        recognitionRef.current = recog;
-        return recog;
-    }
-
-    function toggleListening() {
-        const recog = initRecognition();
-        if (!recog) return;
-
-        // Stop previous speech if any
-        if (window.speechSynthesis && window.speechSynthesis.speaking) {
-            window.speechSynthesis.cancel();
-        }
-
-        if (!isListening) {
-            try {
-                stoppedRef.current = false;
-                recog.start();
-                setTranscript('');
-                setIsListening(true);
-            } catch (e) {
-                console.error('Speech recognition start error:', e);
-            }
-            } else {
-                stoppedRef.current = true;
-            try {
-                recog.stop();
-            } catch (e) {
-                console.error('Speech recognition stop error:', e);
-            }
-            setIsListening(false);
-            setChatOpen(true);
-        }
-    }
-
-    // helper: simple intent parser (keyword-based)
-    function parseIntent(text) {
-        const t = text.toLowerCase();
-        if (t.includes('chest') || t.includes('angina') || t.includes('heart')) return 'chest_pain';
-        if (t.includes('fever') || t.includes('temperature')) return 'fever';
-        if (t.includes('headache') || t.includes('migraine')) return 'headache';
-        if (t.includes('covid') || t.includes('coronavirus')) return 'covid';
-        return 'general_symptom';
-    }
-
-    function intentToReply(intent) {
-        switch (intent) {
-            case 'chest_pain':
-                return 'Chest pain can be serious. If you are experiencing severe pain, shortness of breath, or fainting, seek emergency help. For general causes, it can be related to heart, lungs, or muscle issues. Consider visiting our chest pain guide.';
-            case 'fever':
-                return 'Fever may indicate infection. Stay hydrated and rest. If your temperature is very high or persistent, contact a healthcare provider.';
-            case 'headache':
-                return 'Headaches are common and can be caused by stress, dehydration, or other conditions. Try resting and hydrating. If severe or sudden, seek medical advice.';
-            case 'covid':
-                return 'If you suspect COVID-19, please follow local testing guidelines and isolate as recommended. Seek urgent care if you have trouble breathing.';
-            default:
-                return 'Thanks — I heard you. For better guidance, please provide a few more details about your symptoms.';
-        }
-    }
-
-    function speakReply(text) {
-        if (!window.speechSynthesis) return;
-        try {
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-            }
-
-            const voices = window.speechSynthesis.getVoices();
-            // Pick a female voice if available
-            const femaleVoice = voices.find(
-                (v) => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman')
-            ) || voices[0]; // fallback to first voice
-
-            const utter = new SpeechSynthesisUtterance(text);
-            utter.voice = femaleVoice;
-            utter.rate = 1;
-            utter.pitch = 1;
-            window.speechSynthesis.speak(utter);
-        } catch (e) {
-            console.error('TTS error', e);
-        }
-    }
-
-
-    return (
-        <div className={cn("rounded-lg p-6 transition-shadow duration-200", isListening ? "ring-4 ring-primary/30 shadow-2xl bg-primary/5" : "bg-background")}>
-            <div className="flex items-start mb-4">
-                <div className={cn("w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0", isListening ? "bg-primary-600 text-white" : "bg-foreground")}>
-                    <Mic size={20} strokeWidth={1.5} className={isListening ? "text-white" : "text-primary"} />
-                </div>
-                <div className="text-left">
-                    <h3 className="font-semibold text-foreground">Try Voice Demo</h3>
-                    <p className="text-sm text-foreground/60">Ask: "What causes chest pain?"</p>
-                </div>
-            </div>
-
-            <button
-                onClick={toggleListening}
-                aria-pressed={isListening}
-                className={cn(
-                "w-full py-3 rounded-full font-semibold transition transform-gpu focus:outline-none focus:ring-2 cursor-pointer",
-                isListening
-                    ? "bg-gradient-to-r from-teal-500 to-indigo-600 text-white shadow-lg hover:shadow-2xl"
-                    : "bg-primary text-primary-foreground hover:scale-105"
-                )}
-            >
-                {isListening ? 'Listening — Tap to stop' : '🎤 Start Speaking'}
-            </button>
-
-            {transcript && (
-                <div className="mt-3 text-sm text-foreground/70">
-                    <div className="font-medium mb-1">Suggested action</div>
-                    <div className="flex gap-2">
-                        <button className="px-3 py-1 rounded-md bg-primary text-white text-xs">
-                            Open Symptom Guide
-                        </button>
-                        <button className="px-3 py-1 rounded-md border border-border/30 text-xs">
-                            Search Docs
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            <ChatModal
-                open={chatOpen}
-                onClose={() => {
-                // Stop any ongoing speech when closing
-                if (window.speechSynthesis && window.speechSynthesis.speaking) {
-                    window.speechSynthesis.cancel();
-                }
-                setChatOpen(false);
-                }}
-                messages={messages}
-                onSend={(text) => addMessage('user', text)}
-            />
-        </div>
-    );
-}
+import SettingsModal from './guest-compo/settingsmodal';
+import BackgroundLoadingState from '../components/BackgroundLoadingState';
+import ToastMessage, { showToast } from '../components/ToastMessage';
 
 const LandingPage = () => {
+    const navigate = useNavigate();
+    const [isListening, setIsListening] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [showDemoModal, setShowDemoModal] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [transcript, setTranscript] = useState("Tap the button below to start your health query...");
+
+    const toggleListening = () => {
+        setIsListening(!isListening);
+        
+        if (!isListening) {
+            setTranscript("I've been feeling a sharp pain in my lower back for the past two days...");
+        } else {
+            console.log("Stopped listening.");
+        }
+    };
+
+    const handleVoiceSequence = () => {
+        if (!isListening) {
+            // Start Listening
+            setIsListening(true);
+            setTranscript("I've been feeling a sharp pain in my lower back...");
+        } else {
+            // Stop Listening and Start Processing
+            setIsListening(false);
+            setIsLoading(true); // Trigger BackgroundLoadingState
+
+            // Simulate API Processing Delay
+            setTimeout(() => {
+                setIsLoading(false);
+                showToast("Analysis Complete! Redirecting to your guidance...", "success");
+                
+                // Redirect pagkatapos ng maikling sandali para mabasa ang toast
+                setTimeout(() => {
+                    navigate('/chat-response'); // Ang path ng bago mong page
+                }, 1500);
+            }, 3000);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background text-foreground">
+
             <Navbar />
-            <main className="pt-16">
+            <SettingsModal 
+                isOpen={showSettings} 
+                onClose={() => setShowSettings(false)} 
+            />
+            <ToastMessage />
+            <BackgroundLoadingState isLoading={isLoading} message="Analyzing your symptoms..." />
+
+            <main className="pt-14">
                 <section className="bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900 dark:to-accent-900 min-h-screen flex items-center">
                     {/* Hero Section */}
                     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                         <div className="grid lg:grid-cols-2 gap-12 items-center">
                             {/* Left Content */}
                             <div className="text-center lg:text-left">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6 animate-fade-in">
+                                    <Sparkles size={16} className="text-primary animate-pulse" />
+                                    <span className="text-xs font-bold tracking-widest uppercase text-primary">Next-Gen Health Assistant</span>
+                                </div>
                                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-                                    Get Medical Answers <span className="text-primary">Instantly</span> with Voice
+                                    Get Medical Answers <span className="text-primary italic">Instantly</span> with Voice
                                 </h1>
                                 <p className="text-xl text-foreground/70 mb-8 max-w-2xl">
                                     Skip the wait — speak your symptoms and get reliable health guidance in seconds, 24/7.
                                 </p>
 
                                 {/* CTA Buttons */}
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-                                    <button 
-                                        className="inline-flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-4 rounded-lg shadow-sm transition-colors cursor-pointer"
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-16">
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        text="Navigate to Login"
+                                        aria-label="Navigate to Login"
+                                        className="group relative inline-flex items-center justify-center bg-primary hover:bg-primary/80 text-white text-lg font-bold px-10 py-4 rounded-2xl shadow-[0_10px_20px_-10px_rgba(37,99,235,0.5)] transition-all hover:-translate-y-1 active:scale-95 overflow-hidden cursor-pointer w-full sm:w-auto"
                                     >
-                                        Start Free 7-Day Trial
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                        <span className="relative z-10 flex items-center gap-2">
+                                            Start your 7-Day Free Trial <Check size={20} />
+                                        </span>
                                     </button>
                                     <button
                                         onClick={() => setShowDemoModal(true)}
-                                        className="inline-flex items-center justify-center bg-transparent border-2 border text-foreground font-semibold px-8 py-4 rounded-lg hover:bg-primary/20 transition-colors cursor-pointer"
+                                        className="inline-flex items-center justify-center bg-transparent border-2 border-border text-primary hover:text-primary-foreground font-bold px-8 py-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-300 transition-all active:scale-95 cursor-pointer w-full sm:w-auto"
                                     >
                                         Try Voice Demo
                                     </button>
                                 </div>
 
-                                {/* Trust Bar */}
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                                    <div className="bg-card p-4 rounded-lg shadow-subtle">
-                                        <div className="text-2xl font-bold text-accent">2,847</div>
-                                        <div className="text-sm text-foreground/90">Queries Resolved Today</div>
+                                {/* Modernized Security & Trust Bar */}
+                                <div className="flex flex-wrap justify-center lg:justify-start gap-4 items-center">
+                                    <div className="flex flex-col">
+                                        <span className="text-3xl font-black text-foreground">2.8k+</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Queries Today</span>
                                     </div>
-                                    <div className="bg-card p-4 rounded-lg shadow-subtle">
-                                        <div className="text-2xl font-bold text-accent">&lt; 30s</div>
-                                        <div className="text-sm text-foreground/90">Average Response Time</div>
+                                    
+                                    <div className="w-px h-10 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+                                    
+                                    <div className="flex items-center gap-3 bg-card px-5 py-3 rounded-2xl border border-border">
+                                        <ShieldCheck className="text-blue-600" size={24} />
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-bold uppercase tracking-tighter text-blue-400 leading-none">Data Safety</p>
+                                            <p className="text-sm font-bold text-foreground">AES-256 Encrypted</p>
+                                        </div>
                                     </div>
-                                    <div className="bg-card p-4 rounded-lg shadow-subtle flex items-center justify-center">
-                                        <img
-                                            src={HIPAACert}
-                                            alt="HIPAA Compliance Badge"
-                                            className="h-15 w-full object-cover"
-                                        />
-                                        <span className="ml-2 text-sm font-medium text-foreground/90">
-                                            HIPAA Compliant
-                                        </span>
+
+                                    <div className="flex items-center gap-3 bg-card px-5 py-3 rounded-2xl border border-border">
+                                        <Terminal className="text-slate-500" size={20} />
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-bold uppercase tracking-tighter text-slate-400 leading-none">Project Status</p>
+                                            <p className="text-sm font-bold text-foreground italic">Research Prototype</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right Content */}
-                            <div className="relative">
-                                <div className="bg-card rounded-2xl shadow-demo p-8 border border-border/50">
-                                    <div className="w-full h-80 bg-slate-950 rounded-xl mb-6 overflow-hidden relative group">
-                                        {/* Background Grid Pattern */}
-                                        <div className="absolute inset-0 opacity-20" 
-                                            style={{ backgroundImage: 'linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
-                                        </div>
+                            <div className="relative group">
+                                {/* Guidance Ready Notification - Floating Top Right */}
+                                <div className="absolute -top-6 -right-6 z-40 bg-card p-3 pr-6 rounded-2xl shadow-xl border border-border flex items-center gap-3 animate-bounce-slow">
+                                    <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white">
+                                        <Activity size={16} />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-foreground leading-none">Guidance Ready</p>
+                                        <p className="text-[10px] text-foreground/50">Immediate Action Advised</p>
+                                    </div>
+                                </div>
 
-                                        {/* Pulsing Medical Core */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="relative">
-                                                {/* Outer Rings */}
-                                                <div className="absolute inset-0 -m-8 border-2 border-primary/30 rounded-full animate-[spin_10s_linear_infinite]"></div>
-                                                <div className="absolute inset-0 -m-12 border border-dashed border-primary/20 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
-                                                
-                                                {/* Center Icon */}
-                                                <div className="relative z-10 w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center backdrop-blur-xl border border-primary/50 shadow-[0_0_40px_rgba(var(--primary),0.3)]">
-                                                    <HeartPlus size={48} className="text-primary animate-pulse" />
+                                {/* Main Interaction Card */}
+                                <div className="bg-card rounded-[40px] shadow-2xl p-10 border border-border/40 min-h-[500px] flex flex-col justify-between">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
+                                                <Stethoscope size={24} />
+                                            </div>
+                                            <div className="text-left">
+                                                <h3 className="font-bold text-lg text-foreground leading-none">Medi</h3>
+                                                <div className="flex items-center gap-1.5 mt-1">
+                                                    <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-orange-500 animate-pulse' : 'bg-slate-300'}`}></div>
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                                        {isListening ? "Listening..." : "Idle"}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
+                                        <button 
+                                            onClick={() => setShowSettings(true)}
+                                            className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                                        >
+                                            <Settings size={22} />
+                                        </button>
+                                    </div>
 
-                                        {/* Scanning Line Effect */}
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 animate-scan"></div>
-
-                                        {/* Floating Data Labels */}
-                                        <div className="absolute top-4 left-4 font-mono text-[10px] text-primary/60 space-y-1">
-                                            <p>SYS_STATUS: ACTIVE</p>
-                                            <p>ENCRYPTION: AES-256</p>
-                                            <p>LOC: CAVITE_PH</p>
-                                        </div>
-                                        
-                                        <div className="absolute bottom-4 right-4 flex gap-1 items-end">
-                                            {[...Array(5)].map((_, i) => (
-                                                <div 
-                                                    key={i} 
-                                                    className="w-1 bg-primary/40 rounded-full animate-bounce" 
-                                                    style={{ height: `${Math.random() * 30 + 10}px`, animationDelay: `${i * 0.1}s` }}
+                                    {/* Audio Waveform Area */}
+                                    <div className="flex items-center justify-center py-14">
+                                        <div className="flex items-end gap-1.5 h-16">
+                                            {[...Array(12)].map((_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className={cn(
+                                                        "w-1.5 bg-primary/40 rounded-full transition-all duration-300",
+                                                        isListening ? "animate-bounce" : "h-4"
+                                                    )}
+                                                    style={{ 
+                                                        height: isListening ? `${Math.random() * 100 + 20}%` : "16px",
+                                                        animationDelay: `${i * 0.1}s` 
+                                                    }}
                                                 ></div>
                                             ))}
                                         </div>
                                     </div>
-                                    <VoiceWidget />
+
+                                    {/* Transcript Box */}
+                                    <div className="bg-slate-200 rounded-xl p-6 mb-8 border text-left">
+                                        <p className="text-slate-600 italic text-md leading-relaxed">
+                                            "{transcript}"
+                                        </p>
+                                    </div>
+
+                                    {/* Footer Stats & Button */}
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between px-2">
+                                            <div className="text-left">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Duration</p>
+                                                <p className="text-lg font-bold text-blue-600">0:42s</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Confidence</p>
+                                                <p className="text-lg font-bold text-purple-500">98%</p>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={handleVoiceSequence}
+                                            className={cn(
+                                                "w-full py-4 rounded-2xl font-bold cursor-pointer flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl",
+                                                isListening 
+                                                    ? "bg-red-500 text-white shadow-red-500/20" 
+                                                    : "bg-primary text-white shadow-blue-600/20 hover:bg-primary/80"
+                                            )}
+                                        >
+                                            <Mic size={20} />
+                                            {isListening ? "Stop Speaking" : "Start Speaking for Voice Query"}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    {/* Demo modal */}
-                    <DemoModal
-                        open={showDemoModal}
-                        onClose={() => setShowDemoModal(false)}
-                    />
                 </section>
 
                 {/* High-level overview of MediHelp's Value Proposition */}
@@ -560,141 +466,5 @@ const LandingPage = () => {
         </div>
     );
 };
-
-// ------------------------------
-// 🔹 DemoModal Component
-// ------------------------------
-function DemoModal({ open, onClose }) {
-    const [consent, setConsent] = useState(() => {
-        try {
-            return localStorage.getItem('voice_demo_consent') === 'true';
-        } catch {
-            return false;
-        }
-    });
-
-    useEffect(() => {
-        const handleEsc = (e) => {
-            if (e.key === 'Escape') onClose(false);
-        };
-        window.addEventListener('keydown', handleEsc);
-        return () => window.removeEventListener('keydown', handleEsc);
-    }, [onClose]);
-
-    function handleStart() {
-        if (!consent) return;
-        try {
-            localStorage.setItem('voice_demo_consent', 'true');
-        } catch {}
-        onClose(true);
-    }
-
-    if (!open) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 transition-opacity">
-            {/* Main Modal Card */}
-            <div className="bg-card rounded-[32px] max-w-[480px] w-full shadow-2xl overflow-hidden border border-border animate-pop-up flex flex-col">
-                
-                {/* Header Section */}
-                <div className="p-8 pb-0 relative"> 
-                    <button 
-                        onClick={() => onClose(false)}
-                        className="absolute right-6 top-6 p-2 rounded-full hover:bg-foreground/5 transition-colors 
-                        text-foreground/40 hover:text-foreground z-10 cursor-pointer"
-                    >
-                        <X size={20} />
-                    </button>
-
-                    <div className="flex flex-col items-center text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary ring-4 ring-primary/5 animate-float mb-4">
-                            <Mic size={32} strokeWidth={2.5} />
-                        </div>
-                        <h3 className="text-2xl font-bold tracking-tight text-foreground">
-                            Voice Demo
-                        </h3>
-                        <p className="text-foreground/60 mt-2 text-sm leading-relaxed max-w-[320px]">
-                            Experience real-time speech recognition. Your privacy is our priority—audio is processed on your device.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Features List - Adjusted to Left Align for better readability */}
-                <div className="px-8 mt-4">
-                    <div className="space-y-4 py-6 border-t border-border/50">
-                        <FeatureItem text="Instant local transcription with zero lag." />
-                        <FeatureItem text="Smart intent recognition for voice commands." />
-                        <FeatureItem text="Your audio data never leaves this device." />
-                    </div>
-                </div>
-
-                {/* Consent Section - Modern Card Style */}
-                <div className="px-8 py-4">
-                    <label 
-                        className={`group flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
-                            consent ? 'bg-primary/5 border-primary/40' : 'bg-background border-border hover:border-foreground/20'
-                        }`}
-                    >
-                        <div className="relative flex items-center mt-1">
-                            <input
-                                type="checkbox"
-                                checked={consent}
-                                onChange={(e) => setConsent(e.target.checked)}
-                                className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-border bg-background transition-all checked:bg-primary checked:border-primary"
-                            />
-                            <CheckCircle2 className="absolute h-5 w-5 text-primary-foreground scale-0 peer-checked:scale-100 transition-transform pointer-events-none p-0.5" />
-                        </div>
-                        <div className="flex flex-col text-left">
-                            <span className="text-sm font-semibold text-foreground">Enable Local Processing</span>
-                            <span className="text-[12px] text-foreground/50 leading-snug mt-0.5">
-                                I consent to processing my audio locally for this demonstration.
-                            </span>
-                        </div>
-                    </label>
-                </div>
-
-                {/* Action Buttons - Fixed sizing and spacing */}
-                <div className="p-8 pt-2 flex items-center gap-3">
-                    <button 
-                        onClick={() => onClose(false)} 
-                        className="flex-1 h-12 rounded-xl text-sm font-bold border border-border text-foreground/70 
-                        hover:bg-foreground/5 transition-all active:scale-95 cursor-pointer"
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        onClick={handleStart}
-                        disabled={!consent}
-                        className={`flex-[1.8] h-12 rounded-xl text-sm font-bold shadow-lg transition-all 
-                            active:scale-95 ${
-                            consent 
-                            ? 'bg-primary text-primary-foreground shadow-primary/20 hover:opacity-90 cursor-pointer' 
-                            : 'bg-foreground/10 text-foreground/30 cursor-not-allowed'
-                        }`}
-                    >
-                        Launch Demo
-                    </button>
-                </div>
-
-                {/* Bottom Security Badge */}
-                <div className="pb-6 flex justify-center items-center gap-2 text-[10px] uppercase tracking-[0.1em] text-foreground/30 font-bold">
-                    <ShieldCheck size={12} />
-                    On-Device Encrypted
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function FeatureItem({ text }) {
-    return (
-        <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-success/10 flex items-center justify-center">
-                <CheckCircle2 size={13} className="text-success" />
-            </div>
-            <span className="text-sm font-medium text-foreground/70">{text}</span>
-        </div>
-    );
-}
 
 export default LandingPage;

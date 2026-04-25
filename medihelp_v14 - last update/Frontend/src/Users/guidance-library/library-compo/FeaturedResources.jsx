@@ -35,7 +35,9 @@ const FeaturedResources = ( { onArticleClick } ) => {
                 <button 
                     onClick={() => navigate('/dashboard/guidance-library/all-articles')}
                     className="flex items-center gap-2 px-5 py-2 text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 rounded-full transition-all group self-start md:self-end cursor-pointer"
-                >                    View All 
+                    text="View All Article"
+                >                    
+                    View All 
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -49,7 +51,7 @@ const FeaturedResources = ( { onArticleClick } ) => {
                         className="group relative flex flex-col bg-card border border-border rounded-[2rem] overflow-hidden card-hover animate-fade-in"
                         style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                        <div className="relative h-48 w-full overflow-hidden">
+                        <div className="relative h-56 w-full overflow-hidden">
                             <img 
                                 src={res.image_url} 
                                 alt={res.title}
@@ -62,11 +64,11 @@ const FeaturedResources = ( { onArticleClick } ) => {
                             <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60" />
                         </div>
 
-                        <div className="p-7 flex flex-col flex-grow">
+                        <div className="p-5 flex flex-col flex-grow">
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="text-lg">{res.icon_emoji}</span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                    {res.category}
+                                    {res.category_name}
                                 </span>
                             </div>
 
@@ -102,7 +104,7 @@ const FeaturedResources = ( { onArticleClick } ) => {
 
                                 <button
                                     onClick={() => onArticleClick(res.article_id)}
-                                    className="flex items-center gap-2 bg-blue text-white px-5 py-2.5 
+                                    className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 
                                     rounded-xl text-sm font-bold hover:brightness-110 active:scale-95 
                                     transition-all shadow-lg shadow-blue/20 group/btn cursor-pointer"
                                 >
