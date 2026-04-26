@@ -199,7 +199,7 @@ const RecentHistory = ({ isOpen, onClose }) => {
                                                         </h4>
                                                         <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                                                             <Calendar size={12} />
-                                                            <span>{new Date(item.viewed_at).toLocaleDateString()}</span>
+                                                            <span>{new Date(item.last_visited).toLocaleDateString()}</span>
                                                             <div className="h-1 w-1 rounded-full bg-slate-300" />
                                                             <span className="text-primary">{item.progress_percentage}% DONE</span>
                                                         </div>

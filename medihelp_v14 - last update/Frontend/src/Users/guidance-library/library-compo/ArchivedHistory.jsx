@@ -82,7 +82,7 @@ const ArchivedHistory = () => {
                             <Archive className="text-primary" size={32} />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Archived Footprints</h1>
+                            <h1 className="text-3xl font-black text-foreground tracking-tight">Archived Footprints</h1>
                             <p className="text-sm text-slate-400 font-bold uppercase tracking-[0.2em]">Safety vault for your history</p>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ const ArchivedHistory = () => {
                             <motion.div 
                                 layout
                                 key={item.ArchiveID} 
-                                className="group relative bg-white border border-slate-200/60 p-0 rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden"
+                                className="group relative bg-card border border-border p-0 rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden"
                             >
                                 {/* Decorative Accent */}
 
@@ -184,7 +184,7 @@ const ArchivedHistory = () => {
                                             </div>
 
                                             <div>
-                                                <h4 className="font-extrabold text-slate-800 text-md line-clamp-1 group-hover:text-primary transition-colors duration-300">
+                                                <h4 className="font-extrabold text-foreground text-md line-clamp-1 group-hover:text-primary transition-colors duration-300">
                                                     {item.Title}
                                                 </h4>
                                                 <div className="flex items-center gap-2 mt-1">
@@ -275,7 +275,7 @@ const ArchivedHistory = () => {
                                 <Archive size={80} className="text-slate-100" />
                             </div>
                         </div>
-                        <h3 className="text-slate-400 font-black uppercase tracking-widest italic text-xl">Vault is Empty</h3>
+                        <h3 className="text-foreground font-black uppercase tracking-widest text-xl">Vault is Empty</h3>
                         <p className="text-sm text-slate-400 max-w-xs mt-3 font-medium leading-relaxed">Safety first! Your archived activity will be stored here for future restoration.</p>
                     </div>
                 )}

@@ -7,13 +7,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion';
 import ToastMessage, { showToast } from '../../../components/ToastMessage';
-// import html2pdf from 'html2pdf.js';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 import Navbar from '../../../components/navbar';
 import ArticleContent from './ArticleContent';
 import MediHelpAvatar from '../../../assets/mediAvatar.png';
 import ArticleNotFound from '../../../pages/error/ArticleNotFound';
 import ScrollToTop from '../../../components/ScrollTop';
+import DownloadPDFModal from '../DownloadPDFModal';
 
 const ArticlePage = () => {
     const navigate = useNavigate();
@@ -25,6 +26,8 @@ const ArticlePage = () => {
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('introduction');
     const [textSize, setTextSize] = useState('standard'); // default text size
+    const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
     // --- NEW: Scroll Progress States ---
     const [maxScroll, setMaxScroll] = useState(0);
@@ -391,12 +394,110 @@ const ArticlePage = () => {
     };
 
     // ----- Download PDF functions -----
-    const handleDownload = () => {
-        // Konting delay para makita ang toast
+    const stripHtml = (html) => {
+        const tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    };
+
+    // 1. The Trigger: This starts the flow when the tool icon is clicked
+    const openDownloadFlow = () => {
+        showToast("Preparing your PDF File...", "info");
+        
+        // Small delay to let the toast be seen before the modal pops up
         setTimeout(() => {
-            window.print();
-            showToast("Download process finished!", "success");
+            setIsPDFModalOpen(true);
         }, 800);
+    };
+
+    // 2. The Executor: This runs when "Download Now" is clicked INSIDE the modal
+    const handleDownloadPDF = async () => {
+        try {
+            setIsGeneratingPDF(true);
+            
+            const pdfDoc = await PDFDocument.create();
+            const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+            const timesBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+            
+            let page = pdfDoc.addPage([595.28, 841.89]);
+            const { width, height } = page.getSize();
+            
+            const fontSize = 11;
+            const lineHeight = 14; 
+            const paragraphGap = 10; 
+            const margin = 50;
+            const maxWidth = width - (margin * 2);
+            let currentY = height - margin;
+
+            // --- HEADER ---
+            page.drawText("MediHelp Guidance Library", {
+                x: margin, y: currentY, size: 16, font: timesBoldFont, color: rgb(0, 0.53, 0.71),
+            });
+            currentY -= 30;
+
+            // --- TITLE ---
+            const titleText = articleData?.title || "Health Article";
+            page.drawText(titleText, { x: margin, y: currentY, size: 14, font: timesBoldFont });
+            currentY -= 20;
+
+            // --- DATE & AUTHOR ---
+            const dateStr = articleData?.created_date ? new Date(articleData.created_date).toLocaleDateString() : "N/A";
+            page.drawText(`Published: ${dateStr} | Author: ${articleData?.author_name || 'MediHelp'}`, {
+                x: margin, y: currentY, size: 9, font: timesRomanFont, color: rgb(0.4, 0.4, 0.4)
+            });
+            currentY -= 35; 
+
+            // --- CONTENT LOGIC ---
+            const cleanContent = stripHtml(articleData?.full_content || articleData?.content || "");
+            const paragraphs = cleanContent.split(/\n\s*\n/); 
+
+            for (const paragraph of paragraphs) {
+                const words = paragraph.trim().split(/\s+/);
+                let line = '';
+
+                for (const word of words) {
+                    const testLine = line + word + ' ';
+                    const testLineWidth = timesRomanFont.widthOfTextAtSize(testLine, fontSize);
+
+                    if (testLineWidth > maxWidth) {
+                        page.drawText(line.trim(), { x: margin, y: currentY, size: fontSize, font: timesRomanFont });
+                        line = word + ' ';
+                        currentY -= lineHeight; 
+
+                        if (currentY < margin) {
+                            page = pdfDoc.addPage([595.28, 841.89]);
+                            currentY = height - margin;
+                        }
+                    } else {
+                        line = testLine;
+                    }
+                }
+                page.drawText(line.trim(), { x: margin, y: currentY, size: fontSize, font: timesRomanFont });
+                currentY -= (lineHeight + paragraphGap);
+            }
+
+            // --- FINALIZE ---
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: "application/pdf" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${titleText.replace(/\s+/g, '_')}_MediHelp.pdf`;
+            link.click();
+
+            // --- SUCCESS FEEDBACK ---
+            setIsGeneratingPDF(false);
+            setIsPDFModalOpen(false); // Close the modal automatically
+            
+            // As requested: showToast after successful download
+            setTimeout(() => {
+                showToast("Successfully downloaded!", "success");
+            }, 300);
+
+        } catch (error) {
+            console.error(error);
+            setIsGeneratingPDF(false);
+            showToast("Error creating PDF", "error");
+        }
     };
 
     if (loading) return (
@@ -426,6 +527,14 @@ const ArticlePage = () => {
             <ScrollToTop progress={maxScroll} />
 
             <ToastMessage />
+
+            <DownloadPDFModal 
+                isOpen={isPDFModalOpen}
+                onClose={() => setIsPDFModalOpen(false)}
+                onConfirm={handleDownloadPDF} // This executes the actual generation logic
+                articleData={articleData}
+                isGenerating={isGeneratingPDF} // Passes the loading state for the button spinner
+            />
 
             {/* 2. HERO SECTION */}
             <header className="relative w-full min-h-[100vh] flex items-center justify-center overflow-hidden bg-slate-950">
@@ -782,7 +891,7 @@ const ArticlePage = () => {
                                         icon: <Download size={15} />, 
                                         label: 'Download PDF', 
                                         color: 'hover:text-amber-900',
-                                        action: handleDownload 
+                                        action: openDownloadFlow 
                                     }
                                 ].map((tool, i) => (
                                     <button 

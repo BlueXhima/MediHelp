@@ -71,15 +71,15 @@ const SavedArticles = () => {
                 message="Are you sure you want to remove all saved articles? This action cannot be undone and your library will be completely empty."
             />
             
-            <main className="max-w-7xl mx-auto px-6 py-12 pt-28">
+            <main className="max-w-7xl mx-auto px-6 py-8 pt-24">
                 {/* Header Section */}
                 <div className="flex flex-col gap-6 mb-10">
                     <button 
                         onClick={() => navigate(-1)} 
-                        className="group flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold transition-colors w-fit"
+                        className="group px-4 py-2 bg-card rounded-full border hover:border-emerald-600 flex items-center gap-2 cursor-pointer text-slate-500 hover:text-emerald-600 font-bold transition-colors w-fit"
                     >
                         <div className="p-2 rounded-full bg-white border border-slate-200 group-hover:border-emerald-200 group-hover:bg-emerald-50 transition-all">
-                            <ArrowLeft size={18} />
+                            <ArrowLeft size={14} />
                         </div>
                         <span>Go Back</span>
                     </button>
