@@ -151,231 +151,217 @@ const Register = () => {
     };
 
     return (
-        <>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans selection:bg-primary/10 relative">
             <BackgroundLoadingState isLoading={isLoading} />
             <ToastMessage />
-            <div className="flex flex-col md:flex-row h-screen w-full font-sans bg-background overflow-hidden">
-                
-                {/* --- LEFT SIDE: Animated Grid & Back Button --- */}
-                <div className="relative hidden md:flex w-full h-full bg-[#0f172a] overflow-hidden items-center justify-center">
+
+            {/* Back Button - Positioned top-left outside the card */}
+            <button 
+                onClick={() => navigate(-1)} 
+                className="fixed top-8 left-8 flex items-center gap-2 text-foreground hover:text-primary cursor-pointer transition-all font-black text-[11px] uppercase tracking-[0.2em] group z-50"
+            >
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                Back
+            </button>
+
+            {/* Main Card */}
+            <div className="w-full max-w-[480px] bg-card rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-border overflow-hidden animate-fade-in">
+                <form onSubmit={handleRegister} className="p-8 md:p-10">
                     
-                    {/* Back to Home Button */}
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="absolute top-8 left-8 z-50 flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white font-bold text-sm hover:bg-white/10 hover:-translate-x-1 transition-all cursor-pointer group"
-                    >
-                        <ArrowLeft size={18} className="group-hover:text-primary transition-colors" />
-                        Back to Home
-                    </button>
-
-                    {/* Animated Background Elements */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#1e1b4b] to-[#4c1d95]"></div>
-                    <div 
-                        className="absolute inset-0 opacity-20" 
-                        style={{ backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`, backgroundSize: '50px 50px' }}
-                    ></div>
-
-                    {/* Meteor Effect */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <span className="absolute top-1/4 left-1/2 w-[2px] h-[50px] bg-gradient-to-b from-primary to-transparent animate-meteor opacity-0"></span>
-                        <span className="absolute top-10 left-1/3 w-[2px] h-[80px] bg-gradient-to-b from-blue-400 to-transparent animate-meteor opacity-0 [animation-delay:1.5s]"></span>
+                    {/* Header Section */}
+                    <div className="flex flex-col items-center text-center mb-8">
+                        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-5 border border-slate-100 shadow-sm">
+                            <Stethoscope size={24} className="text-primary" />
+                        </div>
+                        <h1 className="text-2xl font-black text-foreground tracking-tight mb-1.5">Create Account</h1>
+                        <p className="text-[13px] text-slate-500 font-medium leading-relaxed px-4">
+                            Join MediHelp to start managing your healthcare records securely.
+                        </p>
                     </div>
 
-                    {/* Left Side Content Card */}
-                    <div className="relative z-10 px-12 py-10 mx-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-fade-in text-left">
-                        <div className="flex items-center space-x-3 mb-8">
-                            <div className="p-3 bg-primary/20 rounded-2xl border border-primary/30 text-white">
-                                <Stethoscope size={32} />
-                            </div>
-                            <h2 className="text-4xl font-black text-white tracking-tight">MediHelp</h2>
-                        </div>
-                        <div className="max-w-md space-y-6">
-                            <h1 className="text-5xl font-extrabold text-white leading-tight">
-                                Start Your <br/>
-                                <span className="text-primary-foreground drop-shadow-[0_0_15px_rgba(167,139,250,0.6)]">Healthy Journey.</span>
-                            </h1>
-                            <p className="text-lg text-slate-300/80 leading-relaxed">
-                                Create an account to experience seamless healthcare management and secure medical records.
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Version Label */}
-                    <div className="absolute bottom-10 left-0 right-0 px-12 flex items-center justify-between opacity-50">
-                        <p className="text-xs font-medium text-white/60 tracking-widest uppercase">© 2026 MediHelp Platform</p>
-                        <div className="h-[1px] flex-grow mx-6 bg-gradient-to-r from-white/20 to-transparent"></div>
-                        <p className="text-xs italic text-white/40 font-semibold uppercase tracking-wider">v1.0 Stable Build</p>
-                    </div>
-                </div>
-
-                {/* --- RIGHT SIDE: Enhanced Register Form --- */}
-                <div className="flex flex-col w-full h-full bg-background backdrop-blur-md overflow-y-auto">
-                    <div className="w-full max-w-lg mx-auto animate-fade-in py-8">
-                        
-                        {/* Header */}
-                        <div className="text-left mb-8">
-                            <h2 className="text-4xl font-black text-foreground tracking-tight">Create Account</h2>
-                            <p className="mt-2 text-foreground/60 font-medium italic">Join thousands of users prioritizing their health.</p>
-                        </div>
-
-                        <form className="space-y-4" onSubmit={handleRegister}>
-                            {/* Name Fields Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-foreground/50 ml-1">First Name</label>
-                                    <input 
-                                        type="text" 
-                                        required
-                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                        value={firstName}
-                                        onChange={(e) => setFirstName(e.target.value)}
-                                        placeholder="Enter your first name"
-                                    />
-                                </div>
-                                <div className="space-y-2 text-left">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-foreground/50 ml-1">Last Name</label>
-                                    <input 
-                                        type="text" 
-                                        required
-                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                        value={lastName}
-                                        onChange={(e) => setLastName(e.target.value)}
-                                        placeholder="Enter your last name"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Email Field */}
-                            <div className="space-y-2 text-left">
-                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/50 ml-1">Email Address</label>
-                                <input
-                                    type="email"
+                    <div className="space-y-4">
+                        {/* 2-Column Name Fields with Floating Labels */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="relative group">
+                                <input 
+                                    type="text"
+                                    id="firstName"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    placeholder=" "
                                     required
-                                    className={`w-full px-3 py-2 rounded-xl border ${emailError ? 'border-red-500' : 'border-slate-200'} bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all`}
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
+                                    className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]" 
                                 />
+                                <label 
+                                    htmlFor="firstName"
+                                    className="absolute left-4 top-3.5 text-slate-400 font-bold text-[11px] transition-all pointer-events-none bg-card px-2 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
+                                >
+                                    FIRST NAME
+                                </label>
                             </div>
-
-                            {/* Password Field */}
-                            {/* Password Field */}
-                            <div className="space-y-1.5 text-left">
-                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/50 ml-1">Password</label>
-                                <div className="relative">
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        required
-                                        value={password}
-                                        onChange={handlePasswordChange}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                        placeholder="Create your password"
-                                    />
-                                    <button type="button" onClick={togglePasswordVisibility} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors cursor-pointer">
-                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
-                                </div>
-
-                                {/* Default/Live Password Strength & Requirements */}
-                                <div className="mt-4 px-1 space-y-3">
-                                    {/* Strength Bar */}
-                                    <div>
-                                        <div className="flex justify-between items-center mb-1.5">
-                                            <span className="text-[12px] font-black uppercase tracking-tighter text-slate-400">
-                                                Security Level: 
-                                                <span className={`ml-1 ${
-                                                    passwordStrength === 'Weak' ? 'text-red-500' : 
-                                                    passwordStrength === 'Medium' ? 'text-yellow-500' : 
-                                                    passwordStrength === 'Strong' ? 'text-green-600' : 'text-slate-300'
-                                                }`}>
-                                                    {passwordStrength || "Waiting for input..."}
-                                                </span>
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-1.5 h-1.5">
-                                            <div className={`h-full flex-1 rounded-full transition-all duration-500 ${
-                                                passwordStrength === 'Weak' ? 'bg-red-400' : 
-                                                passwordStrength === 'Medium' ? 'bg-yellow-400' : 
-                                                passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-100'
-                                            }`} />
-                                            <div className={`h-full flex-1 rounded-full transition-all duration-500 ${
-                                                passwordStrength === 'Medium' ? 'bg-yellow-400' : 
-                                                passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-100'
-                                            }`} />
-                                            <div className={`h-full flex-1 rounded-full transition-all duration-500 ${
-                                                passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-100'
-                                            }`} />
-                                        </div>
-                                    </div>
-
-                                    {/* Requirements Checklist - Laging Visible */}
-                                    <div className="grid grid-cols-2 gap-y-2 pb-2">
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${password.length >= 8 ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                            <span className={`text-[11px] font-semibold transition-colors ${password.length >= 8 ? 'text-foreground' : 'text-slate-400'}`}>8+ Characters</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${/[A-Z]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                            <span className={`text-[11px] font-semibold transition-colors ${/[A-Z]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Uppercase Letter</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${/[0-9]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                            <span className={`text-[11px] font-semibold transition-colors ${/[0-9]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Number Included</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${/[!@#$%^&*]/.test(password) ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                            <span className={`text-[11px] font-semibold transition-colors ${/[!@#$%^&*]/.test(password) ? 'text-foreground' : 'text-slate-400'}`}>Special Character</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="relative group">
+                                <input 
+                                    type="text"
+                                    id="lastName"
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                    placeholder=" "
+                                    required
+                                    className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]" 
+                                />
+                                <label 
+                                    htmlFor="lastName"
+                                    className="absolute left-4 top-3.5 text-slate-400 font-bold text-[11px] transition-all pointer-events-none bg-card px-2 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
+                                >
+                                    LAST NAME
+                                </label>
                             </div>
+                        </div>
 
-                            {/* Register Button */}
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full bg-primary text-white py-4 rounded-xl font-black shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2"
+                        {/* Email Field - Floating Label */}
+                        <div className="relative group">
+                            <input 
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder=" "
+                                required
+                                className={`peer w-full px-4 py-3.5 rounded-xl border-2 ${emailError ? 'border-red-500' : 'border-border'} bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]`} 
+                            />
+                            <label 
+                                htmlFor="email"
+                                className="absolute left-4 top-3.5 text-slate-400 font-bold text-[11px] transition-all pointer-events-none bg-card px-2 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
                             >
-                                <span>{isLoading ? "Creating Account..." : "Create Account"}</span>
-                                {!isLoading && <ArrowRight size={18} />}
-                            </button>
+                                EMAIL ADDRESS
+                            </label>
+                        </div>
 
-                            {/* Divider */}
-                            <div className="flex items-center my-4">
-                                <div className="flex-grow border-t border-slate-200"></div>
-                                <span className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">or</span>
-                                <div className="flex-grow border-t border-slate-200"></div>
+                        {/* Password Field - Floating Label */}
+                        <div className="relative group">
+                            <input 
+                                type={showPassword ? "text" : "password"}
+                                id="password"
+                                value={password}
+                                onChange={handlePasswordChange}
+                                placeholder=" "
+                                required
+                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]" 
+                            />
+                            <label 
+                                htmlFor="password"
+                                className="absolute left-4 top-3.5 text-slate-400 font-bold text-[11px] transition-all pointer-events-none bg-card px-2 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
+                            >
+                                CREATE PASSWORD
+                            </label>
+                            <button 
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-primary transition-colors p-2"
+                            >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
+
+                        {/* Password Strength Indicator (Same logic preserved) */}
+                        <div className="px-2 py-3 bg-slate-50/50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-700/50 space-y-3 transition-colors duration-300">
+                            <div className="flex justify-between items-center px-1">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Security Check</span>
+                                <span className={`text-[10px] font-black uppercase transition-colors ${
+                                    passwordStrength === 'Strong' ? 'text-green-600 dark:text-green-400' : 
+                                    passwordStrength === 'Medium' ? 'text-yellow-600 dark:text-yellow-400' :
+                                    passwordStrength === 'Weak' ? 'text-red-600 dark:text-red-400' :
+                                    'text-slate-500 dark:text-slate-600'
+                                }`}>
+                                    {passwordStrength || "None"}
+                                </span>
+                            </div>
+                            
+                            {/* Strength Bars */}
+                            <div className="flex gap-1.5 h-1 px-1">
+                                <div className={`h-full flex-1 rounded-full transition-all duration-500 ${passwordStrength === 'Weak' ? 'bg-red-400' : passwordStrength === 'Medium' ? 'bg-yellow-400' : passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                                <div className={`h-full flex-1 rounded-full transition-all duration-500 ${passwordStrength === 'Medium' ? 'bg-yellow-400' : passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                                <div className={`h-full flex-1 rounded-full transition-all duration-500 ${passwordStrength === 'Strong' ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
                             </div>
 
-                            {/* Google Button */}
-                            <button className="w-full border-2 border-slate-100 bg-white py-3.5 rounded-xl flex items-center justify-center hover:bg-slate-50 hover:border-slate-200 transition-all cursor-pointer font-bold text-slate-700 shadow-sm">
-                                <img src={buttonlogo} alt="Google" className="w-5 h-5 mr-3" />
-                                Sign up with Google
-                            </button>
+                            {/* Requirements Grid */}
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 px-1">
+                                {/* Requirement 1 */}
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-1.5 h-1.5 rounded-full transition-all ${password.length >= 8 ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                                    <span className={`text-[10px] font-bold transition-colors ${password.length >= 8 ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                        8+ Characters
+                                    </span>
+                                </div>
+                                
+                                {/* Requirement 2 */}
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-1.5 h-1.5 rounded-full transition-all ${/[A-Z]/.test(password) ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                                    <span className={`text-[10px] font-bold transition-colors ${/[A-Z]/.test(password) ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                        Uppercase Letter
+                                    </span>
+                                </div>
 
-                            {/* Footer Links */}
-                            <div className="pt-2 space-y-4">
-                                <p className="text-[11px] text-center text-foreground/50 leading-relaxed max-w-xs mx-auto">
-                                    By registering, you agree to our 
-                                    <a href="/terms" className="text-primary font-bold hover:underline mx-1">Terms</a> 
-                                    and 
-                                    <a href="/privacy" className="text-primary font-bold hover:underline mx-1">Privacy Policy</a>.
-                                </p>
-                                <div className="text-sm font-bold text-foreground/80">
-                                    Already have an account? 
-                                    <button 
-                                        onClick={() => navigate('/login')}
-                                        className="ml-2 text-primary hover:underline underline-offset-4 decoration-2"
-                                    >
-                                        Login here
-                                    </button>
+                                {/* Requirement 3 */}
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-1.5 h-1.5 rounded-full transition-all ${/\d/.test(password) ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                                    <span className={`text-[10px] font-bold transition-colors ${/\d/.test(password) ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                        Number Included
+                                    </span>
+                                </div>
+
+                                {/* Requirement 4 */}
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-1.5 h-1.5 rounded-full transition-all ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                                    <span className={`text-[10px] font-bold transition-colors ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                        Special Char
+                                    </span>
                                 </div>
                             </div>
-                        </form>
+                        </div>
+
+                        {/* Create Account Button */}
+                        <button 
+                            type="submit" 
+                            disabled={isLoading}
+                            className="w-full py-3.5 rounded-xl bg-primary text-white font-black uppercase tracking-[0.1em] text-[11px] shadow-sm 
+                            hover:bg-indigo-700 cursor-pointer hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex 
+                            items-center justify-center gap-2 mt-2 shadow-slate-200"
+                        >
+                            <span>{isLoading ? "Processing..." : "Create Account"}</span>
+                            {!isLoading && <ArrowRight size={14} />}
+                        </button>
+
+                        {/* Divider */}
+                        <div className="relative flex items-center justify-center py-3">
+                            <div className="w-full border-t border-slate-100"></div>
+                            <span className="absolute bg-card px-3 text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 italic">
+                                or continue on
+                            </span>
+                        </div>
+
+                        {/* Google Button */}
+                        <button type="button" className="w-full py-3 rounded-xl border-2 border-border bg-card flex items-center justify-center gap-3 hover:bg-slate-100 cursor-pointer transition-all font-bold text-slate-700 text-[12px] shadow-sm">
+                            <img src={buttonlogo} alt="Google" className="w-4 h-4" />
+                            Sign up with Google
+                        </button>
                     </div>
-                </div>
+
+                    {/* Footer Links */}
+                    <div className="mt-8 text-center space-y-4">
+                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed max-w-[280px] mx-auto tracking-tighter">
+                            By registering, you agree to our 
+                            <a href="/terms" className="text-foreground hover:text-primary font-black hover:underline mx-1">Terms</a> 
+                            and 
+                            <a href="/privacy" className="text-foreground hover:text-primary font-black hover:underline mx-1">Privacy Policy</a>.
+                        </p>
+                        <p className="text-[12px] font-bold text-slate-400">
+                            Already have an account? <button onClick={() => navigate('/login')} className="text-foreground hover:text-primary cursor-pointer hover:underline underline-offset-4 decoration-2 decoration-primary/30 font-black">Login here</button>
+                        </p>
+                    </div>
+                </form>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -100,135 +100,132 @@ const OTPVerification = () => {
     };
 
     return (
-        <>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans selection:bg-primary/10 relative text-left">
             <BackgroundLoadingState isLoading={isLoading} />
             <ToastMessage />
-            
-            <div className="flex flex-col md:flex-row h-screen w-full font-sans bg-background overflow-hidden text-left">
-                
-                {/* --- LEFT SIDE: Sticky Security Branding --- */}
-                <div className="relative hidden md:flex w-full h-full bg-[#0f172a] overflow-hidden items-center justify-center">
+
+            {/* Back Button - Top Left */}
+            <button 
+                onClick={() => navigate(-1)} 
+                className="fixed top-8 left-8 flex items-center gap-2 text-foreground hover:text-primary cursor-pointer transition-all font-black text-[11px] uppercase tracking-[0.2em] group z-50"
+            >
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                Back
+            </button>
+
+            {/* Main Card */}
+            <div className="w-full max-w-[480px] bg-card rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-border overflow-hidden animate-fade-in">
+                <form onSubmit={handleOTPSubmit} className="p-10 md:p-12">
                     
-                    {/* Back Button */}
-                    <button 
-                        onClick={() => navigate(-1)} 
-                        className="absolute top-8 left-8 z-50 flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white font-bold text-sm hover:bg-white/10 hover:-translate-x-1 transition-all cursor-pointer group"
-                    >
-                        <ArrowLeft size={18} className="group-hover:text-primary transition-colors" />
-                        Back
-                    </button>
-
-                    {/* Animated Background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#1e1b4b] to-[#4c1d95]"></div>
-                    <div 
-                        className="absolute inset-0 opacity-20" 
-                        style={{ backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`, backgroundSize: '50px 50px' }}
-                    ></div>
-
-                    {/* Meteor Animation */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <span className="absolute top-1/4 left-1/2 w-[2px] h-[50px] bg-gradient-to-b from-primary to-transparent animate-meteor opacity-0"></span>
-                        <span className="absolute top-1/2 left-1/4 w-[2px] h-[80px] bg-gradient-to-b from-blue-400 to-transparent animate-meteor opacity-0 [animation-delay:2s]"></span>
+                    {/* Header Section */}
+                    <div className="flex flex-col items-center text-center mb-10">
+                        <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 border border-slate-100 shadow-sm">
+                            <ShieldCheck size={28} className="text-primary" />
+                        </div>
+                        <h1 className="text-2xl font-black text-foreground tracking-tight mb-2">Verify Your Email</h1>
+                        <p className="text-[13px] text-slate-500 font-medium leading-relaxed px-4">
+                            We've sent a 6-digit code to your email. Enter it below to secure your account.
+                        </p>
                     </div>
 
-                    {/* Content Card */}
-                    <div className="relative z-10 px-12 py-10 mx-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-fade-in text-left">
-                        <div className="flex items-center space-x-3 mb-8 text-white">
-                            <div className="p-3 bg-primary/20 rounded-2xl border border-primary/30">
-                                <ShieldCheck size={32} />
+                    <div className="space-y-8">
+                        {/* OTP Input Field - 6 Digit Style */}
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex justify-start">
+                                Verification Code
+                            </label>
+                            <div 
+                                className="flex justify-between gap-2 md:gap-3"
+                                onPaste={(e) => {
+                                    e.preventDefault();
+                                    const pasteData = e.clipboardData.getData('text').slice(0, 6); // Kunin ang first 6 chars
+                                    if (/^\d+$/.test(pasteData)) { // Siguraduhin na numbers lang
+                                        setOtp(pasteData);
+                                        // I-focus ang huling box na may laman o ang huling box talaga
+                                        const lastIndex = Math.min(pasteData.length, 5);
+                                        document.getElementById(`otp-${lastIndex}`).focus();
+                                    }
+                                }}
+                            >
+                                {[...Array(6)].map((_, index) => (
+                                    <input
+                                        key={index}
+                                        id={`otp-${index}`}
+                                        type="text"
+                                        maxLength="1"
+                                        value={otp[index] || ""}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (/^[0-9]$/.test(value) || value === "") {
+                                                const newOtp = otp.split("");
+                                                newOtp[index] = value;
+                                                setOtp(newOtp.join(""));
+                                                
+                                                // Auto-focus sa susunod na box
+                                                if (value !== "" && index < 5) {
+                                                    document.getElementById(`otp-${index + 1}`).focus();
+                                                }
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Backspace" && !otp[index] && index > 0) {
+                                                document.getElementById(`otp-${index - 1}`).focus();
+                                            }
+                                        }}
+                                        className="w-12 h-14 md:w-14 md:h-16 text-center text-xl font-black rounded-xl border-2 border-border bg-card focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-slate-400 shadow-sm"
+                                        required
+                                    />
+                                ))}
                             </div>
-                            <h2 className="text-4xl font-black tracking-tight">Security</h2>
-                        </div>
-                        <div className="max-w-md space-y-6">
-                            <h1 className="text-5xl font-extrabold text-white leading-tight">
-                                Verify Your <br/>
-                                <span className="text-primary-foreground drop-shadow-[0_0_15px_rgba(167,139,250,0.6)]">Identity.</span>
-                            </h1>
-                            <p className="text-lg text-slate-300/80 leading-relaxed">
-                                We've sent a 6-digit code to your email. This ensures your medical records stay protected and only accessible by you.
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Version Label */}
-                    <div className="absolute bottom-10 left-0 right-0 px-12 flex items-center justify-between opacity-50">
-                        <p className="text-xs font-medium text-white/60 tracking-widest uppercase">© 2026 MediHelp Secure</p>
-                        <div className="h-[1px] flex-grow mx-6 bg-gradient-to-r from-white/20 to-transparent"></div>
-                        <p className="text-xs italic text-white/40 font-semibold uppercase tracking-wider">v2.0 Stable Build</p>
-                    </div>
-                </div>
-
-                {/* --- RIGHT SIDE: OTP Form --- */}
-                <div className="flex flex-col w-full h-full bg-slate-50/40 backdrop-blur-md overflow-y-auto">
-                    <div className="w-full max-w-lg mx-auto px-8 md:px-16 pt-24 pb-16 animate-fade-in">
-                        
-                        {/* Header */}
-                        <div className="mb-10">
-                            <h2 className="text-4xl font-black text-foreground tracking-tight">Enter OTP</h2>
-                            <p className="mt-3 text-foreground/60 font-medium italic">
-                                Please check your inbox for the verification code.
-                            </p>
                         </div>
 
-                        <form onSubmit={handleOTPSubmit} className="space-y-8">
-                            {/* OTP Input Field */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/50 ml-1">Verification Code</label>
-                                <input
-                                    type="text"
-                                    placeholder="000000"
-                                    maxLength="6"
-                                    className="w-full text-center text-3xl tracking-[0.5em] font-black py-5 rounded-2xl border-2 border-slate-200 bg-white focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-200"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    required
-                                />
-                            </div>
+                        {/* Action Buttons */}
+                        <div className="space-y-4">
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full bg-primary text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-sm shadow-slate-200 hover:bg-indigo-700 cursor-pointer hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
+                            >
+                                <span>{isLoading ? "Verifying..." : "Verify Code"}</span>
+                                {!isLoading && <ArrowRight size={16} />}
+                            </button>
 
-                            {/* Action Buttons */}
-                            <div className="space-y-4">
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="w-full bg-primary text-white py-4 rounded-xl font-black shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2"
-                                >
-                                    <span>{isLoading ? "Verifying..." : "Verify Code"}</span>
-                                    {!isLoading && <ArrowRight size={18} />}
-                                </button>
-
-                                <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="pt-2 flex flex-col items-center gap-4">
+                                <div className="text-center">
+                                    <p className="text-[12px] font-bold uppercase text-slate-400 mb-1">Didn't receive the code?</p>
                                     <button
                                         type="button"
                                         onClick={handleResendOTP}
                                         disabled={isLoading}
-                                        className="flex-1 border-2 border-slate-200 bg-white py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer"
+                                        className="text-[11px] cursor-pointer font-black text-primary hover:text-blue-700 uppercase tracking-widest transition-colors disabled:text-slate-300"
                                     >
                                         Resend Code
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleChangeEmail}
-                                        className="flex-1 border-2 border-slate-200 bg-white py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer"
-                                    >
-                                        Change Email
-                                    </button>
                                 </div>
-                            </div>
 
-                            {/* Footer Policy */}
-                            <div className="pt-10 border-t border-slate-200">
-                                <p className="text-[11px] text-center text-foreground/50 leading-relaxed max-w-xs mx-auto font-medium">
-                                    By verifying, you agree to our 
-                                    <a href="/terms" className="text-primary font-bold hover:underline mx-1">Terms</a> 
-                                    and 
-                                    <a href="/privacy" className="text-primary font-bold hover:underline mx-1">Privacy Policy</a>.
-                                </p>
+                                <button
+                                    type="button"
+                                    onClick={handleChangeEmail}
+                                    className="w-full border-2 border-border bg-card cursor-pointer py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm active:scale-[0.98]"
+                                >
+                                    Change Email Address
+                                </button>
                             </div>
-                        </form>
+                        </div>
+
+                        {/* Footer Policy */}
+                        <div className="pt-6 border-t border-slate-50">
+                            <p className="text-[12px] text-center text-slate-400 leading-relaxed max-w-xs mx-auto font-medium tracking-tighter">
+                                By verifying, you agree to our 
+                                <a href="/terms" className="text-foreground hover:text-primary font-black hover:underline mx-1">Terms</a> 
+                                and 
+                                <a href="/privacy" className="text-foreground hover:text-primary font-black hover:underline mx-1">Privacy Policy</a>.
+                            </p>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -183,225 +183,158 @@ const Login = () => {
     }, [lockUntil, isSilentLock]);
 
     return (
-        <>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans selection:bg-primary/10">
             <BackgroundLoadingState isLoading={isLoading} />
             <ToastMessage />
-            <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
-                {/* Left Side */}
-                <div className="relative hidden md:flex w-full min-h-screen bg-[#0f172a] overflow-hidden items-center justify-center">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#1e1b4b] to-[#4c1d95]"></div>
+
+            <button 
+                onClick={() => navigate(-1)} 
+                className="fixed top-8 left-8 flex items-center gap-2 text-foreground hover:text-primary cursor-pointer transition-all font-black text-[11px] uppercase tracking-[0.2em] group"
+            >
+                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                Back
+            </button>
+
+            {/* Main Card */}
+            <div className="w-full max-w-[420px] bg-card rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-border overflow-hidden animate-fade-in">
+                <form onSubmit={handleLogin} className="p-8 md:p-10">
                     
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="absolute top-8 left-8 z-50 flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white font-bold text-sm hover:bg-white/10 hover:-translate-x-1 transition-all cursor-pointer group"
-                    >
-                        <ArrowLeft size={18} className="group-hover:text-primary transition-colors" />
-                        Back to Home
-                    </button>
-
-                    <div 
-                        className="absolute inset-0 opacity-20" 
-                        style={{ 
-                            backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
-                            backgroundSize: '50px 50px' 
-                        }}
-                    ></div>
-
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <span className="absolute top-1/4 left-1/2 w-[2px] h-[50px] bg-gradient-to-b from-primary to-transparent animate-meteor opacity-0"></span>
-                        <span className="absolute top-10 left-1/3 w-[2px] h-[80px] bg-gradient-to-b from-blue-400 to-transparent animate-meteor opacity-0 [animation-delay:1.5s]"></span>
-                        <span className="absolute top-2/3 left-1/4 w-[2px] h-[60px] bg-gradient-to-b from-purple-400 to-transparent animate-meteor opacity-0 [animation-delay:3s]"></span>
+                    {/* Header Section - Reduced sizes */}
+                    <div className="flex flex-col items-center text-center mb-8">
+                        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-5 border border-slate-100 shadow-sm">
+                            <Stethoscope size={24} className="text-primary" />
+                        </div>
+                        <h1 className="text-2xl font-black text-foreground tracking-tight mb-1.5">Welcome Back</h1>
+                        <p className="text-[13px] text-slate-500 font-medium leading-relaxed px-2">
+                            Enter your credentials to access the medical portal.
+                        </p>
                     </div>
 
-                    <div className="relative z-10 px-12 py-10 mx-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl animate-fade-in">
-                        <div className="flex items-center space-x-3 mb-8">
-                            <div className="p-3 bg-primary/20 rounded-2xl border border-primary/30">
-                                <Stethoscope size={32} className="text-white" />
+                    {/* Error Message - Reduced text */}
+                    {error && (
+                        <div className="mb-6 p-3.5 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3 animate-shake">
+                            <MessageSquareWarning size={16} className="text-red-500 mt-0.5 shrink-0" />
+                            <div className="flex flex-col text-left">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-red-600 mb-0.5">Alert</span>
+                                <p className="text-[12px] font-bold text-red-900 leading-tight">{error}</p>
                             </div>
-                            <h2 className="text-4xl font-black text-white tracking-tight">MediHelp</h2>
                         </div>
-                        <div className="max-w-md space-y-6">
-                            <h1 className="text-5xl font-extrabold text-white leading-tight">
-                                Smart Care, <br/>
-                                <span className="text-primary-foreground drop-shadow-[0_0_15px_rgba(167,139,250,0.6)]">Better Life.</span>
-                            </h1>
-                            <p className="text-lg text-slate-300/80 leading-relaxed">
-                                Simplify your medical journey with our secure and intuitive healthcare platform.
-                            </p>
-                        </div>
+                    )}
 
-                        {/* Feature Tags with Glow */}
-                        <div className="mt-10 flex flex-wrap gap-3">
-                            {['Cloud Security', 'Real-time Sync', 'Smart Insights'].map((tag) => (
-                                <span key={tag} className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary-foreground uppercase tracking-widest shadow-[0_0_10px_rgba(167,139,250,0.1)]">
-                                    {tag}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Bottom Footer Quote */}
-                    <div className="absolute bottom-10 left-0 right-0 px-12 flex items-center justify-between opacity-50">
-                        <p className="text-xs font-medium text-white/60 tracking-widest uppercase">© 2026 MediHelp Platform</p>
-                        <div className="h-[1px] flex-grow mx-6 bg-gradient-to-r from-white/20 to-transparent"></div>
-                        <p className="text-xs italic text-white/40 font-semibold uppercase tracking-wider">v1.0 Stable Build</p>
-                    </div>
-                </div>
-
-                {/* Right Side */}
-                <div className="flex flex-col justify-center px-8 md:px-16 py-4 bg-background backdrop-blur-md relative">
-                    <div className="w-full max-w-md mx-auto animate-fade-in">
-                        {/* Header section with better spacing */}
-                        <div className="text-left mb-6">
-                            <h2 className="text-4xl font-extrabold text-foreground tracking-tight">Welcome Back</h2>
-                            <p className="mt-3 text-foreground/60 font-medium">
-                                Please enter your details to access your MediHelp account.
-                            </p>
-                        </div>
-
-                        {/* --- Error Message Display --- */}
-                        {error && (
-                            <div className="mb-6 p-4 rounded-xl bg-red-50/50 backdrop-blur-sm border border-red-200 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <div className="shrink-0 p-1.5 bg-red-100 rounded-lg">
-                                    <MessageSquareWarning size={18} className="text-red-600" />
-                                </div>
-                                <div className="flex flex-col gap-0.5 text-left">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.1em] text-red-500/80">
-                                        Security Alert
-                                    </span>
-                                    <p className="text-sm font-semibold text-red-700 leading-tight">
-                                        {error}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleLogin} className="space-y-4">
-                            {/* Email Field with focus-ring effect */}
-                            <div className="space-y-1.5 flex flex-col text-left">
-                                <label className="text-xs font-bold uppercase tracking-widest mb-2 text-foreground/50 ml-1">
-                                    Email Address
-                                </label>
-                                <input 
-                                    type="email" 
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email" 
-                                    required
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200" 
-                                />
-                            </div>
-
-                            {/* Password Field with cleaner toggle icon */}
-                            <div className="space-y-1.5 flex flex-col text-left">
-                                <label className="text-xs font-bold uppercase tracking-widest mb-2 text-foreground/50 ml-1">
-                                    Password
-                                </label>
-                                <div className="relative group">
-                                    <input 
-                                        type={showPassword ? "text" : "password"} 
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter your password" 
-                                        required
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-card focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200" 
-                                    />
-                                    <button 
-                                        type="button"
-                                        onClick={togglePasswordVisibility}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-primary transition-colors cursor-pointer"
-                                    >
-                                        {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Remember & Forgot in one line */}
-                            <div className="flex items-center justify-between text-sm font-medium">
-                                <label className="flex items-center space-x-2 cursor-pointer group">
-                                    <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" />
-                                    <span className="text-foreground/70 group-hover:text-foreground transition-colors">Remember me</span>
-                                </label>
-                                <button 
-                                    type="button"
-                                    onClick={() => navigate('/forgot-password')}
-                                    className="text-primary font-bold hover:text-primary/80 transition-colors"
-                                >
-                                    Forgot password?
-                                </button>
-                            </div>
-
-                            {/* Primary Action Button with shadow and hover lift */}
-                            <button 
-                                type="submit" 
-                                disabled={isLoading || (lockUntil && Date.now() < lockUntil && !isSilentLock)}
-                                className={`
-                                    relative overflow-hidden w-full py-4 rounded-xl cursor-pointer font-bold transition-all duration-300 
-                                    flex items-center justify-center gap-2 group
-                                    ${lockUntil && Date.now() < lockUntil && !isSilentLock 
-                                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed opacity-80' 
-                                        : 'bg-primary text-white shadow-[0_10px_20px_-10px_rgba(var(--primary-rgb),0.4)] active:scale-[0.98] hover:shadow-[0_15px_25px_-10px_rgba(var(--primary-rgb),0.5)] hover:-translate-y-1 active:scale-[0.98]'
-                                    }
-                                `}
+                    <div className="space-y-4">
+                        {/* Email Field - Floating Label (Reduced text) */}
+                        <div className="relative group">
+                            <input 
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder=" "
+                                required
+                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-800 text-[13px]" 
+                            />
+                            <label 
+                                htmlFor="email"
+                                className="absolute left-4 top-3.5 text-slate-400 font-bold text-[12px] transition-all pointer-events-none 
+                                bg-card px-2
+                                peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black
+                                peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
                             >
-                                {/* Shimmer Effect kapag hindi locked */}
-                                {!(lockUntil && Date.now() < lockUntil && !isSilentLock) && !isLoading && (
-                                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] transition-transform" />
-                                )}
+                                EMAIL ADDRESS
+                            </label>
+                        </div>
 
-                                <span className="relative z-10 flex items-center gap-2">
-                                    {isLoading ? (
-                                        <>
-                                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            <span>Signing in...</span>
-                                        </>
-                                    ) : (lockUntil && Date.now() < lockUntil && !isSilentLock) ? (
-                                        <>
-                                            <span className="opacity-60">Account Locked</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>Sign In</span>
-                                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                        </>
-                                    )}
-                                </span>
+                        {/* Password Field - Floating Label (Reduced text) */}
+                        <div className="relative group">
+                            <input 
+                                type={showPassword ? "text" : "password"}
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder=" "
+                                required
+                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-800 text-[13px]" 
+                            />
+                            <label 
+                                htmlFor="password"
+                                className="absolute left-4 top-3.5 text-slate-400 font-bold text-[12px] transition-all pointer-events-none 
+                                bg-card px-2
+                                peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black
+                                peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
+                            >
+                                PASSWORD
+                            </label>
+                            <button 
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-primary transition-colors p-2"
+                            >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
+                        </div>
 
-                            {/* Minimalist Divider */}
-                            <div className="flex items-center my-6">
-                                <div className="flex-grow border-t border-slate-200"></div>
-                                <span className="px-4 text-xs font-bold text-slate-400 uppercase tracking-widest">or</span>
-                                <div className="flex-grow border-t border-slate-200"></div>
-                            </div>
-
-                            {/* Google Button with cleaner border */}
-                            <button className="w-full border-2 border-slate-100 bg-white py-3 rounded-xl flex items-center justify-center 
-                                            hover:bg-slate-50 hover:border-slate-200 transition-all cursor-pointer font-bold text-slate-700">
-                                <img src={buttonlogo} alt="Google" className="w-5 h-5 mr-3" />
-                                Continue with Google
+                        {/* Checkbox & Forgot Password - Compact */}
+                        <div className="flex items-center justify-between pt-0.5">
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" className="w-3.5 h-3.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" />
+                                <span className="text-[11px] font-bold text-slate-500 group-hover:text-slate-800 transition-colors">Remember me?</span>
+                            </label>
+                            <button 
+                                type="button"
+                                onClick={() => navigate('/forgot-password')}
+                                className="text-[11px] font-black text-primary hover:text-indigo-700 uppercase tracking-wider transition-colors"
+                            >
+                                forgot password?
                             </button>
+                        </div>
 
-                            {/* Bottom Navigation Link */}
-                            <div className="pt-4 text-center">
-                                <p className="text-sm text-foreground/60 font-medium">
-                                    Don't have an account? 
-                                    <button 
-                                        onClick={() => navigate('/register')}
-                                        className="ml-1 text-primary font-bold hover:underline underline-offset-4"
-                                    >
-                                        Register for free
-                                    </button>
-                                </p>
-                            </div>
-                        </form>
+                        {/* Sign-in Button - Compact typography */}
+                        <button 
+                            type="submit" 
+                            disabled={isLoading || (lockUntil && Date.now() < lockUntil && !isSilentLock)}
+                            className={`
+                                w-full py-3.5 rounded-xl font-black uppercase tracking-[0.1em] text-[11px] transition-all duration-300 
+                                flex items-center justify-center gap-2 mt-2 shadow-sm cursor-pointer
+                                ${lockUntil && Date.now() < lockUntil && !isSilentLock 
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 
+                                    : 'bg-primary text-white shadow-slate-200 hover:bg-indigo-700 hover:-translate-y-0.5 active:scale-[0.98]'
+                                }
+                            `}
+                        >
+                            {isLoading ? (
+                                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                            ) : (lockUntil && Date.now() < lockUntil && !isSilentLock) ? (
+                                "System Locked"
+                            ) : (
+                                <>
+                                    <span>Sign in to Portal</span>
+                                    <ArrowRight size={14} />
+                                </>
+                            )}
+                        </button>
+
+                        {/* Divider - Smaller text */}
+                        <div className="relative flex items-center justify-center py-3">
+                            <div className="w-full border-t border-slate-100"></div>
+                            <span className="absolute bg-card px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">
+                                or continue
+                            </span>
+                        </div>
+
+                        {/* Google Button - Compact */}
+                        <button type="button" className="w-full py-3 cursor-pointer rounded-xl border-2 border-border bg-card flex items-center justify-center gap-3 hover:bg-slate-100 transition-all font-bold text-slate-700 text-[12px] shadow-sm active:scale-[0.98]">
+                            <img src={buttonlogo} alt="Google" className="w-4 h-4" />
+                            Sign in with Google
+                        </button>
                     </div>
-                </div>
+
+                    {/* Footer - Compact */}
+                    <p className="mt-6 text-center text-[12px] font-bold text-slate-400">
+                        New here? <button onClick={() => navigate('/register')} className="text-foreground hover:text-primary cursor-pointer ml-2 hover:underline underline-offset-4 decoration-2 decoration-primary/30 font-black">Create Profile</button>
+                    </p>
+                </form>
             </div>
-        </>
+        </div>
     );
 };
 
