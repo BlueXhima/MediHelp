@@ -27,10 +27,13 @@ import NavigationTracker from './components/NavigationTracker.jsx';
 import ArchivedHistory from './Users/guidance-library/library-compo/ArchivedHistory';
 import SystemGuideDetail from './pages/systemguidedetail.jsx'
 import SavedArticle from './Users/guidance-library/SavedArticle';
+import SettingsPage from './pages/settingspage.jsx'
+
 
 // Ito yung main file ng frontend, 
 // dito siya magrurun, 
 // dito rin yung mga routes ng frontend
+
 
 function App() {
   const [count, setCount] = useState(0);
@@ -58,22 +61,24 @@ function App() {
         <Route path="/chat-response" element={<ChatPage />} />
 
         {/* Protected or Private Routes */}
-        <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']} />}>
-          <Route path="" element={<AdminDashboard />} />
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="/admin/*" element={<AdminDashboard />} />
         </Route>
 
         {/* Protected or Private Routes */}
-        <Route path="/dashboard/*" element={<ProtectedRoute allowedRoles={['user']} />}>
-          <Route path="" element={<Dashboard />} />
-          <Route path="voice-assistant" element={<VoiceAssistantInteraction />} />
-          <Route path="health-profile" element={<HealthProfile />} /> 
-          <Route path="health-profile/records" element={<HealthRecord />} />
-          <Route path="guidance-library" element={<GuidanceLibrary />} />
-          <Route path="guidance-library/all-articles" element={<AllArticles />} />
-          <Route path="guidance-library/article/:id" element={<ArticlePage />} />
-          <Route path="guidance-library/archives" element={<ArchivedHistory />} />
-          <Route path="guidance-library/save-library" element={<SavedArticle />} />
-          <Route path="help-support" element={<HelpSupport />} />
+        <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+          {/* Tip: Pwedeng payagan ang admin sa user dashboard kung gusto mo silang maka-view */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/voice-assistant" element={<VoiceAssistantInteraction />} />
+          <Route path="/dashboard/health-profile" element={<HealthProfile />} /> 
+          <Route path="/dashboard/health-profile/records" element={<HealthRecord />} />
+          <Route path="/dashboard/guidance-library" element={<GuidanceLibrary />} />
+          <Route path="/dashboard/guidance-library/all-articles" element={<AllArticles />} />
+          <Route path="/dashboard/guidance-library/article/:id" element={<ArticlePage />} />
+          <Route path="/dashboard/guidance-library/archives" element={<ArchivedHistory />} />
+          <Route path="/dashboard/guidance-library/save-library" element={<SavedArticle />} />
+          <Route path="/dashboard/help-support" element={<HelpSupport />} />
+          <Route path="/dashboard/settings" element={<SettingsPage />} />
           <Route path="*" element={<ArticleNotFound />} />
         </Route>
 
