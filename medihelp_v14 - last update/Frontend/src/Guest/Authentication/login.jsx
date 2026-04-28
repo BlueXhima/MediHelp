@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope, ArrowRight, Eye, EyeOff, ArrowLeft, MessageSquareWarning } from 'lucide-react';
 import heroimg2 from "../../assets/login-photo.webp";
@@ -6,6 +6,7 @@ import buttonlogo from "../../assets/google.png";
 import BackgroundLoadingState from "../../components/BackgroundLoadingState";
 import ToastMessage, { showToast } from "../../components/ToastMessage";
 import axios from 'axios';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -16,6 +17,10 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // State for background loading
     const [failedAttempts, setFailedAttempts] = useState(0);
+    const [captchaToken, setCaptchaToken] = useState(null); // State para sa token
+    const [showCaptcha, setShowCaptcha] = useState(false);
+    const recaptchaRef = useRef(null)
+
     // Kunin ang huling duration, kung wala pa, default sa 30000 (30s)
     const [cooldownDuration, setCooldownDuration] = useState(() => {
         const savedDuration = localStorage.getItem("nextCooldownDuration");
@@ -42,47 +47,53 @@ const Login = () => {
         e.preventDefault();
         setError("");
 
-        // 1. Countdown Lock Check (Visible timer)
-        if (lockUntil && Date.now() < lockUntil && !isSilentLock) {
+        // 1. FRONTEND LOCKOUT CHECK (Check if user is currently timed out)
+        if (lockUntil && Date.now() < lockUntil) {
             const remainingTime = Math.ceil((lockUntil - Date.now()) / 1000);
-            setError(`Too many failed attempts. Try again in ${remainingTime}s.`);
+            if (!isSilentLock) {
+                setError(`Too many failed attempts. Try again in ${remainingTime}s.`);
+            } else {
+                showToast("Login temporarily unavailable. Please try again shortly.", "error");
+            }
             return;
         }
 
-        // 2. SilentLock Logic (5 mins)
-        if (isSilentLock && lockUntil && Date.now() < lockUntil) {
-            showToast("Login temporarily unavailable. Please try again shortly.", "error");
-            return;
-        }
-
-        if (!email || !password) {
-            setError("Please fill in all fields.");
+        // 2. BASIC VALIDATION
+        if (!email || !password || !captchaToken) {
+            setError("Please complete all fields and verification.");
             return;
         }
 
         setIsLoading(true);
 
         try {
+            // 3. API CALL TO BACKEND
             const response = await axios.post("http://localhost:5000/api/login", {
                 email,
                 password,
+                captchaToken,
             });
 
+            // 4. SUCCESS FLOW
             if (response.data && response.data.success) {
                 // --- SUCCESS FLOW: Save data to LocalStorage ---
-                localStorage.setItem("token", response.data.token || "temp-token");
+                // Note: Token is now in HttpOnly Cookie, but we still save non-sensitive info
+                // localStorage.setItem("token", response.data.token);
                 localStorage.setItem("userRole", response.data.role);
                 localStorage.setItem("email", email);
                 if (response.data.user) {
                     localStorage.setItem("user", JSON.stringify(response.data.user));
                 }
 
-                // Reset all security states
+                // Reset all security states on success
                 setFailedAttempts(0);
+                setCaptchaToken(null);
+                setShowCaptcha(false);
                 setLockUntil(null);
                 setIsSilentLock(false);
-                setCooldownDuration(30000); // Back to 30s
+                setCooldownDuration(30000);
 
+                // Clean up LocalStorage
                 localStorage.removeItem("loginLockUntil");
                 localStorage.removeItem("isSilentLock");
                 localStorage.removeItem("nextCooldownDuration"); // Reset escalation
@@ -93,24 +104,36 @@ const Login = () => {
                 }, 1500);
             }
         } catch (err) {
+            // 5. CATCH / ERROR FLOW (Dito napupunta kapag 401, 429, or 500 ang error)
             console.error("Login Error:", err);
+
+            // Reset CAPTCHA UI
+            setCaptchaToken(null);
+            if (recaptchaRef.current) {
+                recaptchaRef.current.reset(); // Ito ang magtatanggal ng "Check" sa box
+            }
             
             const newAttempts = failedAttempts + 1;
             setFailedAttempts(newAttempts);
 
+            // Check for Rate Limit (429) from Backend
+            if (err.response && err.response.status === 429) {
+                setError(err.response.data.error || "Too many attempts.");
+                return;
+            }
+
+            // Handle Failed Attempts & Lockout Escalation
             if (newAttempts >= 3) {
-                // TRIGGER LOCKOUT & SEND ALERT
+                setShowCaptcha(false);
                 const currentLockDuration = cooldownDuration;
                 const lockTime = Date.now() + cooldownDuration;
 
                 setLockUntil(lockTime);
                 setIsSilentLock(false);
-                setFailedAttempts(0);
-                
                 localStorage.setItem("loginLockUntil", lockTime.toString());
                 localStorage.setItem("isSilentLock", "false");
 
-                // API Call para sa Security Alert Email
+                // Trigger Security Alert Email
                 try {
                     await axios.post("http://localhost:5000/api/send-security-alert", {
                         Email: email,
@@ -122,7 +145,7 @@ const Login = () => {
                 }
 
                 // --- ESCALATION LOGIC ---
-                // Dagdagan ng 30s ang duration para sa SUSUNOD na lockout
+                // Escalate duration for NEXT lockout
                 const nextDuration = cooldownDuration + 30000; 
                 setCooldownDuration(nextDuration);
                 localStorage.setItem("nextCooldownDuration", nextDuration.toString());
@@ -167,6 +190,10 @@ const Login = () => {
                         setLockUntil(null);
                         setIsSilentLock(false);
                         setFailedAttempts(0); // I-reset ang counter sa 0
+
+                        // OPTIONAL: Pwede mong i-reset din ang captcha visibility rito
+                        setShowCaptcha(false);
+
                         localStorage.removeItem("loginLockUntil");
                         localStorage.removeItem("isSilentLock");
                     }
@@ -229,16 +256,17 @@ const Login = () => {
                                 id="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder=" "
+                                placeholder="example@gmail.com"
                                 required
-                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-800 text-[13px]" 
+                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]
+                                placeholder:text-transparent focus:placeholder-slate-400" 
                             />
                             <label 
                                 htmlFor="email"
                                 className="absolute left-4 top-3.5 text-slate-400 font-bold text-[12px] transition-all pointer-events-none 
-                                bg-card px-2
-                                peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black
-                                peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
+                                bg-card px-2 py-1
+                                peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-[10px] peer-focus:text-primary peer-focus:font-black
+                                peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:text-primary"
                             >
                                 EMAIL ADDRESS
                             </label>
@@ -251,9 +279,9 @@ const Login = () => {
                                 id="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder=" "
+                                placeholder=""
                                 required
-                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-800 text-[13px]" 
+                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]" 
                             />
                             <label 
                                 htmlFor="password"
@@ -282,11 +310,22 @@ const Login = () => {
                             <button 
                                 type="button"
                                 onClick={() => navigate('/forgot-password')}
-                                className="text-[11px] font-black text-primary hover:text-indigo-700 uppercase tracking-wider transition-colors"
+                                className="text-[11px] font-black cursor-pointer text-primary hover:text-indigo-700 uppercase tracking-wider transition-colors"
                             >
                                 forgot password?
                             </button>
                         </div>
+
+                        {(email && password && !lockUntil) && (
+                            <div className="mb-4 flex justify-center scale-90 animate-fade-in">
+                                <ReCAPTCHA
+                                    ref={recaptchaRef}
+                                    sitekey="6LdPzMwsAAAAAHbEB80m9dSZeKAOJ2qixqsPvng9" 
+                                    onChange={(token) => setCaptchaToken(token)}
+                                    onExpired={() => setCaptchaToken(null)}
+                                />
+                            </div>
+                        )}
 
                         {/* Sign-in Button - Compact typography */}
                         <button 
@@ -330,7 +369,7 @@ const Login = () => {
 
                     {/* Footer - Compact */}
                     <p className="mt-6 text-center text-[12px] font-bold text-slate-400">
-                        New here? <button onClick={() => navigate('/register')} className="text-foreground hover:text-primary cursor-pointer ml-2 hover:underline underline-offset-4 decoration-2 decoration-primary/30 font-black">Create Profile</button>
+                        New here? <button onClick={() => navigate('/register')} className="text-foreground hover:text-primary cursor-pointer ml-1 hover:underline underline-offset-4 decoration-2 decoration-primary/30 font-black">Create Profile</button>
                     </p>
                 </form>
             </div>

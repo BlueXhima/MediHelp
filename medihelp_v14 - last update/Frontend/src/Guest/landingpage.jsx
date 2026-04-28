@@ -7,11 +7,13 @@ import { Check, TriangleAlert, UtensilsCrossed, Dumbbell,
     AlarmClock, Leaf, Ribbon, HeartPlus, Brain, CheckCircle2, X, ShieldCheck,
     Mic, Sparkles, Terminal, Stethoscope, Settings, Activity } from "lucide-react";
 import { cn } from '../lib/utils';
+
 import HIPAACert from '../assets/HIPAACert.jpg';
 import { useChatMessages } from '../hooks/useChatMessage';
 import SettingsModal from './guest-compo/settingsmodal';
 import BackgroundLoadingState from '../components/BackgroundLoadingState';
 import ToastMessage, { showToast } from '../components/ToastMessage';
+import PreLoader from './PreLoader';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -20,6 +22,9 @@ const LandingPage = () => {
     const [showDemoModal, setShowDemoModal] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [transcript, setTranscript] = useState("Tap the button below to start your health query...");
+    const [isAppLoading, setIsAppLoading] = useState(() => {
+        return !sessionStorage.getItem('hasLoaded');
+    });
 
     const toggleListening = () => {
         setIsListening(!isListening);
@@ -53,6 +58,25 @@ const LandingPage = () => {
             }, 3000);
         }
     };
+
+    useEffect(() => {
+        // Kung wala pang 'hasLoaded', mag-timer tayo
+        if (!sessionStorage.getItem('hasLoaded')) {
+            const timer = setTimeout(() => {
+                setIsAppLoading(false);
+                sessionStorage.setItem('hasLoaded', 'true'); // I-save na tapos na
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        } else {
+            // Kung nanggaling na sa ibang page o nag-back, wag na mag-load
+            setIsAppLoading(false);
+        }
+    }, []);
+
+    if (isAppLoading) {
+        return <PreLoader />;
+    }
 
     return (
         <div className="min-h-screen bg-background text-foreground">
