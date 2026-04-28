@@ -1,5 +1,7 @@
 const db = require('../config/db');
 
+// Public Controller (Kahit sino pwedeng makakita)
+
 exports.getFeaturedArticles = async (req, res) => {
     try {
         // Gamitin ang [rows] format gaya ng sa userDetails
@@ -57,28 +59,28 @@ exports.getCategories = async (req, res) => {
     }
 };
 
-exports.getArticlesByCategory = async (req, res) => {
-    const { categoryId } = req.params;
-    try {
-        let query = `
-            SELECT ga.*, ac.category_name, ac.icon_name 
-            FROM guidance_articles ga
-            JOIN article_categories ac ON ga.cat_id = ac.category_id
-        `;
+// exports.getArticlesByCategory = async (req, res) => {
+//     const { categoryId } = req.params;
+//     try {
+//         let query = `
+//             SELECT ga.*, ac.category_name, ac.icon_name 
+//             FROM guidance_articles ga
+//             JOIN article_categories ac ON ga.cat_id = ac.category_id
+//         `;
         
-        // Kung hindi "All", mag-filter tayo
-        if (categoryId && categoryId !== 'all') {
-            query += " WHERE ga.cat_id = ?";
-        }
+//         // Kung hindi "All", mag-filter tayo
+//         if (categoryId && categoryId !== 'all') {
+//             query += " WHERE ga.cat_id = ?";
+//         }
         
-        query += " ORDER BY ga.created_date DESC";
+//         query += " ORDER BY ga.created_date DESC";
         
-        const [rows] = await db.query(query, categoryId !== 'all' ? [categoryId] : []);
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+//         const [rows] = await db.query(query, categoryId !== 'all' ? [categoryId] : []);
+//         res.json(rows);
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// };
 
 exports.getArticleById = async (req, res) => {
     const { id } = req.params;
@@ -113,12 +115,15 @@ exports.getArticleById = async (req, res) => {
     }
 };
 
+// Protected Routes (Kailangan ng Login/Token)
+// Ginagamit natin ang verifyToken middleware bago ang bawat controller
+
+// --- History Endpoints ---
+
 // Dito natin pinagsasama ang view_count increment at ang history logging.
 exports.recordArticleVisit = async (req, res) => {
-    const { userId, articleId } = req.body;
-    
-    // DAPAT LUMABAS ITO SA TERMINAL MO
-    console.log("DATA RECEIVED FROM FRONTEND:", { userId, articleId });
+    const userId = req.user.UserID;
+    const { articleId } = req.body;
 
     try {
         const [result] = await db.query(
@@ -144,7 +149,7 @@ exports.recordArticleVisit = async (req, res) => {
 
 // Ito ang gagamitin mo para ipakita ang "Recently Reading History" sa UI.
 exports.getUserHistory = async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.user.UserID;
 
     try {
         const query = `
@@ -169,8 +174,35 @@ exports.getUserHistory = async (req, res) => {
     }
 };
 
+// Endpoint para sa pag-archived ng mga data galing sa
+// Reading History
+exports.getArchivedHistory = async (req, res) => {
+    const userId = req.user.UserID;
+
+    try {
+        const query = `
+            SELECT 
+                arh.ArchiveID,
+                arh.ProgressPercentage,
+                arh.ArchivedDate,
+                arh.ArchivedTime,
+                ga.title AS Title
+            FROM archived_reading_history arh
+            INNER JOIN guidance_articles ga ON arh.ArticleID = ga.article_id
+            WHERE arh.UserID = ?
+            ORDER BY arh.ArchivedDate DESC, arh.ArchivedTime DESC
+        `;
+        const [rows] = await db.query(query, [userId]);
+        res.json(rows);
+    } catch (err) {
+        console.error("Error fetching archives:", err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
 exports.updateReadingProgress = async (req, res) => {
-    const { userId, articleId, progress } = req.body;
+    const userId = req.user.UserID;
+    const { articleId, progress } = req.body;
 
     try {
         const query = `
@@ -186,12 +218,10 @@ exports.updateReadingProgress = async (req, res) => {
     }
 };
 
-// ---- Article Endpoint API functions -----
-
 // Endpoint para i-purge/archive ang history
 // ---- Clear All Delete Button ----
 exports.purgeReadingHistory = async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.user.UserID;
     const connection = await db.getConnection();
     
     try {
@@ -226,34 +256,68 @@ exports.purgeReadingHistory = async (req, res) => {
     }
 };
 
-// Endpoint para sa pag-archived ng mga data galing sa
-// Reading History
-exports.getArchivedHistory = async (req, res) => {
-    const { userId } = req.params;
-
+// Restore All Archives for a user
+exports.restoreAllArchives = async (req, res) => {
+    const userId = req.user.UserID;
+    const connection = await db.getConnection();
     try {
-        const query = `
-            SELECT 
-                arh.ArchiveID,
-                arh.ProgressPercentage,
-                arh.ArchivedDate,
-                arh.ArchivedTime,
-                ga.title AS Title
-            FROM archived_reading_history arh
-            INNER JOIN guidance_articles ga ON arh.ArticleID = ga.article_id
-            WHERE arh.UserID = ?
-            ORDER BY arh.ArchivedDate DESC, arh.ArchivedTime DESC
-        `;
-        const [rows] = await db.query(query, [userId]);
-        res.json(rows);
-    } catch (err) {
-        console.error("Error fetching archives:", err);
-        res.status(500).json({ error: err.message });
+        await connection.beginTransaction();
+
+        // 1. I-balik lahat sa main history table
+        await connection.query(`
+            INSERT INTO user_reading_history (user_id, article_id, progress_percentage, last_visited)
+            SELECT UserID, ArticleID, ProgressPercentage, CURRENT_TIMESTAMP
+            FROM archived_reading_history WHERE UserID = ?
+            ON DUPLICATE KEY UPDATE progress_percentage = VALUES(progress_percentage)
+        `, [userId]);
+
+        // 2. Burahin ang archives ng user
+        await connection.query('DELETE FROM archived_reading_history WHERE UserID = ?', [userId]);
+
+        // 3. Reset increment kung empty na
+        const [remaining] = await connection.query('SELECT COUNT(*) as count FROM archived_reading_history');
+        if (remaining[0].count === 0) {
+            await connection.query('ALTER TABLE archived_reading_history AUTO_INCREMENT = 1');
+        }
+
+        await connection.commit();
+        res.json({ success: true, message: "All records restored" });
+    } catch (error) {
+        await connection.rollback();
+        res.status(500).json({ error: error.message });
+    } finally {
+        connection.release();
+    }
+};
+
+// Delete All Archives for a user
+exports.deleteAllArchives = async (req, res) => {
+    const userId = req.user.UserID;
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        await connection.query('DELETE FROM archived_reading_history WHERE UserID = ?', [userId]);
+
+        // Reset auto_increment dahil All Delete ang ginawa
+        const [remaining] = await connection.query('SELECT COUNT(*) as count FROM archived_reading_history');
+        if (remaining[0].count === 0) {
+            await connection.query('ALTER TABLE archived_reading_history AUTO_INCREMENT = 1');
+        }
+
+        await connection.commit();
+        res.json({ success: true, message: "All archives cleared" });
+    } catch (error) {
+        await connection.rollback();
+        res.status(500).json({ error: error.message });
+    } finally {
+        connection.release();
     }
 };
 
 // Endpoint para i-restore yung mga data na nasa ArchivedHistory
 exports.restoreHistory = async (req, res) => {
+    const userId = req.user.UserID;
     const { archiveId } = req.params;
     const connection = await db.getConnection();
     
@@ -295,6 +359,7 @@ exports.restoreHistory = async (req, res) => {
 
 // Delete individual archive record
 exports.deleteArchiveRecord = async (req, res) => {
+    const userId = req.user.UserID;
     const { archiveId } = req.params;
     const connection = await db.getConnection();
     try {
@@ -320,67 +385,9 @@ exports.deleteArchiveRecord = async (req, res) => {
     }
 };
 
-// Delete All Archives for a user
-exports.deleteAllArchives = async (req, res) => {
-    const { userId } = req.params;
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-
-        await connection.query('DELETE FROM archived_reading_history WHERE UserID = ?', [userId]);
-
-        // Reset auto_increment dahil All Delete ang ginawa
-        const [remaining] = await connection.query('SELECT COUNT(*) as count FROM archived_reading_history');
-        if (remaining[0].count === 0) {
-            await connection.query('ALTER TABLE archived_reading_history AUTO_INCREMENT = 1');
-        }
-
-        await connection.commit();
-        res.json({ success: true, message: "All archives cleared" });
-    } catch (error) {
-        await connection.rollback();
-        res.status(500).json({ error: error.message });
-    } finally {
-        connection.release();
-    }
-};
-
-// Restore All Archives for a user
-exports.restoreAllArchives = async (req, res) => {
-    const { userId } = req.params;
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-
-        // 1. I-balik lahat sa main history table
-        await connection.query(`
-            INSERT INTO user_reading_history (user_id, article_id, progress_percentage, last_visited)
-            SELECT UserID, ArticleID, ProgressPercentage, CURRENT_TIMESTAMP
-            FROM archived_reading_history WHERE UserID = ?
-            ON DUPLICATE KEY UPDATE progress_percentage = VALUES(progress_percentage)
-        `, [userId]);
-
-        // 2. Burahin ang archives ng user
-        await connection.query('DELETE FROM archived_reading_history WHERE UserID = ?', [userId]);
-
-        // 3. Reset increment kung empty na
-        const [remaining] = await connection.query('SELECT COUNT(*) as count FROM archived_reading_history');
-        if (remaining[0].count === 0) {
-            await connection.query('ALTER TABLE archived_reading_history AUTO_INCREMENT = 1');
-        }
-
-        await connection.commit();
-        res.json({ success: true, message: "All records restored" });
-    } catch (error) {
-        await connection.rollback();
-        res.status(500).json({ error: error.message });
-    } finally {
-        connection.release();
-    }
-};
-
 // Archive a single history record
 exports.archiveSingleHistory = async (req, res) => {
+    const userId = req.user.UserID;
     const { historyId } = req.params; 
     const connection = await db.getConnection();
 
@@ -389,8 +396,8 @@ exports.archiveSingleHistory = async (req, res) => {
 
         // 1. Get the data first
         const [record] = await connection.query(
-            'SELECT user_id, article_id, progress_percentage FROM user_reading_history WHERE history_id = ?', 
-            [historyId]
+            'SELECT user_id, article_id, progress_percentage FROM user_reading_history WHERE history_id = ? AND user_id = ?', 
+            [historyId, userId]
         );
 
         if (record.length === 0) return res.status(404).json({ success: false });
@@ -419,7 +426,8 @@ exports.archiveSingleHistory = async (req, res) => {
 // ----- SAVED LIBRARY ENDPOINT -----
 // Toggle Save/Unsave Article
 exports.toggleSaveArticle = async (req, res) => {
-    const { userId, articleId } = req.body;
+    const userId = req.user.UserID;
+    const { articleId } = req.body;
 
     try {
         // 1. Check kung saved na ba ang article para sa user na ito
@@ -455,23 +463,9 @@ exports.toggleSaveArticle = async (req, res) => {
     }
 };
 
-// Check if specific article is saved by user
-exports.checkSaveStatus = async (req, res) => {
-    const { userId, articleId } = req.params;
-    try {
-        const [rows] = await db.query(
-            'SELECT * FROM saved_library WHERE user_id = ? AND article_id = ?', 
-            [userId, articleId]
-        );
-        res.json({ isSaved: rows.length > 0 });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
 // Kunin lahat ng saved articles ng isang user (Para sa Library Page soon)
 exports.getSavedArticles = async (req, res) => {
-    const { userId } = req.params;
+    const userId  = req.user.UserID;
     try {
         const query = `
             SELECT 
@@ -492,7 +486,7 @@ exports.getSavedArticles = async (req, res) => {
 
 // Clear all saved articles for a user
 exports.clearSavedLibrary = async (req, res) => {
-    const { userId } = req.params;
+    const userId  = req.user.UserID;
 
     try {
         // 1. Burahin lahat ng records ng user sa saved_library
@@ -509,5 +503,21 @@ exports.clearSavedLibrary = async (req, res) => {
     } catch (err) {
         console.error("Error clearing library:", err);
         res.status(500).json({ error: "Failed to clear library" });
+    }
+};
+
+// Check if specific article is saved by user
+exports.checkSaveStatus = async (req, res) => {
+    const userId = req.user.UserID;
+    const { articleId } = req.params;
+
+    try {
+        const [rows] = await db.query(
+            'SELECT * FROM saved_library WHERE user_id = ? AND article_id = ?', 
+            [userId, articleId]
+        );
+        res.json({ isSaved: rows.length > 0 });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };
