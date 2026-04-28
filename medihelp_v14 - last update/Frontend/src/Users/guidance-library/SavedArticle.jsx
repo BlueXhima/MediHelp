@@ -14,16 +14,16 @@ const SavedArticles = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const fetchSavedArticles = async () => {
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (userData?.UserID) {
-            try {
-                const res = await axios.get(`http://localhost:5000/api/articles/library/${userData.UserID}`);
-                setSavedList(res.data);
-            } catch (err) {
-                console.error("Failed to fetch library:", err);
-            } finally {
-                setLoading(false);
-            }
+        setLoading(true);
+        try {
+            const res = await axios.get(`http://localhost:5000/api/articles/library`, {
+                withCredentials: true // Importante ito para sa cookies/session
+            });
+            setSavedList(res.data);
+        } catch (err) {
+            console.error("Failed to fetch library:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -32,26 +32,38 @@ const SavedArticles = () => {
     }, []);
 
     const handleRemove = async (e, articleId) => {
-        e.preventDefault(); // Para hindi mag-trigger ang Link
-        const userData = JSON.parse(localStorage.getItem('user'));
+        e.preventDefault(); 
+        e.stopPropagation();
+
         try {
-            await axios.post('http://localhost:5000/api/articles/save-toggle', {
-                userId: userData.UserID,
-                articleId: articleId
-            });
-            showToast("Article removed from library", "info");
-            fetchSavedArticles(); // Refresh list
+            const res = await axios.post(`http://localhost:5000/api/articles/save-toggle`, 
+                { articleId }, 
+                { withCredentials: true }
+            );
+
+            if (res.data.action === 'removed') {
+                // I-update ang UI agad sa pamamagitan ng pag-filter sa local state
+                setSavedList(prev => prev.filter(item => item.article_id !== articleId));
+                showToast("success", "Article removed from library");
+                fetchSavedArticles();
+            }
         } catch (err) {
-            showToast("Failed to remove article", "error");
+            console.error("Error removing article:", err);
+            showToast("error", "Failed to remove article.");
         }
     };
 
     const handleClearAll = async () => {
-        const userData = JSON.parse(localStorage.getItem('user'));
         try {
-            await axios.delete(`http://localhost:5000/api/articles/library/clear/${userData.UserID}`);
-            showToast("Library cleared", "success");
-            setSavedList([]);
+            const res = await axios.delete(`http://localhost:5000/api/articles/library/clear`, {
+                withCredentials: true
+            });
+
+            if (res.data.success) {
+                setSavedList([]);
+                setIsModalOpen(false);
+                showToast("success", "Library cleared successfully!");
+            }
         } catch (err) {
             showToast("Failed to clear library", "error");
         }

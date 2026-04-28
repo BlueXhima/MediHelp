@@ -72,23 +72,13 @@ const GuidanceLibrary = () => {
     
     const handleArticleClick = async (articleId) => {
         try {
-            const userData = JSON.parse(localStorage.getItem('user'));
-            console.log("FULL USER OBJECT:", userData); // Tingnan mo ito sa Console
-    
-            // Subukan nating i-check kung 'id', 'UserID', o 'id_user' ang tawag
-            const userId = userData?.UserID || userData?.id || userData?.userID;
-
-            // Debug log para makita mo sa Console (F12) kung may laman ba talaga
-            console.log("UserID:", userId, "ArticleID:", articleId);
-
-            if (userId && articleId) {
+            if (articleId) {
                 // Siguraduhin na ang second argument ng axios.post ay ang object data
-                await axios.post('http://localhost:5000/api/articles/record-visit', {
-                    userId: userId,
-                    articleId: articleId
-                });
+                await axios.post('http://localhost:5000/api/articles/record-visit',
+                    { articleId }, 
+                    { withCredentials: true }
+                );
             }
-
             navigate(`/dashboard/guidance-library/article/${articleId}`);
         } catch (error) {
             console.error("Tracking Error:", error);

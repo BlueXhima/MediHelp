@@ -9,14 +9,14 @@ const ArchivedHistory = () => {
     const [archives, setArchives] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const userData = JSON.parse(localStorage.getItem('user'));
     const [processingAction, setProcessingAction] = useState(null); // 'restore-all' o 'delete-all'
     const [processingId, setProcessingId] = useState(null);
 
     const fetchArchives = async () => {
-        if (!userData?.UserID) return;
         try {
-            const res = await axios.get(`http://localhost:5000/api/articles/history/archives/${userData.UserID}`);
+            const res = await axios.get(`http://localhost:5000/api/articles/history/archives`, {
+                withCredentials: true
+            });
             setArchives(res.data);
         } catch (err) {
             console.error("Fetch Error:", err);
@@ -27,12 +27,16 @@ const ArchivedHistory = () => {
 
     useEffect(() => { fetchArchives(); }, []);
 
-    const handleBulkAction = async (url, method, actionType) => {
+    const handleBulkAction = async (endpoint, method, actionType) => {
         const itemCount = archives.length; // Kunin ang count bago ma-clear
         setProcessingAction(actionType);
         
         try {
-            const res = await axios[method](url);
+            const res = await axios({
+                method: method,
+                url: `http://localhost:5000${endpoint}`,
+                withCredentials: true // NAPAKAHALAGA
+            });
             if (res.data.success) {
                 // Siguraduhin na tama ang logic ng message
                 const message = actionType === 'restore-all'
@@ -51,10 +55,14 @@ const ArchivedHistory = () => {
     };
 
     // Handler para sa Individual Actions (Restore/Delete)
-    const handleIndividualAction = async (url, item, method, actionType) => {
+    const handleIndividualAction = async (endpoint, item, method, actionType) => {
         setProcessingId(`${actionType}-${item.ArchiveID}`);
         try {
-            const res = await axios[method](url);
+            const res = await axios({
+                method: method,
+                url: `http://localhost:5000${endpoint}`,
+                withCredentials: true // NAPAKAHALAGA
+            });
             if (res.data.success) {
                 const message = actionType === 'restore' 
                     ? `Successfully restored "${item.Title}"!` 
@@ -114,7 +122,7 @@ const ArchivedHistory = () => {
                                 <button 
                                     disabled={processingAction !== null}
                                     onClick={() => handleBulkAction(
-                                        `http://localhost:5000/api/articles/history/restore-all/${userData.UserID}`, 
+                                        `/api/articles/history/restore-all`, 
                                         'post', 
                                         "All records restored!",
                                         'restore-all'
@@ -134,7 +142,7 @@ const ArchivedHistory = () => {
                                 <button 
                                     disabled={processingAction !== null}
                                     onClick={() => handleBulkAction(
-                                        `http://localhost:5000/api/articles/history/archive-all/${userData.UserID}`, 
+                                        `/api/articles/history/archive-all`, 
                                         'delete', 
                                         "Archive cleared!",
                                         'delete-all'
@@ -201,8 +209,10 @@ const ArchivedHistory = () => {
                                             <button 
                                                 disabled={processingAction !== null || processingId !== null}
                                                 onClick={() => handleIndividualAction(
-                                                    `http://localhost:5000/api/articles/history/restore/${item.ArchiveID}`, 
-                                                    item, 'post', 'restore'
+                                                    `/api/articles/history/restore/${item.ArchiveID}`, 
+                                                    item, 
+                                                    'post', 
+                                                    'restore'
                                                 )}
                                                 className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm border border-slate-100 cursor-pointer active:scale-90"
                                                 title="Restore to History"
@@ -217,8 +227,10 @@ const ArchivedHistory = () => {
                                             <button 
                                                 disabled={processingAction !== null || processingId !== null}
                                                 onClick={() => handleIndividualAction(
-                                                    `http://localhost:5000/api/articles/history/archive/${item.ArchiveID}`, 
-                                                    item, 'delete', 'delete'
+                                                    `/api/articles/history/archive/${item.ArchiveID}`, 
+                                                    item, 
+                                                    'delete', 
+                                                    'delete'
                                                 )}
                                                 className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-red-500 hover:text-white transition-all duration-300 shadow-sm border border-slate-100 cursor-pointer active:scale-90"
                                                 title="Delete Permanently"

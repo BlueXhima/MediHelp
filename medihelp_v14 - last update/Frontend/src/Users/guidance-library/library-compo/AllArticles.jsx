@@ -95,19 +95,46 @@ const AllArticles = () => {
                     {/* Right Side: Filters & Search */}
                     <div className="flex flex-wrap items-center gap-3 lg:justify-end">
                         {/* Search Bar */}
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                        <div className="relative group max-w-md">
+                            {/* Animated Background Glow (Focus state) */}
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-blue-500 rounded-2xl blur opacity-0 group-focus-within:opacity-20 transition duration-500"></div>
+                            
+                            <div className="relative flex items-center">
+                                {/* Search Icon */}
+                                <div className="absolute left-4 flex items-center pointer-events-none text-foreground group-focus-within:text-primary transition-all duration-300 group-focus-within:scale-110">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+
+                                {/* Input Field */}
+                                <input 
+                                    type="text" 
+                                    placeholder="SEARCH RESOURCES..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)} 
+                                    className="w-full md:w-72 pl-11 pr-10 py-3.5 bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl text-[11px] font-bold text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40 focus:bg-card/80transition-all duration-300"
+                                />
+
+                                {/* Clear Button (Lalabas lang kapag may tinype) */}
+                                {searchTerm && (
+                                    <button 
+                                        onClick={() => setSearchTerm('')}
+                                        className="absolute right-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-90"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
-                            <input 
-                                type="text" 
-                                placeholder="SEARCH RESOURCES..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)} 
-                                className="w-full md:w-64 pl-11 pr-4 py-3 bg-card/50 backdrop-blur-md border border-border rounded-2xl text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all"
-                            />
+
+                            {/* Shortcut Hint (Optional - pang desktop feel) */}
+                            <div className="absolute right-4 top-1/3 -translate-y-1/3 pointer-events-none hidden lg:group-focus-within:hidden lg:block">
+                                <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted/50 text-[9px] font-bold text-muted-foreground/60 shadow-sm">
+                                    /
+                                </kbd>
+                            </div>
                         </div>
 
                         {/* Category Dropdown/Filter */}

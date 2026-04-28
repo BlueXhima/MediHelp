@@ -22,35 +22,40 @@ const RecentHistory = ({ isOpen, onClose }) => {
 
     useEffect(() => {
         const fetchHistory = async () => {
-            const userData = JSON.parse(localStorage.getItem('user'));
-            const userId = userData?.UserID;
-            // const res = await axios.get(`http://localhost:5000/api/articles/history/${userId}`);
-            // console.log("API Response Data:", res.data[0]); // TIGNAN MO ITO SA BROWSER CONSOLE
-            // setHistoryItems(res.data);
-
-            if (isOpen && userId) {
+            // Kunin ang user object para ma-verify kung logged in
+            // const userData = JSON.parse(localStorage.getItem('user'));
+            
+            // TRIGGER: Kapag bukas ang drawer AT may user session
+            if (isOpen) {
                 setLoading(true);
                 try {
-                    const res = await axios.get(`http://localhost:5000/api/articles/history/${userId}`);
+                    // Ang withCredentials: true ang bahalang magpadala ng httpOnly cookie mo
+                    const res = await axios.get(`http://localhost:5000/api/articles/history`, {
+                        withCredentials: true // ITO ANG PINAKA-IMPORTANTE para sa cookies
+                    });
+                    
                     setHistoryItems(res.data);
                 } catch (err) {
-                    console.error("Error fetching history:", err);
+                    console.error("Fetch error:", err);
+                    if (err.response?.status === 401) {
+                        showToast("Session expired. Please login again.", "error");
+                    }
                 } finally {
                     setLoading(false);
                 }
             }
         };
+
         fetchHistory();
     }, [isOpen]);
 
     const handlePurgeConfirm = async () => {
-        const userData = JSON.parse(localStorage.getItem('user'));
-        const userId = userData?.UserID;
-
         setIsPurging(true);
         try {
             // DINAGDAGAN NG /articles PARA TUMAMA SA ROUTE
-            const res = await axios.post(`http://localhost:5000/api/articles/history/purge/${userId}`);
+            const res = await axios.post(`http://localhost:5000/api/articles/history/purge`, {
+                withCredentials: true
+            });
             
             if (res.data.success) {
                 setHistoryItems([]);
@@ -74,8 +79,10 @@ const RecentHistory = ({ isOpen, onClose }) => {
 
         setIsPurging(true); 
         try {
-            const res = await axios.post(`http://localhost:5000/api/articles/history/archive-single/${historyId}`);
-            
+            const res = await axios.post(`http://localhost:5000/api/articles/history/archive-single/${historyId}`, {}, {
+                withCredentials: true
+            });
+
             if (res.data.success) {
                 // I-filter ang state para mawala agad sa listahan yung in-archive
                 setHistoryItems(prev => prev.filter(item => item.history_id !== historyId));

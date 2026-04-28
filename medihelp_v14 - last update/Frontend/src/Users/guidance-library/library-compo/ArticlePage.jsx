@@ -55,7 +55,6 @@ const ArticlePage = () => {
             if (height > 0) {
                 const scrolled = Math.round((winScroll / height) * 100);
                 
-                // Siguraduhin na hindi lalampas sa 100 at laging pataas lang ang record
                 if (scrolled > scrollRef.current) {
                     const cappedScroll = Math.min(scrolled, 100);
                     scrollRef.current = cappedScroll;
@@ -66,30 +65,31 @@ const ArticlePage = () => {
 
         window.addEventListener("scroll", handleScroll);
 
-        // CLEANUP: Ito ang tatakbo kapag umalis ang user sa page
         return () => {
             window.removeEventListener("scroll", handleScroll);
             
-            const userData = JSON.parse(localStorage.getItem('user'));
-            const userId = userData?.UserID;
             const currentProgress = scrollRef.current;
 
-            // I-save lang kung may progress (kahit 1% lang)
-            if (userId && id && currentProgress > 0) {
-                // Gagamit tayo ng navigator.sendBeacon o standard axios
-                // sendBeacon ay mas reliable para sa "page hide/unload" events
-                const data = JSON.stringify({
-                    userId: userId,
-                    articleId: id,
-                    progress: currentProgress
-                });
+            // I-save lang kung may progress
+            if (id && currentProgress > 0) {
+                const url = 'http://localhost:5000/api/articles/update-progress';
                 
-                // Option A: Axios (Standard)
-                axios.post('http://localhost:5000/api/articles/update-progress', {
-                    userId: userId,
+                // Mas reliable ito para sa "Page Unload/Navigate"
+                // Note: Ang sendBeacon ay laging POST at hindi tumatanggap ng custom headers
+                // Kung kailangan ng verifyToken via Cookie, gagana ito basta't same-origin o configured ang CORS
+                const blob = new Blob([JSON.stringify({
                     articleId: id,
                     progress: currentProgress
-                }).catch(err => console.error("Progress save failed:", err));
+                })], { type: 'application/json' });
+                
+                navigator.sendBeacon(url, blob);
+
+                // Back-up: Axios call (kung hindi supported ang sendBeacon)
+                // Pero sa modern browsers, sapat na ang sendBeacon
+                axios.post(url, 
+                    { articleId: id, progress: currentProgress },
+                    { withCredentials: true }
+                ).catch(() => { /* silent fail sa cleanup */ });
             }
         };
     }, [id]); // Re-run lang kapag nag-change ang article ID
@@ -256,19 +256,11 @@ const ArticlePage = () => {
     }, [id]);
 
     const handleSaveToLibrary = async () => {
-        const userData = JSON.parse(localStorage.getItem('user'));
-        const userId = userData?.UserID;
-
-        if (!userId) {
-            showToast("Please login to save articles", "info");
-            return;
-        }
-
         try {
-            const response = await axios.post('http://localhost:5000/api/articles/save-toggle', {
-                userId: userId,
-                articleId: id
-            });
+            const response = await axios.post('http://localhost:5000/api/articles/save-toggle',
+                { articleId: id }, 
+                { withCredentials: true } // Importante para sa cookies/token
+            );
 
             const isNowSaved = response.data.saved;
             setIsSaved(isNowSaved);
