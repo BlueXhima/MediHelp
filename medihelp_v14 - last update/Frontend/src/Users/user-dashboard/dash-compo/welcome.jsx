@@ -12,13 +12,15 @@ const WelcomeSection = ({ getGreeting }) => {
             if (email) {
                 try {
                     const response = await axios.get('http://localhost:5000/api/user-details', {
-                        params: { email },
+                        withCredentials: true,
                     });
                     const { firstName, lastName } = response.data;
                     const fullName = `${firstName} ${lastName}`;
                     setUserName(fullName);
                 } catch (error) {
                     console.error('Error fetching user details:', error);
+                    // Optional: fallback name pag nag-error
+                    setUserName('User');
                 }
             }
         };
@@ -70,10 +72,10 @@ const WelcomeSection = ({ getGreeting }) => {
         <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-6"
+            className="relative flex flex-col md:flex-row items-start justify-between mb-10 gap-6"
         >
             {/* Left Side: Greeting & Identity */}
-            <div className="space-y-1 text-left">
+            <div className="space-y-1 justify-start">
                 <div className="flex items-center gap-3 mb-2">
                     <div className={`p-2 ${bgColor} rounded-xl transition-colors duration-500`}>
                         {icon}
@@ -87,7 +89,7 @@ const WelcomeSection = ({ getGreeting }) => {
                     Hi, <span className="text-primary">{userName || 'User'}</span>!
                 </h1>
                 
-                <p className="text-muted-foreground font-medium text-sm md:text-base max-w-md">
+                <p className="text-muted-foreground text-left font-medium text-sm md:text-base max-w-md">
                     Welcome back to your <span className="font-bold text-foreground">MediHelp</span> command center. What’s on your mind today?
                 </p>
             </div>
