@@ -28,6 +28,7 @@ import ArchivedHistory from './Users/guidance-library/library-compo/ArchivedHist
 import SystemGuideDetail from './pages/systemguidedetail.jsx'
 import SavedArticle from './Users/guidance-library/SavedArticle';
 import SettingsPage from './pages/settingspage.jsx'
+import NotFound from './pages/error/NotFound';
 
 
 // Ito yung main file ng frontend, 
@@ -59,6 +60,8 @@ function App() {
         <Route path="/learn-how" element={<LearnHow />} />
         <Route path="/learn-how/system-guide-detail/:featureId" element={<SystemGuideDetail />} />
         <Route path="/chat-response" element={<ChatPage />} />
+
+        <Route path="*" element={<NotFound />} />
 
         {/* Protected or Private Routes */}
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
