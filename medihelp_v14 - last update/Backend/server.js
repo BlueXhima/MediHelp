@@ -20,6 +20,7 @@ const changeEmailOtpRoutes = require('./routes/sendOtpForChangeEmail');
 const articleRoutes = require('./routes/articleRoutes');
 const userRoutes = require('./routes/userRoutes');
 const translateRoutes = require('./routes/translate');
+const passwordRouter = require('./controllers/passwordController');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.use('/api', sendOtpRoutes);
 app.use('/api', verifyOtpRoutes);
 app.use('/api', registerRoutes);
 app.use('/api', loginRoutes);
+app.use('/api', passwordRouter);
 app.use('/api', verifyToken, userDetailsRoutes); 
 app.use('/api', verifyToken, updateUserRoutes);
 app.use('/api/change-email-otp', changeEmailOtpRoutes);
