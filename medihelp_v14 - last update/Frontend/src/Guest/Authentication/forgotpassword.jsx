@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Stethoscope, ArrowRight, ArrowLeft, Mail, Lock, ShieldCheck, CheckCircle2, LifeBuoy, Eye, EyeOff, KeyRound } from 'lucide-react';
 import BackgroundLoadingState from "../../components/BackgroundLoadingState";
 import ToastMessage, { showToast } from "../../components/ToastMessage";
+import axios from 'axios';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -11,33 +12,65 @@ const ForgotPassword = () => {
     const [step, setStep] = useState("email");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const urlToken = searchParams.get('token');
+    const urlEmail = searchParams.get('email');
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    useEffect(() => {
+        if (urlToken && urlEmail) {
+            setEmail(urlEmail);
+            setStep("reset"); // Skip the email input step if arriving from email link
+        }
+    }, [urlToken, urlEmail]);
 
     const handleForgotPassword = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        if (step === "email") {
-            // Simulate API Call for Email Verification
-            setTimeout(() => {
-                showToast("Verification link sent to your email!", "success");
-                setStep("reset");
-                setIsLoading(false);
-            }, 1500);
-        } else if (step === "reset") {
-            if (newPassword !== confirmPassword) {
-                showToast("Passwords do not match!", "error");
-                setIsLoading(false);
-                return;
+        try {
+            if (step === "email") {
+                // STEP 1: Input email, check if exists, then send link
+                const response = await axios.post("http://localhost:5000/api/forgot-password", { 
+                    email 
+                });
+
+                if (response.data.success) {
+                    showToast("Verification link sent to your email!", "success");
+                    setStep("success"); // Pupunta sa "Check your Inbox" view
+                }
+            } 
+            else if (step === "reset") {
+                // STEP 2: Input new password and confirm
+                if (newPassword !== confirmPassword) {
+                    showToast("Passwords do not match!", "error");
+                    setIsLoading(false);
+                    return;
+                }
+
+                const response = await axios.post("http://localhost:5000/api/reset-password", {
+                    email,
+                    token: urlToken, // Ito yung galing sa email link
+                    newPassword
+                });
+
+                if (response.data.success) {
+                    // STEP 3: Success toast then redirect
+                    showToast("Password updated successfully!", "success");
+                    
+                    setTimeout(() => {
+                        navigate('/login');
+                    }, 3000);
+                }
             }
-            // Simulate API Call for Password Update
-            setTimeout(() => {
-                showToast("Password updated successfully!", "success");
-                setStep("success");
-                setIsLoading(false);
-                setTimeout(() => navigate('/login'), 3000);
-            }, 1500);
+        } catch (err) {
+            // Lalabas dito kung mali ang email o expired ang token
+            const errorMsg = err.response?.data?.error || "Something went wrong. Please try again.";
+            showToast(errorMsg, "error");
+            console.error("Forgot Password Error:", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -77,6 +110,14 @@ const ForgotPassword = () => {
                                 We've sent a recovery link to <span className="font-bold foreground underline">{email}</span>. 
                                 Please check your email to continue.
                             </p>
+                            <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                <p className="text-[11px] text-slate-400 uppercase font-bold tracking-widest">
+                                    Next Step
+                                </p>
+                                <p className="text-xs text-slate-600 mt-1">
+                                    Once you reset your password in the other tab, you can close this window.
+                                </p>
+                            </div>
                         </div>
                     ) : step === "reset" ? (
                         /* 2. RESET STATE (New Password Fields) - ITO ANG WALA SA CODE MO */
@@ -103,7 +144,7 @@ const ForgotPassword = () => {
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         placeholder=" " 
                                         required
-                                        className="peer w-full pl-12 pr-12 py-4 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]" 
+                                        className="peer w-full pl-12 pr-12 py-4 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]" 
                                     />
                                     <label 
                                         htmlFor="newpass"
@@ -133,7 +174,7 @@ const ForgotPassword = () => {
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         placeholder=" "
-                                        className="peer w-full pl-12 pr-12 py-4 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]"                                
+                                        className="peer w-full pl-12 pr-12 py-4 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]"                                
                                     />
                                     <label 
                                         htmlFor="conpass"
@@ -189,7 +230,7 @@ const ForgotPassword = () => {
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="example@gmail.com"
                                         required
-                                        className="peer w-full pl-12 pr-5 py-4 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px] 
+                                        className="peer w-full pl-12 pr-5 py-4 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px] 
                                                 placeholder:text-transparent focus:placeholder-slate-400" 
                                     />
 
