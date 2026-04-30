@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
-import HeroBanner from '../components/herobanner';
+import HeroBanner from './section/herobanner';
+import Overview from './section/overview';
+import Prevention from './section/prevention';
+import Library from './section/knowledge';
+import Workflow from './section/workflow';
+import Testimonials from './section/testimonial';
+import FAQ from './section/faq';
 import PageEnd from '../components/footer';
 import { Check, TriangleAlert, UtensilsCrossed, Dumbbell, 
     AlarmClock, Leaf, Ribbon, HeartPlus, Brain, CheckCircle2, X, ShieldCheck,
@@ -252,234 +258,20 @@ const LandingPage = () => {
                 </section>
 
                 {/* High-level overview of MediHelp's Value Proposition */}
-                <section className="bg-card py-20 relative overflow-hidden">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-                            <div className="max-w-2xl text-left">
-                                <span className="text-primary font-bold tracking-wider uppercase text-sm">The Problem</span>
-                                <h2 className="mt-2 text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                                    Healthcare shouldn't be <br/> <span className="text-primary/60 italic">this complicated.</span>
-                                </h2>
-                            </div>
-                            <p className="text-foreground/70 text-lg max-w-sm pb-2">
-                                We're bridging the gap between your symptoms and the clarity you deserve.
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                            {/* Main Pain Point */}
-                            <div className="md:col-span-7 bg-red-50 dark:bg-red-950/20 p-10 rounded-3xl border border-red-100 dark:border-red-900/30 flex flex-col justify-between min-h-[320px]">
-                                <div className="w-14 h-14 bg-red-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-500/20">
-                                    <AlarmClock size={30} />
-                                </div>
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-3">The 3-Week Wait Gap</h3>
-                                    <p className="text-foreground/80 text-lg">Traditional scheduling leaves you in a state of anxiety. MediHelp provides the "right now" answers you need while waiting for your specialist.</p>
-                                </div>
-                            </div>
-
-                            {/* Side Pain Points */}
-                            <div className="md:col-span-5 space-y-6">
-                                <div className="bg-yellow-50 dark:bg-yellow-950/20 p-8 rounded-3xl border border-yellow-100 dark:border-yellow-900/30">
-                                    <TriangleAlert className="text-yellow-600 mb-4" size={28} />
-                                    <h4 className="text-xl font-bold mb-2">Information Overload</h4>
-                                    <p className="text-sm text-foreground/80">Stop "doom-scrolling" medical forums that only increase your stress levels.</p>
-                                </div>
-                                <div className="bg-blue-50 dark:bg-blue-950/20 p-8 rounded-3xl border border-blue-100 dark:border-blue-900/30">
-                                    <Brain className="text-blue-600 mb-4" size={28} />
-                                    <h4 className="text-xl font-bold mb-2">24/7 Accessibility</h4>
-                                    <p className="text-sm text-foreground/80">Health concerns don't follow a 9-to-5 schedule. Neither do we.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <Overview />
 
                 {/* Other HomePage Sections */}
-                <section className="py-20 bg-background/50">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="flex flex-col md:flex-row justify-between items-center mb-16">
-                            <div className="text-left max-w-xl">
-                                <span className="text-primary font-bold tracking-widest uppercase text-xs">Prevention First</span>
-                                <h3 className="text-4xl font-extrabold text-foreground mt-2">Stay Informed, Stay Healthy</h3>
-                                <p className="mt-4 text-foreground/70">
-                                    Practical habits to prevent health issues before they arise.
-                                </p>
-                            </div>
-                            <button className="mt-6 md:mt-0 px-6 py-3 border border-primary text-primary rounded-full hover:bg-primary/10 transition-all font-medium">
-                                View All Tips
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Nutrition - Wide Card */}
-                            <div className="group p-8 rounded-3xl bg-green-50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/20 flex gap-6 items-center hover:shadow-md transition-all">
-                                <div className="w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl bg-white dark:bg-green-900 text-green-600 shadow-sm group-hover:scale-110 transition-transform">
-                                    <UtensilsCrossed size={28} />
-                                </div>
-                                <div className="text-left">
-                                    <h4 className="text-xl font-bold text-foreground">Nutrition & Diet</h4>
-                                    <p className="text-sm text-foreground/70 mt-1">Eat balanced meals rich in fiber and vitamins to fuel your recovery.</p>
-                                </div>
-                            </div>
-
-                            {/* Exercise - Wide Card */}
-                            <div className="group p-8 rounded-3xl bg-blue-50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900/20 flex gap-6 items-center hover:shadow-md transition-all">
-                                <div className="w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl bg-white dark:bg-blue-900 text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
-                                    <Dumbbell size={28} />
-                                </div>
-                                <div className="text-left">
-                                    <h4 className="text-xl font-bold text-foreground">Active Movement</h4>
-                                    <p className="text-sm text-foreground/70 mt-1">Stay active with at least 30 minutes of intentional movement daily.</p>
-                                </div>
-                            </div>
-
-                            {/* Sleep - Wide Card */}
-                            <div className="group p-8 rounded-3xl bg-purple-50 dark:bg-purple-950/10 border border-purple-100 dark:border-purple-900/20 flex gap-6 items-center hover:shadow-md transition-all">
-                                <div className="w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl bg-white dark:bg-purple-900 text-purple-600 shadow-sm group-hover:scale-110 transition-transform">
-                                    <AlarmClock size={28} />
-                                </div>
-                                <div className="text-left">
-                                    <h4 className="text-xl font-bold text-foreground">Restful Sleep</h4>
-                                    <p className="text-sm text-foreground/70 mt-1">Maintain 7–8 hours of restful sleep to support cognitive health.</p>
-                                </div>
-                            </div>
-
-                            {/* Lifestyle - Wide Card */}
-                            <div className="group p-8 rounded-3xl bg-orange-50 dark:bg-orange-950/10 border border-orange-100 dark:border-orange-900/20 flex gap-6 items-center hover:shadow-md transition-all">
-                                <div className="w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl bg-white dark:bg-orange-900 text-orange-600 shadow-sm group-hover:scale-110 transition-transform">
-                                    <Leaf size={28} />
-                                </div>
-                                <div className="text-left">
-                                    <h4 className="text-xl font-bold text-foreground">Mindful Lifestyle</h4>
-                                    <p className="text-sm text-foreground/70 mt-1">Avoid habits like smoking and limit alcohol for long-term wellness.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <Prevention />
 
                 {/* Refactored Resources Library */}
-                <section className="bg-card py-24 relative">
-                    <div className="max-w-7xl mx-auto px-6 text-center">
-                        <h3 className="text-4xl font-bold mb-12">Trusted Knowledge Hub</h3>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {/* Cancer Awareness */}
-                            <div className="relative group bg-background rounded-3xl overflow-hidden border border-border/50 
-                                hover:border-primary/50 transition-all shadow-subtle
-                                backdrop-blur-md bg-white/10"
-                            >
-                                <div className="h-2 bg-orange-400 w-full"></div>
-                                <div className="p-8 text-left">
-                                    <Ribbon className="text-orange-500 mb-4" size={32} />
-                                    <h4 className="text-2xl font-bold mb-3">Cancer Awareness</h4>
-                                    <p className="text-foreground/70 text-sm mb-6 leading-relaxed">
-                                        Learn about prevention, screening, and support resources for various conditions.
-                                    </p>
-                                    <a href="#" className="inline-flex items-center text-primary font-semibold hover:gap-2 transition-all">
-                                        Read Guide <span className="ml-2">→</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            {/* Heart Health */}
-                            <div className="relative group bg-background rounded-3xl overflow-hidden border border-border/50 
-                                hover:border-primary/50 transition-all shadow-subtle
-                                backdrop-blur-md bg-white/10"
-                            >
-                                <div className="h-2 bg-blue-400 w-full"></div>
-                                <div className="p-8 text-left">
-                                    <HeartPlus className="text-blue-500 mb-4" size={32} />
-                                    <h4 className="text-2xl font-bold mb-3">Heart Health</h4>
-                                    <p className="text-foreground/70 text-sm mb-6 leading-relaxed">
-                                        Keep your heart strong with expert-backed tips on diet and risk management.
-                                    </p>
-                                    <a href="#" className="inline-flex items-center text-primary font-semibold hover:gap-2 transition-all">
-                                        Read Guide <span className="ml-2">→</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            {/* Mental Wellness */}
-                            <div className="relative group bg-background rounded-3xl overflow-hidden border border-border/50 
-                                hover:border-primary/50 transition-all shadow-subtle
-                                backdrop-blur-md bg-white/10"
-                            >
-                                <div className="h-2 bg-purple-400 w-full"></div>
-                                <div className="p-8 text-left">
-                                    <Brain className="text-purple-500 mb-4" size={32} />
-                                    <h4 className="text-2xl font-bold mb-3">Mental Wellness</h4>
-                                    <p className="text-foreground/70 text-sm mb-6 leading-relaxed">
-                                        Resources to support your emotional well-being and stress management.
-                                    </p>
-                                    <a href="#" className="inline-flex items-center text-primary font-semibold hover:gap-2 transition-all">
-                                        Read Guide <span className="ml-2">→</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <Library />
                 
                 {/* Timeline / FAQ (Optional) Sections*/}
-                <section className="py-24 bg-background">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center mb-20">
-                            <h3 className="text-4xl font-bold mb-4">Three Steps to Peace of Mind</h3>
-                            <div className="w-20 h-1.5 bg-primary mx-auto rounded-full"></div>
-                        </div>
+                <Workflow />
 
-                        <div className="relative">
-                            {/* Vertical Line for Desktop */}
-                            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/0 via-primary/20 to-primary/0"></div>
+                <Testimonials />
 
-                            <div className="space-y-20">
-                                {/* Step 1 */}
-                                <div className="flex flex-col md:flex-row items-center gap-10">
-                                    <div className="flex-1 text-right hidden md:block">
-                                        <h4 className="text-2xl font-bold text-primary">01</h4>
-                                    </div>
-                                    <div className="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white ring-8 ring-background font-bold">
-                                        <Mic size={20} />
-                                    </div>
-                                    <div className="flex-1 text-left">
-                                        <h4 className="text-2xl font-bold mb-2">Voice Activation</h4>
-                                        <p className="text-foreground/70 leading-relaxed">Simply tap and speak. No typing complex medical terms—just describe how you feel in your own words.</p>
-                                    </div>
-                                </div>
-
-                                {/* Step 2 */}
-                                <div className="flex flex-col md:flex-row-reverse items-center gap-10">
-                                    <div className="flex-1 text-left hidden md:block">
-                                        <h4 className="text-2xl font-bold text-primary">02</h4>
-                                    </div>
-                                    <div className="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white ring-8 ring-background font-bold">
-                                        <Brain size={20} />
-                                    </div>
-                                    <div className="flex-1 text-right">
-                                        <h4 className="text-2xl font-bold mb-2">Smart Analysis</h4>
-                                        <p className="text-foreground/70 leading-relaxed">Our system analyzes your intent and symptoms against trusted medical databases to provide instant context.</p>
-                                    </div>
-                                </div>
-
-                                {/* Step 3 */}
-                                <div className="flex flex-col md:flex-row items-center gap-10">
-                                    <div className="flex-1 text-right hidden md:block">
-                                        <h4 className="text-2xl font-bold text-primary">03</h4>
-                                    </div>
-                                    <div className="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white ring-8 ring-background font-bold">
-                                        <Check size={20} />
-                                    </div>
-                                    <div className="flex-1 text-left">
-                                        <h4 className="text-2xl font-bold mb-2">Actionable Guidance</h4>
-                                        <p className="text-foreground/70 leading-relaxed">Receive clear next steps—whether it's home care, scheduling a checkup, or seeking urgent medical attention.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <FAQ />
 
                 {/* Hero-Banner Section */}
                 <HeroBanner />
