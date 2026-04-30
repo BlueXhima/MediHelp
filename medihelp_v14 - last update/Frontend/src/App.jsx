@@ -29,6 +29,8 @@ import SystemGuideDetail from './pages/systemguidedetail.jsx'
 import SavedArticle from './Users/guidance-library/SavedArticle';
 import SettingsPage from './pages/settingspage.jsx'
 import NotFound from './pages/error/NotFound';
+import AboutUs from './pages/AboutUs';
+import MedicalDisclaimer from './pages/medicaldisclaimer';
 
 
 // Ito yung main file ng frontend, 
@@ -60,6 +62,9 @@ function App() {
         <Route path="/learn-how" element={<LearnHow />} />
         <Route path="/learn-how/system-guide-detail/:featureId" element={<SystemGuideDetail />} />
         <Route path="/chat-response" element={<ChatPage />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/disclaimer" element={<MedicalDisclaimer />} />
+        <Route path="/help-support" element={<HelpSupport />} />
 
         <Route path="*" element={<NotFound />} />
 
@@ -80,7 +85,6 @@ function App() {
           <Route path="/dashboard/guidance-library/article/:id" element={<ArticlePage />} />
           <Route path="/dashboard/guidance-library/archives" element={<ArchivedHistory />} />
           <Route path="/dashboard/guidance-library/save-library" element={<SavedArticle />} />
-          <Route path="/dashboard/help-support" element={<HelpSupport />} />
           <Route path="/dashboard/settings" element={<SettingsPage />} />
           <Route path="*" element={<ArticleNotFound />} />
         </Route>
