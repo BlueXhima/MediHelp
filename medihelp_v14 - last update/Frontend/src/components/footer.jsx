@@ -48,11 +48,19 @@ const Footer = () => {
                         <div>
                             <h4 className="font-extrabold text-foreground text-xs uppercase tracking-[0.2em] mb-7">Information</h4>
                             <ul className="space-y-5 text-md text-foreground/70 font-medium leading-relaxed">
-                                {['Help Center', 'About Us', 'Privacy Policy', 'Terms of Service', 'Security'].map((item) => (
-                                    <li key={item} className="group flex items-center gap-2 justify-center md:justify-start">
+                                {[
+                                    { name: 'Help Center', path: '/help-support' },
+                                    { name: 'About Us', path: '/about-us' },
+                                    { name: 'Privacy Policy', path: '/privacy' },
+                                    { name: 'Medical Disclaimer', path: '/disclaimer' },
+                                    { name: 'Terms of Service', path: '/terms' },
+                                    { name: 'Security', path: '/security' }
+                                ].map((item) => (
+                                    <li key={item.name} className="group flex items-center gap-2 justify-center md:justify-start">
                                         <span className="text-primary w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300">→</span>
-                                        <a href="#" className="hover:text-primary transition-colors">
-                                            {item}
+                                        {/* Use 'Link' from react-router-dom if you are using it for navigation */}
+                                        <a href={item.path} className="hover:text-primary transition-colors">
+                                            {item.name}
                                         </a>
                                     </li>
                                 ))}
