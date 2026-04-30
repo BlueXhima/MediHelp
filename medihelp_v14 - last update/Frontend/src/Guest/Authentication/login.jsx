@@ -7,10 +7,10 @@ import BackgroundLoadingState from "../../components/BackgroundLoadingState";
 import ToastMessage, { showToast } from "../../components/ToastMessage";
 import axios from 'axios';
 import ReCAPTCHA from "react-google-recaptcha";
+import { useGoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +20,9 @@ const Login = () => {
     const [captchaToken, setCaptchaToken] = useState(null); // State para sa token
     const [showCaptcha, setShowCaptcha] = useState(false);
     const recaptchaRef = useRef(null)
+    const [rememberMe, setRememberMe] = useState(() => {
+        return localStorage.getItem("rememberMe") === "true";
+    });
 
     // Kunin ang huling duration, kung wala pa, default sa 30000 (30s)
     const [cooldownDuration, setCooldownDuration] = useState(() => {
@@ -32,6 +35,11 @@ const Login = () => {
         email: "admin@medihelp.com",
         password: "admin123"
     };
+
+    const [email, setEmail] = useState(() => {
+        const savedEmail = localStorage.getItem("rememberedEmail");
+        return savedEmail ? savedEmail : "";
+    });
 
     // Kunin ang lock data mula sa localStorage sa simula
     const [lockUntil, setLockUntil] = useState(() => {
@@ -77,6 +85,16 @@ const Login = () => {
             // 4. SUCCESS FLOW
             if (response.data && response.data.success) {
                 // --- SUCCESS FLOW: Save data to LocalStorage ---
+
+                // --- REMEMBER ME LOGIC ---
+                if (rememberMe) {
+                    localStorage.setItem("rememberedEmail", email);
+                    localStorage.setItem("rememberMe", "true");
+                } else {
+                    localStorage.removeItem("rememberedEmail");
+                    localStorage.setItem("rememberMe", "false");
+                }
+
                 // Note: Token is now in HttpOnly Cookie, but we still save non-sensitive info
                 // localStorage.setItem("token", response.data.token);
                 localStorage.setItem("userRole", response.data.role);
@@ -209,6 +227,33 @@ const Login = () => {
         return () => clearInterval(interval);
     }, [lockUntil, isSilentLock]);
 
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setIsLoading(true);
+            try {
+                const res = await axios.post("http://localhost:5000/api/google-login", {
+                    // Check if your library provides .access_token or .credential
+                    token: tokenResponse.access_token 
+                }, { withCredentials: true });
+
+                if (res.data.success) {
+                    // Match the storage pattern in your handleLogin
+                    localStorage.setItem("userRole", res.data.role);
+                    localStorage.setItem("email", res.data.email);
+                    
+                    showToast("Logged in with Google!", "success");
+                    setTimeout(() => {
+                        navigate(res.data.role === 'admin' ? "/admin" : "/dashboard");
+                    }, 1500);
+                }
+            } catch (err) {
+                showToast(err.response?.data?.message || "Google Login Failed", "error");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    });
+
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans selection:bg-primary/10">
             <BackgroundLoadingState isLoading={isLoading} />
@@ -304,8 +349,15 @@ const Login = () => {
                         {/* Checkbox & Forgot Password - Compact */}
                         <div className="flex items-center justify-between pt-0.5">
                             <label className="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" className="w-3.5 h-3.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" />
-                                <span className="text-[11px] font-bold text-slate-500 group-hover:text-slate-800 transition-colors">Remember me?</span>
+                                <input 
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)} 
+                                    className="w-3.5 h-3.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer" 
+                                />
+                                <span className="text-[11px] font-bold text-slate-500 group-hover:text-slate-800 transition-colors">
+                                    Remember me?
+                                </span>
                             </label>
                             <button 
                                 type="button"
@@ -361,7 +413,13 @@ const Login = () => {
                         </div>
 
                         {/* Google Button - Compact */}
-                        <button type="button" className="w-full py-3 cursor-pointer rounded-xl border-2 border-border bg-card flex items-center justify-center gap-3 hover:bg-slate-100 transition-all font-bold text-slate-700 text-[12px] shadow-sm active:scale-[0.98]">
+                        <button 
+                            type="button"
+                            onClick={() => googleLogin()} 
+                            className="w-full py-3 cursor-pointer rounded-xl border-2 border-border bg-card flex 
+                            items-center justify-center gap-3 hover:bg-slate-100 transition-all font-bold 
+                            text-slate-700 text-[12px] shadow-sm active:scale-[0.98]"
+                        >
                             <img src={buttonlogo} alt="Google" className="w-4 h-4" />
                             Sign in with Google
                         </button>
