@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ToastMessage, { showToast } from "../../components/ToastMessage";
 import { ArrowLeft, Stethoscope, ShieldCheck, ArrowRight } from "lucide-react";
 import axios from "axios";
 import BackgroundLoadingState from "../../components/BackgroundLoadingState";
+import ChangeEmailModal from "./ChangeEmailModal";
 
 const OTPVerification = () => {
     const [otp, setOtp] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [timeLeft, setTimeLeft] = useState(60);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [email, setEmail] = useState(localStorage.getItem("email") || "");
 
     // Logic remains exactly the same as your original file
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -16,55 +20,41 @@ const OTPVerification = () => {
     const handleOTPSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-
-        // 1. Ipakita ang unang toast
+        
         showToast("Verifying OTP, please wait...", "info");
 
-        const email = localStorage.getItem("email"); // Retrieve email from local storage
-
-        if (!email) {
-            showToast("Email is required. Please register again.", "error");
-            setIsLoading(false);
-            return;
-        }
-
-        console.log("Request payload:", { email, otp });
+        const email = localStorage.getItem("email");
 
         try {
-            // 2. Magdagdag ng maliit na artificial delay (halimbawa: 800ms) 
-            // para hindi biglaang maglaho ang "Verifying" toast
-            await delay(800);
-
-            // Make API call to verify OTP
+            await delay(1000);
+            // TANDAAN: Siguraduhin na ang axios ay may { withCredentials: true } 
+            // kung ang frontend at backend ay magkaiba ng domain
             const response = await axios.post("http://localhost:5000/api/verify-otp", {
-                email: localStorage.getItem("email"), // Ensure email is sent
+                email,
                 otp,
-            });
-
-            console.log("Backend response:", response);
+            }, { withCredentials: true }); // Mahalaga ito para sa Cookies
 
             if (response.status === 200) {
-                // 3. Ipakita ang success toast
-                showToast("OTP verified successfully! Redirecting...", "success");
+                showToast("Success! Account verified. Redirecting...", "success");
 
-                localStorage.setItem("userRole", "user"); // Set the correct user role
-                localStorage.setItem("isFirstLogin", "true"); // Set isFirstLogin for new users
-
-                // Bigyan ng oras ang user na mabasa ang success toast bago mag-navigate
+                // I-save sa localStorage para mabasa ng Dashboard
+                localStorage.setItem("userRole", "user");
+                localStorage.setItem("isFirstLogin", "true");
+                localStorage.setItem("email", email);
+                if (response.data.user) {
+                    // Ito ang babasahin ng iyong Welcome.jsx o Navbar.jsx
+                    localStorage.setItem("user", JSON.stringify(response.data.user)); 
+                }
+                
+                // HABAAN ang timeout sa 2500ms para malasap ng user ang Success Toast
                 setTimeout(() => {
-                    navigate("/dashboard"); // Redirect to dashboard
-                }, 2000); // Add delay to show the loading state and toast
-            } else {
-                showToast(response.data.message || "Invalid OTP. Please try again.", "error");
+                    setIsLoading(false); // Dito lang natin papatayin ang loading
+                    navigate("/dashboard");
+                }, 2500);
             }
         } catch (error) {
-            console.error("Error during OTP verification:", error);
-            showToast(
-                error.response?.data?.message || "An error occurred. Please try again.",
-                "error"
-            );
-        } finally {
-            setTimeout(() => setIsLoading(false), 2000); // Ensure loading state is visible for at least 2 seconds
+            showToast(error.response?.data?.message || "Invalid OTP.", "error");
+            setIsLoading(false);
         }
     };
 
@@ -74,35 +64,70 @@ const OTPVerification = () => {
             showToast("Email not found.", "error");
             return;
         }
+        
+        setIsLoading(true); // Idagdag ito para gumana ang "Sending..." state sa button
+
         try {
-            // Make API call to resend OTP
             const response = await axios.post("http://localhost:5000/api/send-otp", {
                 email,
             });
 
             if (response.status === 200) {
                 showToast("OTP resent successfully!", "success");
+                setTimeLeft(60); // I-reset sa 1 minute (60 seconds)
             } else {
-                showToast(response.data.message || "Failed to resend OTP. Please try again.", "error");
+                showToast(response.data.message || "Failed to resend OTP.", "error");
             }
         } catch (error) {
-            showToast(
-                error.response?.data?.message || "An error occurred while resending OTP.",
-                "error"
-            );
+            showToast(error.response?.data?.message || "Error occurred.", "error");
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleChangeEmail = () => {
-        navigate("/register?changeEmail=true");
+    // Buksan lang ang modal
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    // Ito ang tatakbo kapag successful ang update sa modal
+    const handleEmailUpdated = (updatedEmail) => {
+        setEmail(updatedEmail);
+        localStorage.setItem("email", updatedEmail);
+        setTimeLeft(60); // Reset timer para sa bagong OTP
+    };
+
+    useEffect(() => {
+        if (timeLeft <= 0) {
+            setOtp(""); // Buburahin ang lahat ng input sa OTP boxes
+            showToast("Verification code expired. Please resend a new one.", "error"); // Notification para sa user
+            return;
+    }
+
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [timeLeft]);
+
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans selection:bg-primary/10 relative text-left">
             <BackgroundLoadingState isLoading={isLoading} />
             <ToastMessage />
+
+            <ChangeEmailModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                currentEmail={email} 
+                onEmailUpdated={handleEmailUpdated} 
+            />
 
             {/* Back Button - Top Left */}
             <button 
@@ -131,9 +156,19 @@ const OTPVerification = () => {
                     <div className="space-y-8">
                         {/* OTP Input Field - 6 Digit Style */}
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex justify-start">
-                                Verification Code
-                            </label>
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-black tracking-[0.1em] text-slate-400">
+                                    Verification Code
+                                </label>
+                                
+                                {/* Timer sa Right Side ng Label */}
+                                <div className="flex items-center gap-1.5 bg-red-50 px-2 py-1 rounded-md border border-red-100">
+                                    <span className="text-xs font-black text-red-400 tracking-tighter">Expires in:</span>
+                                    <span className="text-sm font-black text-red-500 tabular-nums">
+                                        {formatTime(timeLeft)}
+                                    </span>
+                                </div>
+                            </div>
                             <div 
                                 className="flex justify-between gap-2 md:gap-3"
                                 onPaste={(e) => {
@@ -190,22 +225,27 @@ const OTPVerification = () => {
                                 {!isLoading && <ArrowRight size={16} />}
                             </button>
 
-                            <div className="pt-2 flex flex-col items-center gap-4">
+                            <div className="pt-2 flex flex-col items-center gap-5">
                                 <div className="text-center">
-                                    <p className="text-[12px] font-bold uppercase text-slate-400 mb-1">Didn't receive the code?</p>
+                                    <p className="text-[12px] font-bold uppercase text-slate-400 mb-4">Didn't receive the code?</p>
                                     <button
                                         type="button"
                                         onClick={handleResendOTP}
-                                        disabled={isLoading}
-                                        className="text-[11px] cursor-pointer font-black text-primary hover:text-blue-700 uppercase tracking-widest transition-colors disabled:text-slate-300"
+                                        disabled={isLoading || timeLeft > 0}
+                                        className={`
+                                            px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300
+                                            ${timeLeft > 0 || isLoading 
+                                                ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-70' 
+                                                : 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white hover:-translate-y-0.5 cursor-pointer shadow-sm active:scale-[0.98]'}
+                                        `}
                                     >
-                                        Resend Code
+                                        {isLoading ? "Sending..." : "Resend Code"}
                                     </button>
                                 </div>
 
                                 <button
                                     type="button"
-                                    onClick={handleChangeEmail}
+                                    onClick={handleOpenModal}
                                     className="w-full border-2 border-border bg-card cursor-pointer py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm active:scale-[0.98]"
                                 >
                                     Change Email Address
@@ -214,7 +254,7 @@ const OTPVerification = () => {
                         </div>
 
                         {/* Footer Policy */}
-                        <div className="pt-6 border-t border-slate-50">
+                        <div className="border-t border-slate-50">
                             <p className="text-[12px] text-center text-slate-400 leading-relaxed max-w-xs mx-auto font-medium tracking-tighter">
                                 By verifying, you agree to our 
                                 <a href="/terms" className="text-foreground hover:text-primary font-black hover:underline mx-1">Terms</a> 

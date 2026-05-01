@@ -6,49 +6,24 @@ import axios from "axios"; // Import axios for API requests
 import ToastMessage, { showToast } from "../../components/ToastMessage";
 import BackgroundLoadingState from "../../components/BackgroundLoadingState";
 import { useNavigate } from "react-router-dom";
+import { useGoogleLogin } from '@react-oauth/google';
 
 const Register = () => {
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
-    const [emailError, setEmailError] = useState("");
-
-    const [isLoading, setIsLoading] = useState(false); // Set initial state to false
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState("");
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [emailError, setEmailError] = useState(false);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const isChangeEmail = urlParams.get("changeEmail");
-
-        if (isChangeEmail) {
-            const storedFirstName = localStorage.getItem("firstName");
-            const storedLastName = localStorage.getItem("lastName");
-            const storedEmail = localStorage.getItem("email");
-            const storedPassword = localStorage.getItem("password");
-
-            if (storedFirstName) setFirstName(storedFirstName);
-            if (storedLastName) setLastName(storedLastName);
-            if (storedEmail) setEmail(storedEmail);
-            if (storedPassword) setPassword(storedPassword);
-        }
-    }, []);
-
-    const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev);
-    };
-
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
-    const validatePassword = (password) => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*\d).{8,}$/;
-        return passwordRegex.test(password);
-    };
+    const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+    const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
 
     const evaluatePasswordStrength = (password) => {
         if (password.length === 0) return "None"; // Bagong state para sa default
@@ -77,78 +52,89 @@ const Register = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setEmailError(false);
 
-        // Kinukuha ang mga parameters sa URL (halimbawa: ?changeEmail=true)
-        const urlParams = new URLSearchParams(window.location.search);
-        const isChangeEmail = urlParams.get("changeEmail");
-        
-        // Kinukuha ang dating email na naka-save sa browser (pang-hanap sa database)
-        const oldEmail = localStorage.getItem("email"); 
+        // 1. Email Format Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showToast("Please enter a valid email address.", "error");
+            setEmailError(true);
+            setIsLoading(false);
+            return;
+        }
+
+        if (passwordStrength === "Weak") {
+            showToast("Password is too weak. Please follow the requirements below.", "error");
+            setIsLoading(false);
+            return;
+        }
+
+        // Frontend pre-validation (Double check bago mag-API call)
+        if (!agreedToTerms) {
+            showToast("Please agree to the Terms and Privacy Policy.", "error");
+            setIsLoading(false);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showToast("Passwords do not match!", "error");
+            setIsLoading(false);
+            return;
+        }
 
         try {
-            if (isChangeEmail) {
-                // --- CHANGE EMAIL FLOW (Kapag galing sa "Change Email" button) ---
-                
-                // 1. UPDATE USER: Binabago ang details sa database gamit ang oldEmail bilang reference
-                console.log("Sending request to update user details...");
+            // STANDARD REGISTER FLOW ONLY
+            const response = await axios.post("http://localhost:5000/api/register", {
+                FirstName: firstName,
+                LastName: lastName,
+                Email: email,
+                Password: password,
+                confirmPassword: confirmPassword,
+                agreedToTerms: agreedToTerms
+            });
 
-                const response = await axios.put(`http://localhost:5000/api/update-user/${oldEmail}`, {
-                    FirstName: firstName,
-                    LastName: lastName,
-                    Email: email, // Ito yung bagong email na nilagay sa input
-                    Password: password,
-                });
-
-                if (response.status === 200) {
-                    // Store the updated user details in localStorage
-                    localStorage.setItem("email", email);
-                    localStorage.setItem("firstName", firstName);
-                    localStorage.setItem("lastName", lastName);
-                    localStorage.setItem("password", password);
-
-                    // Notify the user and navigate to OTP verification page
-                    showToast("Update successful! Verify your new email.", "success");
-
-                    setTimeout(() => {
-                        console.log("Navigating to OTP page...");
-                        setIsLoading(false);
-                        navigate("/otp");
-                    }, 1500); // Small delay to display the toast
-                }
-            } else {
-                // --- STANDARD REGISTER FLOW (Normal na paggawa ng account) ---
-                
-                // Nagpapadala ng POST request para i-save ang bagong user
-                const response = await axios.post("http://localhost:5000/api/register", {
-                    FirstName: firstName,
-                    LastName: lastName,
-                    Email: email,
-                    Password: password,
-                });
-
-                if (response.status === 201) {
-                    localStorage.setItem("email", email);
-                    localStorage.setItem("firstName", firstName);
-                    localStorage.setItem("lastName", lastName);
-                    localStorage.setItem("password", password);
-                    
-                    showToast("Account created! Redirecting...", "success");
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        navigate("/otp");
-                    }, 1500); // Konting delay para mabasa yung Toast
-                }
+            if (response.status === 201) {
+                localStorage.setItem("email", email);
+                showToast("Account created! Redirecting to verification...", "success");
+                setTimeout(() => {
+                    navigate("/otp");
+                }, 1500);
             }
         } catch (error) {
-            // Kapag may nag-error (halimbawa: offline ang server o mali ang data)
-            console.error("Error during process:", error);
-            console.error("Error response:", error.response);
-            showToast(error.response?.data?.message || "An error occurred.", "error");
-        } finally {
-            // 5. SAFETY NET: Kahit mag-success o mag-fail, siguraduhin na mamamatay ang loading screen
+            console.error("Registration Error:", error);
+            showToast(error.response?.data?.message || "An error occurred during registration.", "error");
             setIsLoading(false);
         }
     };
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setIsLoading(true);
+            try {
+                const res = await axios.post("http://localhost:5000/api/google-login", {
+                    token: tokenResponse.access_token 
+                }, { withCredentials: true });
+
+                if (res.data.success) {
+                    // I-save ang mahahalagang info sa localStorage gaya ng sa login
+                    localStorage.setItem("userRole", res.data.role);
+                    localStorage.setItem("email", res.data.email);
+                    if (res.data.user) {
+                        localStorage.setItem("user", JSON.stringify(res.data.user));
+                    }
+                    
+                    showToast("Account linked with Google!", "success");
+                    setTimeout(() => {
+                        navigate(res.data.role === 'admin' ? "/admin" : "/dashboard");
+                    }, 1500);
+                }
+            } catch (err) {
+                showToast(err.response?.data?.message || "Google Sign-up Failed", "error");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    });
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4 font-sans selection:bg-primary/10 relative">
@@ -190,7 +176,7 @@ const Register = () => {
                                     onChange={(e) => setFirstName(e.target.value)}
                                     placeholder=" "
                                     required
-                                    className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]" 
+                                    className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]" 
                                 />
                                 <label 
                                     htmlFor="firstName"
@@ -207,7 +193,7 @@ const Register = () => {
                                     onChange={(e) => setLastName(e.target.value)}
                                     placeholder=" "
                                     required
-                                    className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]" 
+                                    className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]" 
                                 />
                                 <label 
                                     htmlFor="lastName"
@@ -227,7 +213,7 @@ const Register = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder=" "
                                 required
-                                className={`peer w-full px-4 py-3.5 rounded-xl border-2 ${emailError ? 'border-red-500' : 'border-border'} bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]`} 
+                                className={`peer w-full px-4 py-3.5 rounded-xl border-2 ${emailError ? 'border-red-500' : 'border-border'} bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]`} 
                             />
                             <label 
                                 htmlFor="email"
@@ -246,7 +232,7 @@ const Register = () => {
                                 onChange={handlePasswordChange}
                                 placeholder=" "
                                 required
-                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-slate-400 text-[13px]" 
+                                className="peer w-full px-4 py-3.5 rounded-xl border-2 border-border bg-transparent focus:border-primary outline-none transition-all font-semibold text-foreground text-[13px]" 
                             />
                             <label 
                                 htmlFor="password"
@@ -263,12 +249,58 @@ const Register = () => {
                             </button>
                         </div>
 
+                        {/* Confirm Password Field */}
+                        <div className="relative group">
+                            <input 
+                                type={showConfirmPassword ? "text" : "password"}
+                                id="confirmPassword"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder=" "
+                                required
+                                className={`peer w-full px-4 py-3.5 rounded-xl border-2 bg-transparent outline-none transition-all font-semibold text-foreground text-[13px]
+                                    ${!confirmPassword 
+                                        ? 'border-border focus:border-primary' // Default state kapag walang laman
+                                        : confirmPassword === password 
+                                            ? 'border-green-500 focus:border-green-600' // Green kapag match
+                                            : 'border-red-500 focus:border-red-600'    // Red kapag mali
+                                    }`} 
+                            />
+                            <label 
+                                htmlFor="confirmPassword"
+                                className={`absolute left-4 top-3.5 font-bold text-[11px] transition-all pointer-events-none bg-card px-2 
+                                    peer-focus:-top-2 peer-focus:left-3 peer-focus:text-[10px] peer-focus:font-black 
+                                    peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:left-3 peer-[:not(:placeholder-shown)]:text-[10px]
+                                    ${!confirmPassword 
+                                        ? 'text-slate-400 peer-focus:text-primary' 
+                                        : confirmPassword === password 
+                                            ? 'text-green-600' 
+                                            : 'text-red-600'
+                                    }`}
+                            >
+                                CONFIRM PASSWORD
+                            </label>
+                            <button 
+                                type="button"
+                                onClick={toggleConfirmPasswordVisibility}
+                                className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors p-2
+                                    ${!confirmPassword 
+                                        ? 'text-slate-300 hover:text-primary' 
+                                        : confirmPassword === password 
+                                            ? 'text-green-500' 
+                                            : 'text-red-500'
+                                    }`}
+                            >
+                                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
+
                         {/* Password Strength Indicator (Same logic preserved) */}
-                        <div className="px-2 py-3 bg-slate-50/50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-700/50 space-y-3 transition-colors duration-300">
+                        <div className="px-2 py-3 rounded-2xl border border-border space-y-3 transition-colors duration-300">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Security Check</span>
                                 <span className={`text-[10px] font-black uppercase transition-colors ${
-                                    passwordStrength === 'Strong' ? 'text-green-600 dark:text-green-400' : 
+                                    passwordStrength === 'Strong' ? 'text-green-600 dark:text-green-4r00' : 
                                     passwordStrength === 'Medium' ? 'text-yellow-600 dark:text-yellow-400' :
                                     passwordStrength === 'Weak' ? 'text-red-600 dark:text-red-400' :
                                     'text-slate-500 dark:text-slate-600'
@@ -289,7 +321,7 @@ const Register = () => {
                                 {/* Requirement 1 */}
                                 <div className="flex items-center gap-2">
                                     <div className={`w-1.5 h-1.5 rounded-full transition-all ${password.length >= 8 ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
-                                    <span className={`text-[10px] font-bold transition-colors ${password.length >= 8 ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                    <span className={`text-[10px] font-bold transition-colors ${password.length >= 8 ? 'text-green-900 dark:text-green-500' : 'text-slate-400 dark:text-slate-500'}`}>
                                         8+ Characters
                                     </span>
                                 </div>
@@ -297,7 +329,7 @@ const Register = () => {
                                 {/* Requirement 2 */}
                                 <div className="flex items-center gap-2">
                                     <div className={`w-1.5 h-1.5 rounded-full transition-all ${/[A-Z]/.test(password) ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
-                                    <span className={`text-[10px] font-bold transition-colors ${/[A-Z]/.test(password) ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                    <span className={`text-[10px] font-bold transition-colors ${/[A-Z]/.test(password) ? 'text-green-900 dark:text-green-500' : 'text-slate-400 dark:text-slate-500'}`}>
                                         Uppercase Letter
                                     </span>
                                 </div>
@@ -305,7 +337,7 @@ const Register = () => {
                                 {/* Requirement 3 */}
                                 <div className="flex items-center gap-2">
                                     <div className={`w-1.5 h-1.5 rounded-full transition-all ${/\d/.test(password) ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
-                                    <span className={`text-[10px] font-bold transition-colors ${/\d/.test(password) ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                    <span className={`text-[10px] font-bold transition-colors ${/\d/.test(password) ? 'text-green-900 dark:text-green-500' : 'text-slate-400 dark:text-slate-500'}`}>
                                         Number Included
                                     </span>
                                 </div>
@@ -313,11 +345,41 @@ const Register = () => {
                                 {/* Requirement 4 */}
                                 <div className="flex items-center gap-2">
                                     <div className={`w-1.5 h-1.5 rounded-full transition-all ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
-                                    <span className={`text-[10px] font-bold transition-colors ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-slate-900 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                                    <span className={`text-[10px] font-bold transition-colors ${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-green-900 dark:text-green-500' : 'text-slate-400 dark:text-slate-500'}`}>
                                         Special Char
                                     </span>
                                 </div>
                             </div>
+                        </div>
+
+                        {confirmPassword && (
+                            <p className={`text-[10px] font-black uppercase mt-1 ml-2 tracking-wider animate-fade-in ${
+                                confirmPassword === password ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                                {confirmPassword === password ? '✓ Passwords Match' : '× Passwords do not match'}
+                            </p>
+                        )}
+
+                        {/* Terms & Conditions */}
+                        <div className="flex items-start gap-3 px-3 py-2 bg-transparent rounded-xl border border-border mb-2">
+                            <div className="flex items-center h-5">
+                                <input 
+                                    type="checkbox" 
+                                    id="terms"
+                                    checked={agreedToTerms}
+                                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                    className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer transition-all"
+                                />
+                            </div>
+                            <label htmlFor="terms" className="text-[11px] text-foreground font-medium leading-[1.5] cursor-pointer select-none">
+                                I have read and agree to the 
+                                <a href="/terms" className="text-primary font-bold hover:underline mx-1">Terms of Service</a> 
+                                and 
+                                <a href="/privacy" className="text-primary font-bold hover:underline mx-1">Privacy Policy</a>. 
+                                <span className="block mt-1 text-slate-400 italic">
+                                    I understand that MediHelp handles my health data securely.
+                                </span>
+                            </label>
                         </div>
 
                         {/* Create Account Button */}
@@ -341,20 +403,20 @@ const Register = () => {
                         </div>
 
                         {/* Google Button */}
-                        <button type="button" className="w-full py-3 rounded-xl border-2 border-border bg-card flex items-center justify-center gap-3 hover:bg-slate-100 cursor-pointer transition-all font-bold text-slate-700 text-[12px] shadow-sm">
+                        <button 
+                            type="button"
+                            onClick={() => googleLogin()} 
+                            className="w-full py-3 rounded-xl border-2 border-border bg-card flex items-center 
+                            justify-center gap-3 hover:bg-slate-100 cursor-pointer transition-all font-bold 
+                            text-slate-700 text-[12px] shadow-sm"
+                        >
                             <img src={buttonlogo} alt="Google" className="w-4 h-4" />
                             Sign up with Google
                         </button>
                     </div>
 
                     {/* Footer Links */}
-                    <div className="mt-8 text-center space-y-4">
-                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed max-w-[280px] mx-auto tracking-tighter">
-                            By registering, you agree to our 
-                            <a href="/terms" className="text-foreground hover:text-primary font-black hover:underline mx-1">Terms</a> 
-                            and 
-                            <a href="/privacy" className="text-foreground hover:text-primary font-black hover:underline mx-1">Privacy Policy</a>.
-                        </p>
+                    <div className="mt-6 text-center">
                         <p className="text-[12px] font-bold text-slate-400">
                             Already have an account? <button onClick={() => navigate('/login')} className="text-foreground hover:text-primary cursor-pointer hover:underline underline-offset-4 decoration-2 decoration-primary/30 font-black">Login here</button>
                         </p>
