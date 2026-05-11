@@ -31,10 +31,7 @@ const Login = () => {
     });
 
     // Static admin credentials
-    const adminCredentials = {
-        email: "admin@medihelp.com",
-        password: "admin123"
-    };
+    // nasa database na yung Admin Account
 
     const [email, setEmail] = useState(() => {
         const savedEmail = localStorage.getItem("rememberedEmail");
