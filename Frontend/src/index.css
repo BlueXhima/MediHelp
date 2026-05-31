@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+    /* Map HSL variables to Tailwind colors */
+    --color-border: hsl(var(--border));
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-card: hsl(var(--card));
+    --color-success: hsl(var(--success));
+
+    /* Custom Purple Theme Utilities */
+    --animate-float: float 6s ease-in-out infinite;
+    --animate-fade-in: fade-in 0.7s ease-out forwards;
+    --animate-pulse-subtle: pulse-subtle 4s ease-in-out infinite;
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-subtle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+}
+
+@layer base {
+    :root {
+        /* Premium Purple Light Mode */
+        --background: 270 40% 99%;
+        --foreground: 270 20% 10%;
+        --card: 0 0% 100%;
+        --primary: 262 83% 58%; /* Main Purple */
+        --primary-foreground: 0 0% 100%;
+        --border: 270 10% 90%;
+        --success: 142 76% 36%;
+    }
+
+    .dark {
+        /* Deep Purple Dark Mode */
+        --background: 270 30% 4%;
+        --foreground: 270 10% 95%;
+        --card: 270 30% 7%;
+        --primary: 262 80% 65%; /* Softer Purple for Dark Mode */
+        --primary-foreground: 270 10% 95%;
+        --border: 270 20% 15%;
+        --success: 142 70% 45%;
+    }
+
+    * {
+        @apply border-border;
+    }
+
+    body {
+        /* Apply background and text globally with smooth transition[cite: 11] */
+        @apply bg-background text-foreground font-sans transition-colors duration-300;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+}
+
+/* CUSTOM UTILITIES[cite: 11] */
+@utility text-glow {
+    text-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
+}
+
+@utility card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10;
+    &:hover {
+        transform: translateY(-4px);
+    }
+}
+
+/* MODERN SCROLLBAR[cite: 11] */
+.scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-background;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, hsl(var(--primary)), #a855f7);
+    border-radius: 10px;
+    border: 2px solid hsl(var(--background));
+}
+
+/* LEAFLET POPUP FIXES[cite: 11] */
+.hospital-popup-custom .leaflet-popup-content-wrapper {
+    @apply p-0 overflow-hidden rounded-2xl bg-card text-foreground shadow-2xl;
+}
+
+.hospital-popup-custom .leaflet-popup-tip {
+    @apply bg-card;
+}
+
+.hospital-pin-selected {
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+    animation: marker-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes marker-bounce {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Tanggalin ang default Leaflet tooltip styling */
+.leaflet-tooltip.custom-tooltip {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* Tanggalin ang maliit na triangle sa ilalim */
+.leaflet-tooltip-top.custom-tooltip::before {
+    display: none !important;
+}
