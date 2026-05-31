@@ -7,9 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies and Builds (Applies to all subfolders)
+**/node_modules
+**/dist
+**/dist-ssr
 *.local
 
 # Editor directories and files
@@ -23,7 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
-
-# env files (CRITICAL)
-.env
-.env.*
+# env files
+**/.env
+**/.env.*
