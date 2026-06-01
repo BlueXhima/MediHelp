@@ -2,4 +2,5 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  force = true
+  # Ito ang importante: huwag i-redirect ang mga files na may extension
+  conditions = { StaticFile = true }
