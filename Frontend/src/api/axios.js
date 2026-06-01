@@ -1,8 +1,12 @@
 // src/api/axios.js
 import axios from 'axios';
 
+// Gagamit tayo ng environment variable. 
+// Kung wala itong value, mag-default siya sa localhost (para sa dev).
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: API_BASE_URL,
     withCredentials: true // Mahalaga ito para maipadala ang refreshToken cookie
 });
 
@@ -18,7 +22,7 @@ api.interceptors.response.use(
 
             try {
                 // TATAWAGIN DITO ANG IYONG exports.refreshToken
-                const res = await axios.post('http://localhost:5000/api/refresh', {}, { withCredentials: true });
+                const res = await axios.post(`${API_BASE_URL}/refresh`, {}, { withCredentials: true });
                 
                 const { accessToken } = res.data;
                 
