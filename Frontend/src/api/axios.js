@@ -5,6 +5,9 @@ import axios from 'axios';
 // Kung wala itong value, mag-default siya sa localhost (para sa dev).
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+// I-LOG NATIN PARA MAKITA NATIN SA BROWSER CONSOLE KUNG ANO ANG NABABASA NIYA
+console.log("Current API Base URL is:", API_BASE_URL);
+
 const api = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true // Mahalaga ito para maipadala ang refreshToken cookie
