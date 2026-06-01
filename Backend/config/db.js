@@ -11,6 +11,9 @@ const dbconnection = mysql.createPool({
     database: process.env.DB_NAME
 })
 
+// Magdagdag ka ng console log para makita natin kung ano ang nababasa niya
+console.log("Connecting to:", process.env.DB_HOST);
+
 // Test the database connection
 dbconnection.getConnection()
     .then(connection => {
