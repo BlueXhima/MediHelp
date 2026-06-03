@@ -132,7 +132,7 @@ const Learn = () => {
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col antialiased selection:bg-primary/20">
             <Navbar />
-            <main className="flex-1 pt-28 sm:pt-36 pb-24 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto w-full space-y-12">
+            <main className="flex-1 pt-24 sm:pt-28 pb-24 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto w-full space-y-12">
                 <div className="flex items-center justify-between">
                     <button 
                         onClick={() => navigate('/landingpage')}
