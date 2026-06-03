@@ -98,19 +98,27 @@ exports.login = async (req, res) => {
 };
 
 exports.verifySession = (req, res) => {
-    const token = req.cookies.token; // Basahin ang cookie
+    // Basahin ang token mula sa req.cookies O req.signedCookies para sa cross-site compatibility
+    const token = req.cookies?.token || req.headers?.cookie?.split('token=')[1]?.split(';')[0];
 
     if (!token) {
         console.log("No token found in cookies");
-        return res.status(401).json({ isAuthenticated: false });
+        return res.status(200).json({ isAuthenticated: false });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Isalin ang RoleID para tumugma sa format ng ProtectedRoute mo
+        const normalizedUser = {
+            ...decoded,
+            Role: decoded.Role // Tiyaking itong decoded.Role ay ang user.RoleID (1 o 2)
+        };
+        
         res.json({ isAuthenticated: true, user: decoded });
     } catch (err) {
         console.error("JWT Verification Error:", err.message);
-        res.status(401).json({ isAuthenticated: false });
+        res.status(200).json({ isAuthenticated: false });
     }
 };
 
