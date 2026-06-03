@@ -122,7 +122,7 @@ const ForgotPassword = () => {
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 selection:bg-primary/20 relative">
             <BackgroundLoadingState isLoading={isLoading} />
-            <ToastMessage />
+            {/* <ToastMessage /> */}
 
             {/* Back Button */}
             <button 

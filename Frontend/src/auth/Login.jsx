@@ -73,7 +73,7 @@ const LoginPage = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post("http://localhost:5000/api/login", {
+            const response = await axios.post("https://medihelp-production-af7b.up.railway.app/api/login", {
                 email,
                 password,
                 captchaToken
@@ -157,7 +157,7 @@ const LoginPage = () => {
 
                 // Trigger Security Alert Email
                 try {
-                    await axios.post("http://localhost:5000/api/send-security-alert", {
+                    await axios.post("https://medihelp-production-af7b.up.railway.app/api/send-security-alert", {
                         Email: email,
                         Device: navigator.userAgent,
                         Time: new Date().toLocaleString()
@@ -258,7 +258,7 @@ const LoginPage = () => {
 
             setIsLoading(true);
             try {
-                const res = await axios.post("http://localhost:5000/api/google-login", {
+                const res = await axios.post("https://medihelp-production-af7b.up.railway.app/api/google-login", {
                     token: tokenResponse.access_token 
                 }, { withCredentials: true });
 
