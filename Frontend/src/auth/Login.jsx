@@ -107,7 +107,7 @@ const LoginPage = () => {
                 sessionStorage.removeItem("nextCooldownDuration");
 
                 // 2. PATAYIN ANG LOADING STATE DITO
-                // setIsLoading(false); 
+                setIsLoading(false); 
 
                 // 3. TSAKA IPAKITA ANG TOAST
                 showToast("Login Successful!", "success");
