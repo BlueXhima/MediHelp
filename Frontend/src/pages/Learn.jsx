@@ -75,8 +75,13 @@ const Learn = () => {
                     sopService.getAllFirstAid()
                 ]);
 
+                // // I-map lang ang data kung matagumpay (fulfilled) ang API request mula sa server
                 if (articlesRes.status === 'fulfilled') setDbArticles(articlesRes.value);
-                if (glossaryRes.status === 'fulfilled') setDbGlossary(glossaryRes.value);
+                if (glossaryRes.status === 'rejected') {
+                    console.error("Glossary fetch failed because:", glossaryRes.reason);
+                } else {
+                    setDbGlossary(glossaryRes.value);
+                }
                 if (infoRes.status === 'fulfilled') setDbInfographics(infoRes.value);
                 if (sopRes.status === 'fulfilled') setDbFirstAid(sopRes.value);
             } catch (err) {
