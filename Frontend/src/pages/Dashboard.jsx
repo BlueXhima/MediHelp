@@ -242,7 +242,7 @@ const Dashboard = () => {
                 sessionStorage.removeItem("token");
                 sessionStorage.removeItem("isFirstLogin");
                 
-                (false); // Stop loading animation
+                setIsLoading(false); // Stop loading animation
                 navigate("/landingpage");
             }, 1500);
         }
