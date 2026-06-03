@@ -75,15 +75,15 @@ exports.login = async (req, res) => {
         // SET COOKIES
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Set to true kung naka-HTTPS ka na
-            sameSite: 'strict',
+            secure: true, // Set to true kung naka-HTTPS ka na
+            sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000
         });
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: false, // Set to true kung naka-HTTPS ka na
-            sameSite: 'strict',
+            secure: true, // Set to true kung naka-HTTPS ka na
+            sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -117,8 +117,8 @@ exports.verifySession = (req, res) => {
 exports.logout = (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
-        secure: false,
-        sameSite: 'strict'
+        secure: true,
+        sameSite: 'lax'
     });
     return res.json({ success: true, message: "Logged out successfully" });
 };
