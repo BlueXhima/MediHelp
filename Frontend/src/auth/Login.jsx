@@ -73,12 +73,10 @@ const LoginPage = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post("https://medihelp-production-af7b.up.railway.app/api/login", {
+            const response = await api.post("/login", {
                 email,
                 password,
                 captchaToken
-            }, {
-                withCredentials: true // NAPAKAHALAGA NITO
             });
 
             if (response.data && response.data.success) {
@@ -157,7 +155,7 @@ const LoginPage = () => {
 
                 // Trigger Security Alert Email
                 try {
-                    await axios.post("https://medihelp-production-af7b.up.railway.app/api/send-security-alert", {
+                    await api.post("/send-security-alert", {
                         Email: email,
                         Device: navigator.userAgent,
                         Time: new Date().toLocaleString()
