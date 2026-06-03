@@ -3,7 +3,7 @@ import {
     LayoutDashboard, Mic, BookOpen, User, Users, ChevronDown, Menu, X,
     Settings, LogOut, ArrowUpRight, Heart, Brain, MapPin, HelpCircle, Search 
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -226,7 +226,7 @@ const Dashboard = () => {
     // 7. LOGOUT LOGIC
     const handleLogout = async () => {
         try {
-            await axios.post("http://localhost:5000/api/logout", {}, { withCredentials: true });
+            await api.post("/logout");
             
             // Clear all local storage[cite: 16]
             sessionStorage.removeItem("userRole");
@@ -238,6 +238,7 @@ const Dashboard = () => {
             navigate("/landingpage");
         } catch (err) {
             console.error("Logout failed:", err);
+            // Clean up pa rin kahit mag-fail ang API call para hindi ma-stuck ang user
             sessionStorage.clear();
             navigate("/landingpage");
         }
