@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Mic, Heart, BookOpen, ArrowUpRight, Brain, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Button from '../../components/ui/Button';
@@ -16,9 +16,7 @@ const Overview = ({ onViewChange }) => {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/articles/history', {
-                    withCredentials: true,
-                });
+                const response = await api.get('/articles/history');
                 setTotalRead(response.data.length);
                 setHistory(response.data.slice(0, 3));
             } catch (error) {
