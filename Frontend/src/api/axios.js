@@ -1,12 +1,12 @@
 // Frontend/src/api/axios.js
 import axios from 'axios';
-import 'dotenv/config';
+// import 'dotenv/config';
 
 // Subukan nating i-log kung ano ang nakikita niya
-console.log("Process ENV:", process.env.VITE_APP_API_URL);
+console.log("Process ENV:", import.meta.env.VITE_APP_API_URL);
 
 // Gagamit tayo ng environment variable. 
-const API_BASE_URL = process.env.VITE_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
