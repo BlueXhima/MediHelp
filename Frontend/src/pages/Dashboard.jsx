@@ -225,22 +225,26 @@ const Dashboard = () => {
 
     // 7. LOGOUT LOGIC
     const handleLogout = async () => {
+        setIsLoading(true); // Start loading animation
         try {
             await api.post("/logout");
-            
-            // Clear all local storage[cite: 16]
-            sessionStorage.removeItem("userRole");
-            sessionStorage.removeItem("user");
-            sessionStorage.removeItem("email");
-            sessionStorage.removeItem("token");
-            sessionStorage.removeItem("isFirstLogin");
-
-            navigate("/landingpage");
+            showToast("Logged out successfully!", "success");
         } catch (err) {
             console.error("Logout failed:", err);
-            // Clean up pa rin kahit mag-fail ang API call para hindi ma-stuck ang user
-            sessionStorage.clear();
-            navigate("/landingpage");
+            showToast("Session expired. Logging out...", "info");
+        } finally {
+            // 1.5-second delay before redirecting
+            setTimeout(() => {
+                // Clear storage
+                sessionStorage.removeItem("userRole");
+                sessionStorage.removeItem("user");
+                sessionStorage.removeItem("email");
+                sessionStorage.removeItem("token");
+                sessionStorage.removeItem("isFirstLogin");
+                
+                (false); // Stop loading animation
+                navigate("/landingpage");
+            }, 1500);
         }
     };
 
