@@ -6,7 +6,7 @@ import MediHelpLogo from "/MediHelpLogo.png";
 import BackgroundLoadingState from "../components/BackgroundLoadingState";
 import { showToast } from "../components/ToastMessage";
 import Button from "../components/ui/Button";
-import axios from 'axios';
+import api from '../api/axios';
 import ReCAPTCHA from "react-google-recaptcha";
 import { useGoogleLogin } from '@react-oauth/google';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
