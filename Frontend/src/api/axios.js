@@ -3,7 +3,7 @@ import axios from 'axios';
 // import 'dotenv/config';
 
 // Subukan nating i-log kung ano ang nakikita niya
-console.log("Process ENV:", import.meta.env.VITE_APP_API_URL);
+// console.log("Process ENV:", import.meta.env.VITE_APP_API_URL);  // DONE
 
 // Gagamit tayo ng environment variable. 
 const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:5000/api';
@@ -14,7 +14,7 @@ const api = axios.create({
 });
 
 // I-LOG NATIN PARA MAKITA NATIN SA BROWSER CONSOLE KUNG ANO ANG NABABASA NIYA
-console.log("Current API Base URL is:", API_BASE_URL);
+// console.log("Current API Base URL is:", API_BASE_URL); // DONE
 
 // Interceptor para sa Response
 api.interceptors.response.use(
