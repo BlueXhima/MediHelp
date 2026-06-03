@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import BackgroundLoadingState from '../components/BackgroundLoadingState';
 
 // Check kung admin, or user yung account na ilologin 
@@ -12,9 +12,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
         const verifySession = async () => {
             try {
                 // I-verify ang HttpOnly Cookie sa backend
-                const response = await axios.get("http://localhost:5000/api/verify-session", {
-                    withCredentials: true
-                });
+                const response = await api.get("/verify-session");
 
                 if (response.data.isAuthenticated) {
                     setIsVerified(true);
