@@ -55,7 +55,7 @@ exports.googleLogin = async (req, res) => {
         // 3. Set HttpOnly Cookie
         res.cookie('token', sessionToken, {
             httpOnly: true,
-            secure: false, // Gawing true kung naka-HTTPS sa production
+            secure: true, // Gawing true kung naka-HTTPS sa production
             sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000 
         });
