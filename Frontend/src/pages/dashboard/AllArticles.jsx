@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Search, Clock, ArrowRight, Loader2, X, BookOpen, Filter, ChevronLeft, Archive } from 'lucide-react';
 import ReadingHistory from '../article-compo/RecentHistory';
@@ -77,10 +77,10 @@ const AllArticles = ({ onViewChange, setModalConfig }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/articles/all');
+                const res = await api.get('/articles/all');
                 setArticles(res.data);
                 setFilteredArticles(res.data);
-                const catRes = await axios.get('http://localhost:5000/api/articles/categories');
+                const catRes = await api.get('/articles/categories');
                 setCategories(catRes.data);
             } catch (err) {
                 console.error("Fetch error:", err);
@@ -108,7 +108,7 @@ const AllArticles = ({ onViewChange, setModalConfig }) => {
             const currentUserId = user?.UserID || user?.id;
             
             // Tawagin ang record-visit API
-            await axios.post('http://localhost:5000/api/articles/record-visit', 
+            await api.post('/articles/record-visit', 
                 { articleId: articleId }, 
                 { 
                     withCredentials: true 
