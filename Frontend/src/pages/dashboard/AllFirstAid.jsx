@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Loader2, HeartPulse, ChevronLeft, Archive, Clock, BookOpen } from 'lucide-react';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -24,11 +24,11 @@ const AllFirstAid = ({ onViewChange }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/sop/all');
+                const res = await api.get('/sop/all');
                 setFirstAid(res.data);
                 setFilteredFirstAid(res.data);
                 
-                const catRes = await axios.get('http://localhost:5000/api/articles/categories');
+                const catRes = await api.get('/articles/categories');
                 setCategories(catRes.data);
             } catch (err) {
                 console.error("Fetch error:", err);
