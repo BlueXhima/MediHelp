@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Loader2, BookOpen, Clock, Archive, ChevronLeft } from 'lucide-react';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -34,11 +34,11 @@ const AllGlossary = ({ onViewChange }) => {
         const fetchData = async () => {
             try {
                 // Siguraduhin na tama ang endpoints mo rito
-                const res = await axios.get('http://localhost:5000/api/glossary/all');
+                const res = await api.get('/glossary/all');
                 setGlossary(res.data);
                 setFilteredGlossary(res.data);
                 
-                const catRes = await axios.get('http://localhost:5000/api/articles/categories');
+                const catRes = await api.get('/articles/categories');
                 setCategories(catRes.data);
             } catch (err) {
                 console.error("Fetch error:", err);
