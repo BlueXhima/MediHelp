@@ -3,7 +3,7 @@
 import { Square, Mic, RotateCcw, ClipboardList, Info, Lock, MicOff, AlertCircle } from 'lucide-react';
 
 const VoiceControlPanel = ({ 
-    isLoggedIn, isListening, toggleListening, isSupported, permissionDenied,
+    isLoggedIn, isListening, toggleListening, isSupported, permissionDenied, remainingAttempts,
     voiceAttempts, MAX_VOICE_ATTEMPTS, handleClearConversation, setIsInfoOpen 
 }) => {
     
@@ -87,7 +87,7 @@ const VoiceControlPanel = ({
                     <p className="text-[10px] text-success font-black uppercase mt-1 tracking-widest">Unlimited Member System</p>
                 ) : (
                     <p className="text-[10px] text-amber-500 font-black uppercase mt-1 tracking-widest">
-                        Trial Account: {Math.max(0, MAX_VOICE_ATTEMPTS - voiceAttempts)} Left
+                        Trial Account: {Math.max(0, remainingAttempts - voiceAttempts)} Left
                     </p>
                 )}
             </div>
