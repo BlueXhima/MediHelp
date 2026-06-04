@@ -136,18 +136,18 @@ const AllGlossary = ({ onViewChange }) => {
                                 <div className="space-y-2">
                                     {/* Header: Term at Pronunciation */}
                                     <div className="flex flex-col gap-0.5">
-                                        <h3 className="text-sm font-bold tracking-tight text-foreground/90 group-hover:text-primary transition-colors duration-200">
+                                        <h3 className="text-md font-bold tracking-tight text-foreground/90 group-hover:text-primary transition-colors duration-200">
                                             {item.term}
                                         </h3>
                                         {item.pronunciation && (
-                                            <span className="text-[11px] font-mono text-muted-foreground/70 italic tracking-wide">
+                                            <span className="text-[12px] font-mono text-muted-foreground/70 italic tracking-wide">
                                                 /{item.pronunciation}/
                                             </span>
                                         )}
                                     </div>
                 
                                     {/* Body: Definition */}
-                                    <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-3 font-light">
+                                    <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-3 font-light">
                                         {item.definition}
                                     </p>
                                 </div>
