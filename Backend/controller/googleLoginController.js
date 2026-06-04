@@ -56,7 +56,7 @@ exports.googleLogin = async (req, res) => {
         res.cookie('token', sessionToken, {
             httpOnly: true,
             secure: true, // Gawing true kung naka-HTTPS sa production
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000 
         });
 
