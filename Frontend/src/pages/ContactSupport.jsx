@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { 
     ChevronLeft, Settings, Send, HelpCircle, 
     MessageSquare, Mail, Globe, ArrowRight, Loader2 
@@ -69,9 +69,7 @@ const ContactSupport = () => {
         setIsSubmitting(true); // Simulan ang loading animation
 
         try {
-            const response = await axios.post('http://localhost:5000/api/contact', formData, {
-                withCredentials: true
-            });
+            const response = await api.post('/contact', formData);
 
             if (response.data.success) {
                 setTimeout(() => {
