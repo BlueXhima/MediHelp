@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Archive, Trash2, RotateCcw, Loader2, BookOpen, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
@@ -12,7 +12,7 @@ const ArchivedHistory = ({ setModalConfig }) => {
 
     const fetchArchives = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/articles/history/archives', {
+            const res = await api.get('/articles/history/archives', {
                 withCredentials: true
             });
             setArchives(res.data);
@@ -32,7 +32,7 @@ const ArchivedHistory = ({ setModalConfig }) => {
     // --- RESTORE ACTIONS (No Modal, Direct Toast) ---
     const handleRestoreAll = async () => {
         try {
-            const res = await axios.post('http://localhost:5000/api/articles/history/restore-all', {}, { withCredentials: true });
+            const res = await api.post('/articles/history/restore-all');
             if (res.data.success) {
                 setArchives([]);
                 showToast("All articles restored to history!", "success");
@@ -47,7 +47,7 @@ const ArchivedHistory = ({ setModalConfig }) => {
     // 1. Delete All Logic
     const handleDeleteAllConfirm = async () => {
         try {
-            const res = await axios.delete('http://localhost:5000/api/articles/history/archive-all', { withCredentials: true });
+            const res = await api.delete('/articles/history/archive-all');
             if (res.data.success) {
                 setArchives([]);
                 showToast("Archive cleared permanently", "success");
@@ -70,7 +70,7 @@ const ArchivedHistory = ({ setModalConfig }) => {
     // --- INDIVIDUAL ACTIONS ---
     const handleRestoreSingle = async (archiveId) => {
         try {
-            const res = await axios.post(`http://localhost:5000/api/articles/history/restore/${archiveId}`, {}, { withCredentials: true });
+            const res = await api.post(`/articles/history/restore/${archiveId}`);
             setArchives(prevArchives => 
                 prevArchives.filter(item => {
                     const currentId = item.ArchiveID || item.archive_id;
@@ -87,7 +87,7 @@ const ArchivedHistory = ({ setModalConfig }) => {
     // 2. Delete Single Logic
     const handleDeleteSingleConfirm = async (archiveId) => {
         try {
-            const res = await axios.delete(`http://localhost:5000/api/articles/history/archive/${archiveId}`, { withCredentials: true });
+            const res = await api.delete(`/articles/history/archive/${archiveId}`);
             if (res.data.success) {
                 setArchives(prev => prev.filter(item => (item.ArchiveID || item.archive_id) !== archiveId));
                 showToast("Article permanently deleted", "success");
