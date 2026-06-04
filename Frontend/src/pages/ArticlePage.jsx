@@ -141,9 +141,7 @@ const ArticlePage = () => {
     // Function para i-verify kung saved na ang article na ito
     const checkIfSaved = async () => {
         try {
-            const res = await api.get('/articles/library', {
-                withCredentials: true
-            });
+            const res = await api.get('/articles/library');
             // I-check kung yung ID ng article ngayon ay nasa listahan ng saved articles
             const saved = res.data.some(item => item.article_id === parseInt(id));
             setIsSaved(saved);
@@ -208,7 +206,7 @@ const ArticlePage = () => {
                         await api.post('/articles/update-progress', {
                             articleId: id,
                             progress: maxScroll
-                        }
+                        });
                     } catch (err) {
                         console.error("Failed to save progress on leave");
                     }
@@ -285,10 +283,9 @@ const ArticlePage = () => {
 
     const handleSaveToLibrary = async () => {
         try {
-            const response = await api.post('/articles/save-toggle',
-                { articleId: id }, 
-                { withCredentials: true } // Importante para sa cookies/token
-            );
+            const saveToggleRes = await api.post('/articles/save-toggle', { 
+                articleId: id 
+            });
 
             const isNowSaved = response.data.saved;
             setIsSaved(isNowSaved);
