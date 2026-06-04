@@ -1,3 +1,5 @@
+//Frontend/src/pages/ChatPage.jsx
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Send, AlertTriangle, Terminal, Mic } from 'lucide-react';
@@ -344,7 +346,8 @@ const ChatPage = () => {
                     category: "General"
                 }
             ]);
-            setGuestAttempts(0);
+            // REMOVED: setGuestAttempts(0);
+            // Guest attempts persist even after clearing chat — prevents limit bypass
         } else if (deleteMode === 'single') {
             const targetId = messageToDelete;
             const current = messagesRef.current;

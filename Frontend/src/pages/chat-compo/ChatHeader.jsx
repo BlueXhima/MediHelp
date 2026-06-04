@@ -6,11 +6,13 @@ import { ChevronLeft, ShieldCheck, RotateCcw, Info } from 'lucide-react';
 const ChatHeader = ({ 
     navigate, 
     isLoggedIn, 
-    MAX_VOICE_ATTEMPTS, remainingAttempts,
-    voiceAttempts,
+    MAX_GUEST_ATTEMPTS, 
+    guestAttempts,
     handleClearConversation,
     setIsInfoOpen 
 }) => {
+    const remainingAttempts = Math.max(0, MAX_GUEST_ATTEMPTS - guestAttempts);
+
     return (
         <div className="h-16 flex justify-between items-center px-4 md:px-6 border-b border-border bg-background/80 backdrop-blur-md shrink-0 sticky top-0 z-10">
             {/* Back Button */}
@@ -24,7 +26,7 @@ const ChatHeader = ({
             
             {/* Status at Actions Container */}
             <div className="flex items-center gap-3">
-                {/* Status Badge - Nakikita parin (Hidden sa napakaliit na screen kung kailangan, pero pinanatili ko dito) */}
+                {/* Status Badge */}
                 <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${isLoggedIn ? 'border-primary bg-primary/10' : 'border-amber-500/30 bg-amber-500/5'}`}>
                     {isLoggedIn ? (
                         <>
@@ -33,8 +35,7 @@ const ChatHeader = ({
                         </>
                     ) : (
                         <span className="text-[10px] font-black tracking-wider text-amber-500 uppercase">
-                            {/* Ginawang (remainingAttempts || 0) at (voiceAttempts || 0) para laging may numero */}
-                            {Math.max(0, (remainingAttempts || 0) - (voiceAttempts || 0))} / {remainingAttempts || 0} <span className="sm:inline">FREE ATTEMPTS LEFT</span>
+                            {remainingAttempts} / {MAX_GUEST_ATTEMPTS} <span className="sm:inline">FREE ATTEMPTS LEFT</span>
                         </span>
                     )}
                 </div>

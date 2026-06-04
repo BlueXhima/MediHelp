@@ -3,11 +3,12 @@
 import { Square, Mic, RotateCcw, ClipboardList, Info, Lock, MicOff, AlertCircle } from 'lucide-react';
 
 const VoiceControlPanel = ({ 
-    isLoggedIn, isListening, toggleListening, isSupported, permissionDenied, remainingAttempts,
-    voiceAttempts, MAX_VOICE_ATTEMPTS, handleClearConversation, setIsInfoOpen 
+    isLoggedIn, isListening, toggleListening, isSupported, permissionDenied,
+    guestAttempts, MAX_GUEST_ATTEMPTS, handleClearConversation, setIsInfoOpen 
 }) => {
     
-    const isLocked = !isLoggedIn && voiceAttempts >= MAX_VOICE_ATTEMPTS;
+    const isLocked = !isLoggedIn && guestAttempts >= MAX_GUEST_ATTEMPTS;
+    const remainingAttempts = Math.max(0, MAX_GUEST_ATTEMPTS - guestAttempts);
 
     // Determine button state text and icon
     const getButtonState = () => {
@@ -87,8 +88,7 @@ const VoiceControlPanel = ({
                     <p className="text-[10px] text-success font-black uppercase mt-1 tracking-widest">Unlimited Member System</p>
                 ) : (
                     <p className="text-[10px] text-amber-500 font-black uppercase mt-1 tracking-widest">
-                        {/* Sinisigurong 0 ang fallback kapag hindi pa naglo-load ang mga variable */}
-                        Trial Account: {Math.max(0, (remainingAttempts || 0) - (voiceAttempts || 0))} Left
+                        Trial Account: {remainingAttempts} Left
                     </p>
                 )}
             </div>
