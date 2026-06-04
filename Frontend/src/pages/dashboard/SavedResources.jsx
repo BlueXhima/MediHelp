@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Loader2, BookOpen, HeartPulse, Book, Image as ImageIcon } from 'lucide-react';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
@@ -17,10 +17,10 @@ const SavedResources = ({ onViewChange }) => {
             try {
                 // Palitan ang mga endpoint na ito base sa API mo
                 const [art, fa, gl, info] = await Promise.all([
-                    axios.get('http://localhost:5000/api/articles/library', { withCredentials: true }),
-                    axios.get('http://localhost:5000/api/saved/firstaid', { withCredentials: true }),
-                    axios.get('http://localhost:5000/api/saved/glossary', { withCredentials: true }),
-                    axios.get('http://localhost:5000/api/saved/infographics', { withCredentials: true })
+                    api.get('/articles/library'),
+                    api.get('/saved/firstaid'),
+                    api.get('/saved/glossary'),
+                    api.get('/saved/infographics')
                 ]);
                 
                 setSavedData({ 
