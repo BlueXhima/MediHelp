@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import api from '../../api/axios';
+import api from '../api/axios';
 import { Loader2, Home, ArrowLeft, LayoutList, Settings2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScrollToTop from '../components/ui/ScrollTopButton';
