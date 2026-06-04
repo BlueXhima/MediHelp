@@ -4,22 +4,23 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-    host: '://gmail.com', // Siguraduhing '://gmail.com' ito, HINDI '://gmail.com'
-    port: 465,              // SSL Port ng Gmail
-    secure: true,           // Naka-on ang SSL security
+    host: 'smtp.gmail.com',
+    port: 587,             // Palitan ang 465 ng 587
+    secure: false,          // Gawing false para sa port 587 (gagamit ito ng STARTTLS)
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD, // Dikit-dikit na 16-character string na walang space
+        pass: process.env.EMAIL_PASSWORD, // Dito mo ilalagay ang BAGONG dikit-dikit na password
     },
+    tls: {
+        rejectUnauthorized: false // Pinipigilan nito ang mga SSL/TLS restrictions sa hosting provider
+    }
 });
 
-// Ito ang magpapakita sa Railway logs mo kung nababasa na ang keys
 transporter.verify((error, success) => {
     if (error) {
-        console.error('❌ Mailer Connection Failed:', error.message);
-        console.log(`🔍 Debug Railway Variables -> EMAIL_USER: ${process.env.EMAIL_USER ? 'May laman' : 'WALANG LAMAN'}, EMAIL_PASSWORD: ${process.env.EMAIL_PASSWORD ? 'May laman' : 'WALANG LAMAN'}`);
+        console.error('❌ Transporter Verification Failed:', error.message);
     } else {
-        console.log('✅ Mailer Connection Successful! Ready na si MediHelp mag-send.');
+        console.log('✅ Success! Transporter is bypass-ready and connected.');
     }
 });
 
