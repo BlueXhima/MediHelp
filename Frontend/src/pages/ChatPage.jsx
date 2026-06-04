@@ -434,6 +434,7 @@ const ChatPage = () => {
                 navigate={navigate}
                 isLoggedIn={isLoggedIn}
                 MAX_GUEST_ATTEMPTS={MAX_GUEST_ATTEMPTS}
+                remainingAttempts={remainingAttempts}
                 guestAttempts={guestAttempts}
                 handleClearConversation={handleClearConversation}
                 setIsInfoOpen={setIsInfoOpen}
@@ -554,6 +555,7 @@ const ChatPage = () => {
                         permissionDenied={permissionDenied}
                         guestAttempts={guestAttempts}
                         MAX_GUEST_ATTEMPTS={MAX_GUEST_ATTEMPTS}
+                        remainingAttempts={remainingAttempts}
                         handleClearConversation={handleClearConversation}
                         setIsInfoOpen={setIsInfoOpen}
                     />
