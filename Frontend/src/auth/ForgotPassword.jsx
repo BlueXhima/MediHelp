@@ -5,7 +5,7 @@ import BackgroundLoadingState from "../components/BackgroundLoadingState";
 import { showToast } from "../components/ToastMessage";
 import MediHelpLogo from "/MediHelpLogo.png"; // Sinunod ang logo pattern sa Login
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import axios from 'axios';
+import api from '../api/axios';
 
 const ForgotPassword = () => {
     useDocumentTitle("Forgot Password");
@@ -50,7 +50,7 @@ const ForgotPassword = () => {
 
         try {
             if (step === "email") {
-                const response = await axios.post("http://localhost:5000/api/forgot-password", { email });
+                const response = await api.post("/forgot-password", { email });
                 if (response.data.success) {
                     showToast("Verification link sent to your email!", "success");
                     setStep("success");
@@ -63,7 +63,7 @@ const ForgotPassword = () => {
                     return;
                 }
 
-                const response = await axios.post("http://localhost:5000/api/reset-password", {
+                const response = await api.post("/reset-password", {
                     email,
                     token: urlToken,
                     newPassword
