@@ -47,7 +47,7 @@ exports.registerUser = async (req, res) => {
 
             // 5. Insert to Database (Ligtas na ito dahil sa Parameterized Queries + Sanitization)
             await dbconnection.query(
-                'INSERT INTO users (FirstName, LastName, Email, Password, RoleID, isVerified, created_date, created_time) VALUES (?, ?, ?, ?, ?, 0, CURDATE(), CURTIME())',
+                'INSERT INTO users (FirstName, LastName, Email, Password, RoleID, isVerified, Created_Date, Created_Time) VALUES (?, ?, ?, ?, ?, 0, CURDATE(), CURTIME())',
                 [FirstName, LastName, Email, hashedPassword, roleID]
             );
 
