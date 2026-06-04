@@ -1,0 +1,10 @@
+// vercel.json root file
+
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
