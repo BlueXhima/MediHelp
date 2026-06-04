@@ -283,7 +283,7 @@ const ArticlePage = () => {
 
     const handleSaveToLibrary = async () => {
         try {
-            const saveToggleRes = await api.post('/articles/save-toggle', { 
+            const response = await api.post('/articles/save-toggle', { 
                 articleId: id 
             });
 
