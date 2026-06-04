@@ -6,7 +6,7 @@ import { ChevronLeft, ShieldCheck, RotateCcw, Info } from 'lucide-react';
 const ChatHeader = ({ 
     navigate, 
     isLoggedIn, 
-    MAX_VOICE_ATTEMPTS, 
+    MAX_VOICE_ATTEMPTS, remainingAttempts,
     voiceAttempts,
     handleClearConversation,
     setIsInfoOpen 
@@ -33,7 +33,7 @@ const ChatHeader = ({
                         </>
                     ) : (
                         <span className="text-[10px] font-black tracking-wider text-amber-500 uppercase">
-                            {Math.max(0, MAX_VOICE_ATTEMPTS - voiceAttempts)} / {MAX_VOICE_ATTEMPTS} <span className="sm:inline">FREE ATTEMPTS LEFT</span>
+                            {Math.max(0, remainingAttempts - voiceAttempts)} / {remainingAttempts} <span className="sm:inline">FREE ATTEMPTS LEFT</span>
                         </span>
                     )}
                 </div>
