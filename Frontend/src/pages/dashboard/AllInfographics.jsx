@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Loader2, Image as ImageIcon, Clock, Archive } from 'lucide-react';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -27,11 +27,11 @@ const AllInfographics = ({ onViewChange }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/infographics/all');
+                const res = await api.get('/infographics/all');
                 setInfographics(res.data);
                 setFilteredInfographics(res.data);
 
-                const catRes = await axios.get('http://localhost:5000/api/articles/categories');
+                const catRes = await api.get('/articles/categories');
                 setCategories(catRes.data);
             } catch (err) {
                 console.error("Fetch error:", err);
