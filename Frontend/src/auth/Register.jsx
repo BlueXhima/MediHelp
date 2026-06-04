@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MediHelpLogo from "/MediHelpLogo.png";
 import buttonlogo from "../assets/google.png";
 import { Stethoscope, ArrowRight, Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import axios from "axios"; 
+import api from "../api/axios"; 
 import { showToast } from "../components/ToastMessage";
 import BackgroundLoadingState from "../components/BackgroundLoadingState";
 import { useNavigate } from "react-router-dom";
@@ -85,7 +85,7 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post("http://localhost:5000/api/register", {
+            const response = await api.post("/register", {
                 FirstName: firstName,
                 LastName: lastName,
                 Email: email,
@@ -113,9 +113,9 @@ const Register = () => {
         onSuccess: async (tokenResponse) => {
             setIsLoading(true);
             try {
-                const res = await axios.post("http://localhost:5000/api/google-login", {
+                const res = await api.post("/google-login", {
                     token: tokenResponse.access_token 
-                }, { withCredentials: true });
+                });
 
                 if (res.data.success) {
                     sessionStorage.setItem("userRole", res.data.role);

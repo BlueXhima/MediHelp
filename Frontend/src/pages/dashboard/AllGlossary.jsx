@@ -127,19 +127,46 @@ const AllGlossary = ({ onViewChange }) => {
 
                 {/* Content... */}
                 {filteredGlossary.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredGlossary.map((item) => (
-                            <div key={item.infographic_id} className="group cursor-pointer space-y-3">
-                                <div className="aspect-3/4 rounded-2xl overflow-hidden bg-muted border border-border/40">
-                                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <div 
+                                key={item.infographic_id} 
+                                className="group border border-border/40 hover:border-border-foreground/20 rounded-xl p-5 bg-card/40 backdrop-blur-xs transition-all duration-300 flex flex-col justify-between min-h-[160px]"
+                            >
+                                <div className="space-y-2">
+                                    {/* Header: Term at Pronunciation */}
+                                    <div className="flex flex-col gap-0.5">
+                                        <h3 className="text-md font-bold tracking-tight text-foreground/90 group-hover:text-primary transition-colors duration-200">
+                                            {item.term}
+                                        </h3>
+                                        {item.pronunciation && (
+                                            <span className="text-[12px] font-mono text-muted-foreground/70 italic tracking-wide">
+                                                /{item.pronunciation}/
+                                            </span>
+                                        )}
+                                    </div>
+                
+                                    {/* Body: Definition */}
+                                    <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-3 font-light">
+                                        {item.definition}
+                                    </p>
                                 </div>
-                                <h3 className="text-sm font-semibold tracking-tight">{item.title}</h3>
+                
+                                {/* Optional subtle anchor element at the bottom */}
+                                <div className="pt-3 flex justify-end">
+                                    <span className="text-[9px] uppercase tracking-widest text-muted-foreground/40 group-hover:text-primary/60 transition-colors font-medium">
+                                        View Term
+                                    </span>
+                                </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="py-24 text-center border-t border-border/40">
-                        <p className="text-sm text-muted-foreground font-light italic">No Medical Glossary found.</p>
+                    /* Minimalist Empty State */
+                    <div className="py-20 text-center border border-dashed border-border/40 rounded-2xl bg-card/20">
+                        <p className="text-xs text-muted-foreground font-light tracking-wide">
+                            No medical glossary entries found matching your criteria.
+                        </p>
                     </div>
                 )}
             </div>
