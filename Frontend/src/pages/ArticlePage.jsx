@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Loader2, Home, ArrowLeft, LayoutList, Settings2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScrollToTop from '../components/ui/ScrollTopButton';
@@ -91,7 +91,7 @@ const ArticlePage = () => {
     useEffect(() => {
         const fetchArticle = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/articles/${id}`);
+                const res = await api.get(`/articles/${id}`);
                 const rawHTML = res.data.full_content;
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(rawHTML, 'text/html');
@@ -141,7 +141,7 @@ const ArticlePage = () => {
     // Function para i-verify kung saved na ang article na ito
     const checkIfSaved = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/articles/library', {
+            const res = await api.get('/articles/library', {
                 withCredentials: true
             });
             // I-check kung yung ID ng article ngayon ay nasa listahan ng saved articles
@@ -205,10 +205,10 @@ const ArticlePage = () => {
             const saveFinalProgress = async () => {
                 if (maxScroll > 0) {
                     try {
-                        await axios.post('http://localhost:5000/api/articles/update-progress', {
+                        await api.post('/articles/update-progress', {
                             articleId: id,
                             progress: maxScroll
-                        }, { withCredentials: true });
+                        }
                     } catch (err) {
                         console.error("Failed to save progress on leave");
                     }
@@ -269,7 +269,7 @@ const ArticlePage = () => {
             // Gamitin ang 'id' mula sa useParams()
             if (userData?.UserID && id) {
                 try {
-                    const response = await axios.get(`http://localhost:5000/api/articles/save-status/${userData.UserID}/${id}`);
+                    const response = await api.get(`/articles/save-status/${userData.UserID}/${id}`);
                     setIsSaved(response.data.isSaved);
                 } catch (err) {
                     console.error("Error checking save status:", err);
@@ -285,7 +285,7 @@ const ArticlePage = () => {
 
     const handleSaveToLibrary = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/articles/save-toggle',
+            const response = await api.post('/articles/save-toggle',
                 { articleId: id }, 
                 { withCredentials: true } // Importante para sa cookies/token
             );
@@ -436,7 +436,7 @@ const ArticlePage = () => {
     useEffect(() => {
         const checkFeedbackStatus = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/articles/feedback-status/${id}`);
+                const response = await api.get(`/articles/feedback-status/${id}`);
                 if (response.data.hasFeedback) {
                     // Siguraduhin na boolean ang pagkaka-set (1 becomes true, 0 becomes false)
                     setUserFeedback(!!response.data.is_helpful);
@@ -451,7 +451,7 @@ const ArticlePage = () => {
 
     const handleFeedback = async (isHelpful) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/articles/feedback', {
+            const response = await api.post('/articles/feedback', {
                 article_id: id,
                 is_helpful: isHelpful
             });
@@ -477,7 +477,7 @@ const ArticlePage = () => {
 
         try {
             // 2. MABILISANG TRANSLATION PARA SA LOADER LANG (Para hindi English ang makita ng user)
-            const loaderRes = await axios.post('http://localhost:5000/api/translate/process', {
+            const loaderRes = await api.post('/translate/process', {
                 text: ["Translating Content", "Please wait a moment"],
                 targetLang: targetLangCode
             });
@@ -531,7 +531,7 @@ const ArticlePage = () => {
                 ...footerLabels              // [33] onwards
             ];
 
-            const mainRes = await axios.post('http://localhost:5000/api/translate/process', {
+            const mainRes = await api.post('/translate/process', {
                 text: textToTranslate,
                 targetLang: targetLangCode
             });
