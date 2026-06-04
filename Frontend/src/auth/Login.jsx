@@ -229,21 +229,21 @@ const LoginPage = () => {
     }, [lockUntil, isSilentLock]);
 
     // --- SHORTCUT KEY FOR ADMIN REDIRECT ---
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            // Shortcut: CTRL + SHIFT + A
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
-                e.preventDefault(); // Iwasan ang default browser actions
-                showToast("Redirecting to Admin Gateway...", "success");
-                setTimeout(() => {
-                    navigate('/admin-gateway');
-                }, 800);
-            }
-        };
+    // useEffect(() => {
+    //     const handleKeyDown = (e) => {
+    //         // Shortcut: CTRL + SHIFT + A
+    //         if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+    //             e.preventDefault(); // Iwasan ang default browser actions
+    //             showToast("Redirecting to Admin Gateway...", "success");
+    //             setTimeout(() => {
+    //                 navigate('/admin-gateway');
+    //             }, 800);
+    //         }
+    //     };
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [navigate]);
+    //     window.addEventListener('keydown', handleKeyDown);
+    //     return () => window.removeEventListener('keydown', handleKeyDown);
+    // }, [navigate]);
 
     const handleInputChange = (setter) => (e) => {
         setter(e.target.value);
@@ -303,14 +303,8 @@ const LoginPage = () => {
                             <h1 className="text-3xl font-black text-foreground tracking-tight mb-2 text-glow">MediHelp</h1>
                             <p className="text-[13px] text-foreground/50 font-medium">
                                 Your health journey continues here
-                                {/* Hidden Admin Link */}
-                                <span 
-                                    onClick={() => navigate('/admin-gateway')} 
-                                    className="cursor-default select-none active:opacity-30 transition-opacity"
-                                    title=""
-                                >
-                                    .
-                                </span>
+                                {/* Disabled Hidden Admin Link */}
+                                <span className="select-none text-foreground/50">.</span>
                             </p>
                         </div>
 
