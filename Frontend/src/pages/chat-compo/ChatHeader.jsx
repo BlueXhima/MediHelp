@@ -33,7 +33,8 @@ const ChatHeader = ({
                         </>
                     ) : (
                         <span className="text-[10px] font-black tracking-wider text-amber-500 uppercase">
-                            {Math.max(0, remainingAttempts - voiceAttempts)} / {remainingAttempts} <span className="sm:inline">FREE ATTEMPTS LEFT</span>
+                            {/* Ginawang (remainingAttempts || 0) at (voiceAttempts || 0) para laging may numero */}
+                            {Math.max(0, (remainingAttempts || 0) - (voiceAttempts || 0))} / {remainingAttempts || 0} <span className="sm:inline">FREE ATTEMPTS LEFT</span>
                         </span>
                     )}
                 </div>
