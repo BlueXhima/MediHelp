@@ -256,9 +256,9 @@ const LoginPage = () => {
 
             setIsLoading(true);
             try {
-                const res = await axios.post("https://medihelp-production-af7b.up.railway.app/api/google-login", {
+                const res = await api.post("/google-login", {
                     token: tokenResponse.access_token 
-                }, { withCredentials: true });
+                });
 
                 if (res.data.success) {
                     sessionStorage.setItem("userRole", res.data.role);
