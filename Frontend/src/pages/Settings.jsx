@@ -7,7 +7,7 @@ import {
     Settings as SettingsIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
 import { cn } from "../lib/utils";
 import MobileDrawer from "../components/modals/MobileDrawer";
 import MediHelpLogo from "/MediHelpLogo.png";
@@ -37,7 +37,7 @@ const SettingsPage = () => {
             }
 
             try {
-                const res = await axios.get('http://localhost:5000/api/auth/profile', {
+                const res = await api.get('/auth/profile', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 
