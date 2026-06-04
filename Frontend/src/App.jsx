@@ -68,8 +68,8 @@ function App() {
 
         {/* HELP & SUPPORT MATRIX ROUTES */}
         <Route path="/help-support" element={<HelpSupport />} />
-        <Route path="/help-support/faq/:id" element={<HelpArticleDetail />} />
         <Route path="/help-support/all-faqs" element={<AllFAQs />} />
+        <Route path="/help-support/faq/:id" element={<HelpArticleDetail />} />
 
         {/* AUTH GATEWAY CORES */}
         <Route path="/login" element={<Login />} />
