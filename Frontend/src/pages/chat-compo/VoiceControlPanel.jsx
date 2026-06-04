@@ -87,7 +87,8 @@ const VoiceControlPanel = ({
                     <p className="text-[10px] text-success font-black uppercase mt-1 tracking-widest">Unlimited Member System</p>
                 ) : (
                     <p className="text-[10px] text-amber-500 font-black uppercase mt-1 tracking-widest">
-                        Trial Account: {Math.max(0, remainingAttempts - voiceAttempts)} Left
+                        {/* Sinisigurong 0 ang fallback kapag hindi pa naglo-load ang mga variable */}
+                        Trial Account: {Math.max(0, (remainingAttempts || 0) - (voiceAttempts || 0))} Left
                     </p>
                 )}
             </div>
