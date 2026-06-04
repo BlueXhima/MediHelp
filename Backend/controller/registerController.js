@@ -8,7 +8,15 @@ const jwt = require('jsonwebtoken');
 exports.registerUser = async (req, res) => {
     // 1. Gamitin ang matchedData para makuha ang NILINIS (sanitized) na data
     const data = matchedData(req);
-    const { FirstName, LastName, Email, Password } = req.body;
+    const { FirstName, LastName, Email, Password } = data;
+
+    // Selyo para sa debugging: I-comment out ito kapag okay na
+    console.log("Sanitized Register Data:", { FirstName, LastName, Email });
+
+    // Siguraduhing may pumasok na email at password
+    if (!Email || !Password) {
+        return res.status(400).json({ message: 'Missing required registration fields.' });
+    }
 
     try {
         // 2. Check if email already exists
@@ -25,9 +33,16 @@ exports.registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(Password + pepper, 10);
         const roleID = 2; // Default user role
         const otp = generateOTP();
+        const expiresAt = Date.now() + 1 * 60 * 1000; // 1 minute from now
+
+        // 4. STORE OTP FIRST (I-save muna bago mag-send para iwas error sa verification mamaya)
+        otpStore.set(Email, {
+            otp,
+            expiresAt
+        });
 
         try {
-            // 4. Send Verification Email
+            // 5. Send Verification Email
             await transporter.sendMail({
                 from: '"MediHelp Support" <medihelp.verify@gmail.com>',
                 to: Email,
@@ -45,19 +60,11 @@ exports.registerUser = async (req, res) => {
                 `
             });
 
-            // 5. Insert to Database (Ligtas na ito dahil sa Parameterized Queries + Sanitization)
+            // 6. Insert to Database
             await dbconnection.query(
                 'INSERT INTO users (FirstName, LastName, Email, Password, RoleID, isVerified, Created_Date, Created_Time) VALUES (?, ?, ?, ?, ?, 0, CURDATE(), CURTIME())',
                 [FirstName, LastName, Email, hashedPassword, roleID]
             );
-
-            const expiresAt = Date.now() + 1 * 60 * 1000; // 1 minute from now
-
-            // 5. Store OTP in Map
-            otpStore.set(Email, {
-                otp,
-                expiresAt
-            });
 
             res.status(201).json({ 
                 message: 'User registered successfully. Please verify your email.',
@@ -68,8 +75,9 @@ exports.registerUser = async (req, res) => {
                     lastName: LastName 
                 }
             });
-
         } catch (mailError) {
+            // Kung nabigo ang email, burahin ang OTP sa store para malinis
+            otpStore.delete(Email);
             console.error('Mailer Error:', mailError);
             return res.status(500).json({ message: 'Failed to send verification email.' });
         }
