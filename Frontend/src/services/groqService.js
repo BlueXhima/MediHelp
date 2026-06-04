@@ -3,6 +3,16 @@
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
+// 1. Check kung may nakuha na value (Magbabalik ng true o false)
+console.log("🔑 Is Groq API Key loaded?:", !!GROQ_API_KEY);
+
+// 2. Check ang unang 4 na karakter para malaman kung tama ang format nang hindi ibinubunyag ang buong key
+if (GROQ_API_KEY) {
+    console.log("📌 API Key Preview:", `${GROQ_API_KEY.substring(0, 7)}...`);
+} else {
+    console.error("❌ ERROR: VITE_GROQ_API_KEY is undefined! Check your .env file.");
+}
+
 const MEDI_SYSTEM_PROMPT = `You are Medi, an AI medical symptom checker assistant built into MediHelp.
 Your role is to analyze symptoms described by users and provide helpful, clear health information.
 
