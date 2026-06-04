@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { BookMarked, Trash2, ArrowRight, Loader2, Bookmark, RotateCcw, Eraser, RefreshCw, BookOpen  } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
@@ -12,9 +12,7 @@ const SavedArticles = ({ setModalConfig }) => {
 
     const fetchSavedArticles = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/articles/library', {
-                withCredentials: true
-            });
+            const res = await api.get('/articles/library');
             setSavedList(res.data);
         } catch (err) {
             console.error("Error fetching saved articles:", err);
@@ -32,9 +30,7 @@ const SavedArticles = ({ setModalConfig }) => {
     // 1. Clear All Saved Articles
     const handleClearLibraryConfirm = async () => {
         try {
-            const res = await axios.delete('http://localhost:5000/api/articles/library/clear', { 
-                withCredentials: true 
-            });
+            const res = await api.delete('/articles/library/clear');
             if (res.data.success) {
                 setSavedList([]);
                 showToast("Library cleared successfully", "success");
@@ -58,9 +54,8 @@ const SavedArticles = ({ setModalConfig }) => {
     // 2. Remove Single Saved Article
     const handleRemoveSingleConfirm = async (articleId) => {
         try {
-            const res = await axios.post('http://localhost:5000/api/articles/save-toggle', 
-                { articleId }, 
-                { withCredentials: true }
+            const res = await api.post('/articles/save-toggle', 
+                { articleId }
             );
 
             if (res.status === 200) {
