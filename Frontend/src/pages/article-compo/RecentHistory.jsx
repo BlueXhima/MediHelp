@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { BookOpen, Trash2, ArrowRight, Loader2, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
@@ -12,9 +12,7 @@ const ReadingHistory = ({ setModalConfig}) => {
 
     const fetchHistory = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/articles/history', {
-                withCredentials: true
-            });
+            const res = await api.get('/articles/history');
             setHistory(res.data);
         } catch (err) {
             console.error("Error fetching history:", err);
@@ -31,9 +29,7 @@ const ReadingHistory = ({ setModalConfig}) => {
     const handlePurgeConfirm = async () => {
         try {
             // DINAGDAGAN NG /articles PARA TUMAMA SA ROUTE
-            const res = await axios.post(`http://localhost:5000/api/articles/history/purge`, {
-                withCredentials: true
-            });
+            const res = await api.post(`http://localhost:5000/api/articles/history/purge`);
             
             if (res.data.success) {
                 setHistory([]);
@@ -48,9 +44,7 @@ const ReadingHistory = ({ setModalConfig}) => {
     // 2. Function para sa Single Archive
     const handleArchiveSingle = async (historyId) => {
         try {
-            const res = await axios.post(`http://localhost:5000/api/articles/history/archive-single/${historyId}`, {}, {
-                withCredentials: true
-            });
+            const res = await api.post(`/articles/history/archive-single/${historyId}`);
 
             if (res.data.success) {
                 // I-filter ang state para mawala agad sa listahan yung in-archive
