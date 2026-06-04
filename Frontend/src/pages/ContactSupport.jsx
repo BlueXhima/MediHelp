@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../api/axios';
+import api from '../api/axios';
 import { 
     ChevronLeft, Settings, Send, HelpCircle, 
     MessageSquare, Mail, Globe, ArrowRight, Loader2 
