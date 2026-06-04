@@ -36,9 +36,9 @@ exports.googleLogin = async (req, res) => {
 
             // 2. I-update ang INSERT query para isama ang Password
             const [result] = await dbconnection.query(
-                `INSERT INTO users (FirstName, LastName, Email, Password, RoleID, Created_Date, Created_Time) 
-                VALUES (?, ?, ?, ?, ?, CURDATE(), CURTIME())`,
-                [firstName, lastName, normalizedEmail, placeholderPassword, 2] // Idinagdag ang Password field[cite: 13]
+                `INSERT INTO users (FirstName, LastName, Email, Password, RoleID, isVerified, Created_Date, Created_Time) 
+                VALUES (?, ?, ?, ?, ?, ?, CURDATE(), CURTIME())`,
+                [firstName, lastName, normalizedEmail, placeholderPassword, 2, 1] // Idinagdag ang 1 para sa isVerified
             );
 
             const [newUser] = await dbconnection.query('SELECT * FROM users WHERE UserID = ?', [result.insertId]);
