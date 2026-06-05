@@ -14,7 +14,7 @@ exports.getNearbyHospitals = async (req, res) => {
             method: 'GET',
             headers: {
                 // Mahalaga ito para hindi mag-406 error
-                'User-Agent': 'MediHelp-App/1.0 (Contact: your-email@example.com)',
+                'User-Agent': 'MediHelp-App/1.0 (Contact: medihelp241@gmail.com)',
                 'Accept': 'application/json'
             }
         });
