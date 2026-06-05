@@ -72,173 +72,179 @@ const Navbar = ({ onOpenEmergency }) => {
 
     return (
         <>
-            <nav 
-                className={`fixed top-0 w-full z-100 border-b transition-all duration-300 px-6 py-2 flex items-center justify-between ${
-                    isScrolled ? 'bg-background/95 backdrop-blur-md border-border shadow-sm' : 'bg-transparent border-transparent'
+            <motion.nav 
+                className={`fixed inset-x-0 top-0 w-full z-[100] transition-all duration-300 ${
+                    isScrolled 
+                    ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' 
+                    : 'bg-transparent border-transparent'
                 }`}
                 onMouseLeave={() => setActiveFlyout(null)}
             >
-                {/* LEFT: Logo */}
-                <div className="flex items-center">
-                    <span className="text-2xl font-black tracking-tighter text-primary cursor-pointer" 
-                        onClick={() => navigate('/')}
-                        style={{ fontFamily: "'Unesa', sans-serif" }}>
-                        MEDIHELP
-                    </span>
-                </div>
-
-                {/* CENTER: Desktop Navigation Links */}
-                <div className="hidden md:flex items-center gap-8 h-full">
-                    {Links.map((link) => (
-                        <div 
-                            key={link.name} 
-                            className="h-12 flex items-center"
-                            onMouseEnter={() => link.hasDropdown ? setActiveFlyout(link.name) : setActiveFlyout(null)}
-                        >
-                            {link.hasDropdown ? (
-                                <button className="text-foreground/70 hover:text-primary font-medium transition-colors flex items-center gap-1">
-                                    {link.name}
-                                    <ChevronDown className={`w-4 h-4 transition-transform ${activeFlyout === link.name ? 'rotate-180' : ''}`} />
-                                </button>
-                            ) : (
-                                <a href={link.href} className="text-foreground/70 hover:text-primary font-medium transition-colors">
-                                    {link.name}
-                                </a>
-                            )}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16 w-full">
+                        {/* LEFT: Logo */}
+                        <div className="flex items-center gap-4">
+                            <span className="text-2xl font-black tracking-tighter text-primary cursor-pointer" 
+                                onClick={() => navigate('/')}
+                                style={{ fontFamily: "'Unesa', sans-serif" }}>
+                                MEDIHELP
+                            </span>
                         </div>
-                    ))}
-                </div>
 
-                {/* RIGHT: Actions */}
-                <div className="flex items-center gap-4">
-                    <div className="hidden md:flex items-center gap-4">
-                        <ThemeToggle inline />
-                        <Button variant="primary" onClick={() => navigate('/login')}>
-                            Get Started
-                        </Button>
-                    </div>
+                        {/* CENTER: Desktop Navigation Links */}
+                        <div className="hidden md:flex items-center gap-8">
+                            {Links.map((link) => (
+                                <div 
+                                    key={link.name} 
+                                    className="h-12 flex items-center"
+                                    onMouseEnter={() => link.hasDropdown ? setActiveFlyout(link.name) : setActiveFlyout(null)}
+                                >
+                                    {link.hasDropdown ? (
+                                        <button className="text-foreground/70 hover:text-primary font-medium transition-colors flex items-center gap-1">
+                                            {link.name}
+                                            <ChevronDown className={`w-4 h-4 transition-transform ${activeFlyout === link.name ? 'rotate-180' : ''}`} />
+                                        </button>
+                                    ) : (
+                                        <a href={link.href} className="text-foreground/70 hover:text-primary font-medium transition-colors">
+                                            {link.name}
+                                        </a>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
 
-                    {/* Mobile Menu Button */}
-                    <button 
-                        className="md:hidden p-2 text-foreground/70 hover:text-primary transition-colors z-50"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-
-                {/* DESKTOP FLYOUT MENU */}
-                <AnimatePresence>
-                    {activeFlyout && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="hidden md:block absolute left-0 top-full w-full bg-card border-b border-border shadow-2xl overflow-hidden"
-                            onMouseLeave={() => setActiveFlyout(null)}
-                        >
-                            <div className="max-w-7xl mx-auto p-8">
-                                {activeFlyout === 'Learn' && (
-                                    <div className="grid grid-cols-4 gap-8">
-                                        <div className="col-span-3">
-                                            <h3 className="font-bold text-xs uppercase tracking-wider text-foreground/40 mb-4">Health Categories</h3>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {learnCategories.map((cat) => {
-                                                    const DynamicIcon = IconMap[cat.icon_name] || BookOpen;
-                                                    return (
-                                                        <div 
-                                                            key={cat.category_id} 
-                                                            className="group flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-foreground/5 transition-colors" 
-                                                            onClick={() => {
-                                                                setActiveFlyout(null);
-                                                                // Dito babaguhin ang pag-navigate gamit ang slug/topicId
-                                                                navigate(`/learn?type=education&cat=${cat.slug}`); 
-                                                            }}
-                                                        >
-                                                            <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                                                                <DynamicIcon className="w-5 h-5" />
-                                                            </div>
-                                                            <span className="font-semibold text-sm text-foreground/80 group-hover:text-primary transition-colors">{cat.category_name}</span>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                        <div className="col-span-1 bg-linear-to-br from-red-500/10 to-primary/10 border border-primary/20 rounded-2xl p-6 flex flex-col justify-between overflow-hidden relative group">
-                                            {/* Decorative background grid effect */}
-                                            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -mr-5 -mt-5 transition-transform group-hover:scale-125 duration-500" />
-                                            
-                                            <div className="relative z-10 space-y-3">
-                                                <span className="text-[9px] bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-md uppercase tracking-widest font-bold">
-                                                    Clinical Tool
-                                                </span>
-                                                <h4 className="text-lg font-bold uppercase tracking-tight text-foreground pt-1" style={{ fontFamily: "'Unesa', sans-serif" }}>
-                                                    Symptom Analytics
-                                                </h4>
-                                                <p className="text-xs text-foreground/60 leading-relaxed">
-                                                    Quickly evaluate your symptoms using our advanced diagnostic matrix core.
-                                                </p>
-                                            </div>
-
-                                            <Button 
-                                                variant="primary" 
-                                                size="sm" 
-                                                className="mt-6 w-full text-[10px] font-bold uppercase tracking-wider py-2.5 cursor-pointer shadow-lg shadow-primary/10"
-                                                onClick={() => {
-                                                    setActiveFlyout(null);
-                                                    navigate('/voice-assistant'); 
-                                                }}
-                                            >
-                                                Run Diagnostics
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeFlyout === 'Resources' && (
-                                    <div className="grid grid-cols-4 gap-8">
-                                        <div className="col-span-3">
-                                            <h3 className="font-bold text-xs uppercase tracking-wider text-foreground/40 mb-4">Educational Resources</h3>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {resourceItems.map((item) => {
-                                                    const DynamicIcon = IconMap[item.icon_name] || BookOpen;
-                                                    return (
-                                                        <a href={item.href} key={item.name} className="group flex items-start gap-4 p-3 rounded-xl hover:bg-foreground/5 transition-colors">
-                                                            <div className="p-2.5 bg-primary/10 rounded-xl text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                                                                <DynamicIcon className="w-5 h-5" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{item.name}</p>
-                                                                <p className="text-xs text-foreground/50 mt-0.5">{item.desc}</p>
-                                                            </div>
-                                                        </a>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                        <div className="col-span-1 border-l border-border pl-8 flex flex-col justify-center">
-                                            <h4 className="font-bold text-sm mb-1 text-foreground">Need Urgent Help?</h4>
-                                            <p className="text-xs text-foreground/50 mb-4">Access our quick hotlines and quick relief instructions.</p>
-                                            <Button 
-                                                variant="danger" 
-                                                size="sm" 
-                                                onClick={() => {
-                                                    setActiveFlyout(null);
-                                                    onOpenEmergency(); // 3. Tawagin ang trigger
-                                                }}
-                                                leadingIcon={ShieldAlert}
-                                            >
-                                                Emergency Contact
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
+                        {/* RIGHT: Actions */}
+                        <div className="flex items-center gap-4">
+                            <div className="hidden md:flex items-center gap-4">
+                                <ThemeToggle inline />
+                                <Button variant="primary" onClick={() => navigate('/login')}>
+                                    Get Started
+                                </Button>
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </nav>
+
+                            {/* Mobile Menu Button */}
+                            <button 
+                                className="md:hidden p-2 text-foreground/70 hover:text-primary transition-colors z-50"
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            >
+                                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
+                        </div>
+
+                        {/* DESKTOP FLYOUT MENU */}
+                        <AnimatePresence>
+                            {activeFlyout && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="hidden md:block absolute left-0 top-full w-full bg-card border-b border-border shadow-2xl overflow-hidden"
+                                    onMouseLeave={() => setActiveFlyout(null)}
+                                >
+                                    <div className="max-w-7xl mx-auto p-8">
+                                        {activeFlyout === 'Learn' && (
+                                            <div className="grid grid-cols-4 gap-8">
+                                                <div className="col-span-3">
+                                                    <h3 className="font-bold text-xs uppercase tracking-wider text-foreground/40 mb-4">Health Categories</h3>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        {learnCategories.map((cat) => {
+                                                            const DynamicIcon = IconMap[cat.icon_name] || BookOpen;
+                                                            return (
+                                                                <div 
+                                                                    key={cat.category_id} 
+                                                                    className="group flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-foreground/5 transition-colors" 
+                                                                    onClick={() => {
+                                                                        setActiveFlyout(null);
+                                                                        // Dito babaguhin ang pag-navigate gamit ang slug/topicId
+                                                                        navigate(`/learn?type=education&cat=${cat.slug}`); 
+                                                                    }}
+                                                                >
+                                                                    <div className="p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                                                                        <DynamicIcon className="w-5 h-5" />
+                                                                    </div>
+                                                                    <span className="font-semibold text-sm text-foreground/80 group-hover:text-primary transition-colors">{cat.category_name}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                                <div className="col-span-1 bg-linear-to-br from-red-500/10 to-primary/10 border border-primary/20 rounded-2xl p-6 flex flex-col justify-between overflow-hidden relative group">
+                                                    {/* Decorative background grid effect */}
+                                                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -mr-5 -mt-5 transition-transform group-hover:scale-125 duration-500" />
+                                                    
+                                                    <div className="relative z-10 space-y-3">
+                                                        <span className="text-[9px] bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-md uppercase tracking-widest font-bold">
+                                                            Clinical Tool
+                                                        </span>
+                                                        <h4 className="text-lg font-bold uppercase tracking-tight text-foreground pt-1" style={{ fontFamily: "'Unesa', sans-serif" }}>
+                                                            Symptom Analytics
+                                                        </h4>
+                                                        <p className="text-xs text-foreground/60 leading-relaxed">
+                                                            Quickly evaluate your symptoms using our advanced diagnostic matrix core.
+                                                        </p>
+                                                    </div>
+
+                                                    <Button 
+                                                        variant="primary" 
+                                                        size="sm" 
+                                                        className="mt-6 w-full text-[10px] font-bold uppercase tracking-wider py-2.5 cursor-pointer shadow-lg shadow-primary/10"
+                                                        onClick={() => {
+                                                            setActiveFlyout(null);
+                                                            navigate('/voice-assistant'); 
+                                                        }}
+                                                    >
+                                                        Run Diagnostics
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {activeFlyout === 'Resources' && (
+                                            <div className="grid grid-cols-4 gap-8">
+                                                <div className="col-span-3">
+                                                    <h3 className="font-bold text-xs uppercase tracking-wider text-foreground/40 mb-4">Educational Resources</h3>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        {resourceItems.map((item) => {
+                                                            const DynamicIcon = IconMap[item.icon_name] || BookOpen;
+                                                            return (
+                                                                <a href={item.href} key={item.name} className="group flex items-start gap-4 p-3 rounded-xl hover:bg-foreground/5 transition-colors">
+                                                                    <div className="p-2.5 bg-primary/10 rounded-xl text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                                                                        <DynamicIcon className="w-5 h-5" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{item.name}</p>
+                                                                        <p className="text-xs text-foreground/50 mt-0.5">{item.desc}</p>
+                                                                    </div>
+                                                                </a>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                                <div className="col-span-1 border-l border-border pl-8 flex flex-col justify-center">
+                                                    <h4 className="font-bold text-sm mb-1 text-foreground">Need Urgent Help?</h4>
+                                                    <p className="text-xs text-foreground/50 mb-4">Access our quick hotlines and quick relief instructions.</p>
+                                                    <Button 
+                                                        variant="danger" 
+                                                        size="sm" 
+                                                        onClick={() => {
+                                                            setActiveFlyout(null);
+                                                            onOpenEmergency(); // 3. Tawagin ang trigger
+                                                        }}
+                                                        leadingIcon={ShieldAlert}
+                                                    >
+                                                        Emergency Contact
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+            </motion.nav>
 
             {/* MOBILE NAVIGATION MENU */}
             <AnimatePresence>
