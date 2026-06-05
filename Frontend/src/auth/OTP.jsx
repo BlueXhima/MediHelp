@@ -123,9 +123,9 @@ const OTPVerification = () => {
                 showToast("OTP resent successfully!", "success");
 
                 // I-set ang expiration time (kasalukuyang oras + 60,000ms)
-                const expiryTime = Date.now() + 60000;
+                const expiryTime = Date.now() + 5 * 60 * 1000;
                 sessionStorage.setItem("otpExpiry", expiryTime.toString());
-                setTimeLeft(60);
+                setTimeLeft(300); 
             } else {
                 showToast(response.data.message || "Failed to resend OTP.", "error");
             }
@@ -148,60 +148,45 @@ const OTPVerification = () => {
 
     const [timeLeft, setTimeLeft] = useState(() => {
         const expiry = sessionStorage.getItem("otpExpiry");
-        if (!expiry) return 0; // Kung wala pang expiry, 0 agad
-
+        if (!expiry) return 0;
+    
         const diff = Math.floor((parseInt(expiry) - Date.now()) / 1000);
-        return diff > 0 ? diff : 0; // Kung negative na (expired), 0 ang ibalik
+        return diff > 0 ? diff : 0;
     });
-
-    useEffect(() => {
-        if (timeLeft <= 0) {
-            // Kapag nag-zero ang timer habang nakabukas ang page
-            if (!isInitialMount) {
-                showToast("OTP has expired. Please request a new one.", "error");
-            }
-            setIsInitialMount(false);
-            return;
-        }
-
-        setIsInitialMount(false);
-
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [timeLeft]);
 
     useEffect(() => {
         const syncTimer = () => {
             const expiry = sessionStorage.getItem("otpExpiry");
-            if (expiry) {
-                const remaining = Math.max(0, Math.floor((parseInt(expiry) - Date.now()) / 1000));
-                setTimeLeft(remaining);
-                if (remaining === 0) {
-                    sessionStorage.removeItem("otpExpiry");
-                }
+            if (!expiry) {
+                setTimeLeft(0);
+                return;
+            }
+    
+            const remaining = Math.max(0, Math.floor((parseInt(expiry) - Date.now()) / 1000));
+            setTimeLeft(remaining);
+    
+            // Kapag eksaktong umabot sa zero ang timer habang nagbabasa ang user
+            if (remaining === 0) {
+                sessionStorage.removeItem("otpExpiry");
+                showToast("OTP has expired. Please request a new one.", "error");
             }
         };
-
-        // 1. Patakbuhin ang timer interval
-        const timer = setInterval(() => {
-            syncTimer();
-        }, 1000);
-
-        // 2. Sync kapag bumalik ang user sa tab
+    
+        // 1. I-sync kada segundo base sa totoong natitirang oras sa system clock
+        const timer = setInterval(syncTimer, 1000);
+    
+        // 2. I-sync kapag lumipat ng browser tab ang user at bumalik ulit (iwas freeze ng timer)
         const handleVisibilityChange = () => {
             if (document.visibilityState === "visible") {
                 syncTimer();
             }
         };
-
+    
         window.addEventListener("visibilitychange", handleVisibilityChange);
         
-        // Initial check
+        // Initial load sync
         syncTimer();
-
+    
         return () => {
             clearInterval(timer);
             window.removeEventListener("visibilitychange", handleVisibilityChange);
