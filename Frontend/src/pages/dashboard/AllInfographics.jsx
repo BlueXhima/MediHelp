@@ -118,11 +118,31 @@ const AllInfographics = ({ onViewChange }) => {
                 {filteredInfographics.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredInfographics.map((item) => (
-                            <div key={item.infographic_id} className="group cursor-pointer space-y-3">
-                                <div className="aspect-3/4 rounded-2xl overflow-hidden bg-muted border border-border/40">
-                                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <div key={item.infographic_id} className="group cursor-pointer relative aspect-3/4 rounded-2xl overflow-hidden bg-card border border-border/40">
+                                {/* Image Background */}
+                                <img 
+                                    src={item.image_url} 
+                                    alt={item.title} 
+                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                                
+                                {/* Category Badge */}
+                                <div className="absolute top-4 right-4 z-10">
+                                    <span className="px-2 py-1 bg-background/90 backdrop-blur-sm text-[9px] font-bold uppercase tracking-tighter">
+                                        {item.category_name || 'Uncategorized'}
+                                    </span>
                                 </div>
-                                <h3 className="text-sm font-semibold tracking-tight">{item.title}</h3>
+
+                                {/* Content Overlay with Gradient Shadow */}
+                                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                                    <h3 className="text-md font-semibold text-white tracking-tight">{item.title}</h3>
+                                    {item.description && (
+                                        <p className="text-[12px] text-white/80 line-clamp-2 mt-1 leading-relaxed">
+                                            {item.description}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
