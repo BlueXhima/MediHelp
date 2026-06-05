@@ -42,6 +42,8 @@ const sendOtpLimiter = rateLimit({
     },
     standardHeaders: true, 
     legacyHeaders: false,
+    // Patayin ang strict checking para hindi mag-crash sa Railway environment
+    validate: { xForwardedForHeader: false }, 
 });
 
 // 2. Limiter para sa Pag-verify (Protection laban sa Brute Force/Hula)
@@ -54,6 +56,8 @@ const verifyOtpLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Patayin ang strict checking para hindi mag-crash sa Railway environment
+    validate: { xForwardedForHeader: false }, 
 });
 
 // POST /api/register
