@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LocateFixed, Plus, Minus } from 'lucide-react';
 import { useMap } from 'react-leaflet'; // Added import
 import 'leaflet/dist/leaflet.css';
+import api from '../../api/axios';
 
 // Imports from our separated files
 import { userService } from '../../services/userService';
@@ -84,14 +85,11 @@ const NearbyHospitalMap = () => {
         const query = `[out:json][timeout:60];(${categoryQuery});out center;`;
         
         try {
-            // 1. TAMA: Isang beses lang dapat i-encode ang raw Overpass query param
-            const overpassUrl = `https://overpass-api.de{encodeURIComponent(query)}`;
-
-            // 2. TAMA: Ang AllOrigins RAW API link (May /raw?url= at hinding-hindi na magdidikit ng sabog)
-            const proxyUrl = "https://allorigins.win";
-
-            // Pinagsama sila gamit ang nag-iisang encoding wrapper para malinis ang basag na strings
-            const res = await fetch(`${proxyUrl}${encodeURIComponent(overpassUrl)}`);
+            // GAMIT ANG AXIOS:
+            // Ang endpoint ay 'proxy-overpass' na dinefine natin sa backend
+            const response = await api.get('/proxy-overpass', {
+                params: { query } // Ipapasa ni axios ito bilang ?query=...
+            });
             
             if (!res.ok) {
                 if (res.status === 429) return; // Handle too many requests
