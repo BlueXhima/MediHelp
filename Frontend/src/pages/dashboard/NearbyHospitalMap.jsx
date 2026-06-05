@@ -96,7 +96,7 @@ const NearbyHospitalMap = () => {
                 throw new Error(`Server error: ${res.status}`);
             }
 
-            const data = await res.json();
+            const data = await response.json();
             
             if (!data.elements) {
                 setHospitals([]);
