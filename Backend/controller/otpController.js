@@ -49,7 +49,7 @@ exports.sendOtp = async (req, res) => {
         return res.status(200).json({ success: true, message: 'OTP sent successfully' });
     } catch (error) {
         // Sinalo ang Mailjet Specific Error para sa mas malinis na debugging logs
-        console.error('Mailjet OTP Send Error:', error.statusCode, error.message);
+        console.error('Google Script OTP Send Error:', error.message);
         return res.status(500).json({ success: false, message: 'Failed to send OTP' });
     }
 };
@@ -60,7 +60,7 @@ exports.verifyOtp = async (req, res) => {
         if (!email || !otp) return res.status(400).json({ success: false, message: 'Required fields missing.' });
 
         const normalizedEmail = email.toLowerCase().trim();
-        const otpData = otpStore.get(email);
+        const otpData = otpStore.get(normalizedEmail);
 
         // 1. I-validate ang OTP (existing logic mo)
         if (!otpData || otpData.otp !== otp || Date.now() > otpData.expiresAt) {
@@ -75,17 +75,16 @@ exports.verifyOtp = async (req, res) => {
                 [normalizedEmail, otpData.oldEmail.toLowerCase().trim()]
             );
         } else {
-            // Kung normal registration, i-verify lang ang kasalukuyang email
             await dbconnection.query(
                 'UPDATE users SET isVerified = 1 WHERE Email = ?',
-                [normalizedEmail ]
+                [normalizedEmail]
             );
         }
 
         // 3. Pagkatapos ng update, kunin ang user details para sa JWT (existing logic mo)
         const [users] = await dbconnection.query(
             'SELECT UserID, FirstName, LastName, RoleID, Email FROM users WHERE Email = ?',
-            [normalizedEmail ]
+            [normalizedEmail]
         );
 
         if (users.length === 0) {
@@ -103,7 +102,7 @@ exports.verifyOtp = async (req, res) => {
             },
             process.env.JWT_SECRET,
             { 
-                expiresIn: '15m' // 15 mins lang
+                expiresIn: '24h' 
             }
         );
 
@@ -134,9 +133,11 @@ exports.verifyOtp = async (req, res) => {
         });
 
         otpStore.delete(normalizedEmail);
+        
         // 4. I-send ang Access Token sa JSON response (o pwede ring cookie)
         return res.status(200).json({ 
             success: true, 
+            role: user.RoleID === 1 ? 'admin' : 'user', // Isinama ang role parameter para alam ng frontend kung saan magre-redirect (dashboard o admin)
             user: { 
                 firstName: user.FirstName, 
                 lastName: user.LastName,
