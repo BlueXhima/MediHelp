@@ -84,7 +84,11 @@ const NearbyHospitalMap = () => {
         const query = `[out:json][timeout:60];(${categoryQuery});out center;`;
         
         try {
-            const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+            // Ginamit ang AllOrigins RAW Proxy para lumusot ang map data sa CORS block ng Vercel production site
+            const proxyUrl = "https://allorigins.win";
+            const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+            const res = await fetch(`${proxyUrl}${encodeURIComponent(overpassUrl)}`);
             
             if (!res.ok) {
                 if (res.status === 429) return; // Handle too many requests
