@@ -106,6 +106,9 @@ exports.updateFullProfile = async (req, res) => {
         const cleanAddress = sanitizeAddress(address);
         const encryptedAddress = cleanAddress ? encrypt(cleanAddress) : null;
 
+        // Siguraduhing magiging null kapag blanko ang string ('') para hindi mag-error ang ENUM column
+        const finalGender = (gender && gender.trim() !== '') ? gender : null;
+
         // TINANGGAL ANG Phone = ?, AT ANG phone VARIABLE SA ARRAY DITO:
         await connection.query(
             'UPDATE users SET FirstName = ?, LastName = ?, Email = ?, Updated_Date = CURDATE(), Updated_Time = CURTIME() WHERE UserID = ?',
@@ -115,20 +118,22 @@ exports.updateFullProfile = async (req, res) => {
         const [patientExists] = await connection.query('SELECT PatientID FROM patient WHERE UserID = ?', [userId]);
 
         if (patientExists.length > 0) {
-            await connection.query(
+             await connection.query(
                 `UPDATE patient SET 
                     FirstName = ?, LastName = ?, Address = ?, Gender = ?, 
                     Height_cm = ?, Weight_kg = ?, DateOfBirth = ?, BloodType = ?,
                     Updated_Date = CURDATE(), Updated_Time = CURTIME() 
                 WHERE UserID = ?`,
-                [cleanFirstName, cleanLastName, encryptedAddress, gender, height || null, weight || null, dob || null, bloodType || null, userId]
+                // Ginamit ang finalGender variable
+                [cleanFirstName, cleanLastName, encryptedAddress, finalGender, height || null, weight || null, dob || null, bloodType || null, userId]
             );
         } else {
             await connection.query(
                 `INSERT INTO patient 
                     (UserID, FirstName, LastName, Address, Gender, Height_cm, Weight_kg, DateOfBirth, BloodType, Created_Date, Created_Time) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), CURTIME())`,
-                [userId, cleanFirstName, cleanLastName, encryptedAddress, gender, height || null, weight || null, dob || null, bloodType || null]
+                // Ginamit ang finalGender variable
+                [userId, cleanFirstName, cleanLastName, encryptedAddress, finalGender, height || null, weight || null, dob || null, bloodType || null]
             );
         }
 
