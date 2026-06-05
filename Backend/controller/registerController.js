@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const dbconnection = require('../config/db');
 const { generateOTP, otpStore } = require("../utils/otpUtils");
-const mailjet = require("../config/mailer");
+const sendEmailViaGoogle  = require("../config/mailer");
 const { matchedData } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
@@ -44,37 +44,22 @@ exports.registerUser = async (req, res) => {
         });
 
         try {
-            // 5. ✅ PAGPAPADALA NG EMAIL GAMIT ANG MAILJET API (Hindi ito haharangin ng Railway)
-            await mailjet
-                .post("send", { version: 'v3.1' })
-                .request({
-                    Messages: [
-                        {
-                            From: {
-                                Email: "medihelp241@gmail.com", // Eksaktong tugma sa active sender address mo
-                                Name: "MediHelp Support"
-                            },
-                            To: [
-                                {
-                                    Email: normalizedEmail,
-                                    Name: FirstName
-                                }
-                            ],
-                            Subject: "Verify Your MediHelp Account",
-                            HTMLPart: `
-                                <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 10px;">
-                                    <h2 style="color: #6d28d9; text-align: center;">Welcome to MediHelp!</h2>
-                                    <p>Hi ${FirstName},</p>
-                                    <p>Use the code below to complete your registration:</p>
-                                    <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-                                        <h1 style="letter-spacing: 5px; color: #1f2937; margin: 0;">${otp}</h1>
-                                    </div>
-                                    <p style="font-size: 12px; color: #6b7280; text-align: center;">This code will expire in 1 minute.</p>
-                                </div>
-                            `
-                        }
-                    ]
-                });
+            // 5. TAMA: Pagpapadala ng OTP gamit ang iyong bagong Google Apps Script Service
+            await sendEmailViaGoogle(
+                normalizedEmail,
+                "Verify Your MediHelp Account",
+                `
+                <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 10px;">
+                    <h2 style="color: #6d28d9; text-align: center;">Welcome to MediHelp!</h2>
+                    <p>Hi ${FirstName},</p>
+                    <p>Use the code below to complete your registration:</p>
+                    <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                        <h1 style="letter-spacing: 5px; color: #1f2937; margin: 0;">${otp}</h1>
+                    </div>
+                    <p style="font-size: 12px; color: #6b7280; text-align: center;">This code will expire in 1 minute.</p>
+                </div>
+                `
+            );
             
             // 6. Insert to Database
             await dbconnection.query(
