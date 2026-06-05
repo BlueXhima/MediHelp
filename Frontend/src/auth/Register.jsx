@@ -97,10 +97,21 @@ const Register = () => {
             if (response.status === 201) {
                 sessionStorage.setItem("email", email);
                 sessionStorage.setItem("otpExpiry", response.data.expiresAt);
-                showToast("Account created! Redirecting to verification...", "success");
+                
+                // Displays the success title with the shortened custom instruction underneath
+                showToast(
+                    <div>
+                        <p className="font-bold">Account created! Redirecting...</p>
+                        <p className="text-xs opacity-90 mt-0.5">
+                            Verification code sent. Check your Inbox or Spam folder.
+                        </p>
+                    </div>, 
+                    "success"
+                );
+            
                 setTimeout(() => {
                     navigate("/otp");
-                }, 1500);
+                }, 2500);
             }
         } catch (error) {
             console.error("Registration Error:", error);
