@@ -11,10 +11,10 @@ exports.sendOtp = async (req, res) => {
         const normalizedEmail = email.toLowerCase().trim();
 
         // --- OTP COOLDOWN VALIDATION ---
-        const existingOtp = otpStore.get(normalizedEmail );
+        const existingOtp = otpStore.get(normalizedEmail);
         if (existingOtp) {
             const now = Date.now();
-            // Check if the current time is still before the expiration (60 seconds)
+            // TAMA: Haharangin ang resend request kung hindi pa lumilipas ang 5 minuto
             if (now < existingOtp.expiresAt) {
                 const secondsLeft = Math.ceil((existingOtp.expiresAt - now) / 1000);
                 return res.status(429).json({ 
@@ -26,8 +26,9 @@ exports.sendOtp = async (req, res) => {
         // --------------------------------------
 
         const otp = generateOTP();
-        // Set expiry to 1 minute (60,000ms)
-        otpStore.set(normalizedEmail , { otp, expiresAt: Date.now() + 1 * 60 * 1000}); // Valid for 1 minute
+        
+        // Ginawang 5 minutes mula ngayon (5 * 60 * 1000 = 300,000ms)
+        const expiresAt = Date.now() + 5 * 60 * 1000;
 
         // PINALITAN ANG NODEMAILER AT MAILJET NG GOOGLE APP SCRIPT
         await sendEmailViaGoogle(
@@ -45,6 +46,10 @@ exports.sendOtp = async (req, res) => {
             </div>
             `
         );
+        
+        // Dito lang natin ise-set sa otpStore pagkatapos ng network request
+        // para sariwa at buong-buo ang 5 minuto pagdating sa inbox ng user
+        otpStore.set(normalizedEmail, { otp, expiresAt });
 
         return res.status(200).json({ success: true, message: 'OTP sent successfully' });
     } catch (error) {
