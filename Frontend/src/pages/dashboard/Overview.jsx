@@ -11,6 +11,7 @@ const Overview = ({ onViewChange }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [totalRead, setTotalRead] = useState(0);
     const [userData, setUserData] = useState(null);
+    const isFirstLogin = sessionStorage.getItem("isFirstLogin") === "true";
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -58,10 +59,20 @@ const Overview = ({ onViewChange }) => {
                 <div className="relative z-10 space-y-6 max-w-xl">
                     <div className="space-y-2">
                         <h1 className="text-4xl font-bold tracking-tight text-foreground">
-                            Welcome back, <span className="text-primary">{userData?.firstName || 'Health Seeker'}</span>.
+                            {/* Conditional Check: Pag true, Welcome. Pag false/wala, Welcome back */}
+                            {isFirstLogin ? (
+                                <>Welcome, <span className="text-primary">{userData?.firstName || 'Health Seeker'}</span>.</>
+                            ) : (
+                                <>Welcome back, <span className="text-primary">{userData?.firstName || 'Health Seeker'}</span>.</>
+                            )}
                         </h1>
                         <p className="text-foreground/50 text-base font-medium max-w-sm">
-                            Your voice-guided health journey continues here. What's on your mind today?
+                            {/* Pwede mo ring ibahin ang sub-text para mas swak sa sitwasyon */}
+                            {isFirstLogin ? (
+                                "Your voice-guided health journey starts here. What's on your mind today?"
+                            ) : (
+                                "Your voice-guided health journey continues here. What's on your mind today?"
+                            )}
                         </p>
                     </div>
                     
