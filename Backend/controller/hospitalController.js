@@ -1,9 +1,6 @@
 // controller/hospitalController.js
-// Kung gumagamit ka ng mas lumang Node version, mag-require ng node-fetch:
-// const fetch = require('node-fetch'); 
 
 exports.getNearbyHospitals = async (req, res) => {
-    // Kinukuha ang query mula sa URL parameter
     const { query } = req.query;
 
     if (!query) {
@@ -13,15 +10,22 @@ exports.getNearbyHospitals = async (req, res) => {
     const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
     try {
-        const response = await fetch(overpassUrl);
+        const response = await fetch(overpassUrl, {
+            method: 'GET',
+            headers: {
+                // Mahalaga ito para hindi mag-406 error
+                'User-Agent': 'MediHelp-App/1.0 (Contact: your-email@example.com)',
+                'Accept': 'application/json'
+            }
+        });
         
         if (!response.ok) {
+            const errorText = await response.text(); // Basahin ang error message mula sa Overpass
+            console.error('Overpass API Error:', errorText);
             throw new Error(`Overpass API responded with status ${response.status}`);
         }
 
         const data = await response.json();
-        
-        // Ibinabalik ang data sa iyong React frontend
         res.json(data);
     } catch (error) {
         console.error('Proxy Error:', error.message);
