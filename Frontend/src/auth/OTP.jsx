@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { showToast } from "../components/ToastMessage";
 import { ArrowLeft, Stethoscope, ShieldCheck, ArrowRight } from "lucide-react";
-import axios from "axios";
+import api from "../api/axios";
 import BackgroundLoadingState from "../components/BackgroundLoadingState";
 import ChangeEmailModal from "../components/modals/ChangeEmailModal";
 import Button from "../components/ui/Button";
@@ -32,10 +32,10 @@ const OTPVerification = () => {
 
         try {
             await delay(1000);
-            const response = await axios.post("http://localhost:5000/api/verify-otp", {
+            const response = await api.post("/verify-otp", {
                 email,
                 otp,
-            }, { withCredentials: true });
+            });
 
             if (response.status === 200) {
                 showToast("Success! Account verified. Redirecting...", "success");
@@ -115,7 +115,7 @@ const OTPVerification = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post("http://localhost:5000/api/send-otp", {
+            const response = await api.post("/send-otp", {
                 email,
             });
 
