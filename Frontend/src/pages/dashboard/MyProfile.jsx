@@ -171,41 +171,45 @@ const MyProfile = ({ onNearbyHospitalClick, onViewChange }) => {
         }
     };
 
-    // I-load ang user data galing sa backend database
-    useEffect(() => {
-        const fetchUserData = async (showSilently = false) => {
-            try {
-                if (!showSilently) setIsLoading(true);
-                const rawData = await userService.getFullDetails(true); 
-                
-                // Mapper upang masiguro na camelCase ang babasahin ng React inputs
-                const normalizedData = {
-                    id: rawData.id || rawData.PatientID || rawData.PatientId,
-
-                    firstName: rawData.FirstName || rawData.firstName || '',
-                    lastName: rawData.LastName || rawData.lastName || '',
-                    email: rawData.Email || rawData.email || '',
-                    address: rawData.Address || rawData.address || '',
-                    gender: rawData.Gender || rawData.gender || '',
-                    height: rawData.Height_cm || rawData.height || '',
-                    weight: rawData.Weight_kg || rawData.weight || '',
-                    dob: rawData.birthdate ? rawData.birthdate.split('T')[0] : (rawData.dob || ''),
-                    bloodType: rawData.BloodType || rawData.bloodType || '',
-                    profile_picture: rawData.profile_picture || '',
-                    isVerified: rawData.IsVerified !== undefined ? rawData.IsVerified : (rawData.isVerified || 0)
-                };
-
-                setUserData(normalizedData);
-            } catch (error) {
-                console.error("Error fetching user data:", error);
+    // 1. ILABAS ANG FUNCTION: Ilagay ito nang direkta sa loob ng iyong component body
+    const fetchUserData = async (showSilently = false) => {
+        try {
+            if (!showSilently) setIsLoading(true);
+            const rawData = await userService.getFullDetails(true); 
+            
+            // Mapper upang masiguro na camelCase ang babasahin ng React inputs
+            const normalizedData = {
+                id: rawData.id || rawData.PatientID || rawData.PatientId,
+                firstName: rawData.FirstName || rawData.firstName || '',
+                lastName: rawData.LastName || rawData.lastName || '',
+                email: rawData.Email || rawData.email || '',
+                address: rawData.Address || rawData.address || '',
+                gender: rawData.Gender || rawData.gender || '',
+                height: rawData.Height_cm || rawData.height || '',
+                weight: rawData.Weight_kg || rawData.weight || '',
+                dob: rawData.birthdate ? rawData.birthdate.split('T')[0] : (rawData.dob || ''),
+                bloodType: rawData.BloodType || rawData.bloodType || '',
+                profile_picture: rawData.profile_picture || '',
+                isVerified: rawData.IsVerified !== undefined ? rawData.IsVerified : (rawData.isVerified || 0)
+            };
+    
+            setUserData(normalizedData);
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+            // Hinayaan nating huwag mag-spam ng toast kung silent refresh lang
+            if (!showSilently) {
                 showToast("Failed to load user profile configuration.", "error");
-            } finally {
-                if (!showSilently) setIsLoading(false);
             }
-        };
+        } finally {
+            if (!showSilently) setIsLoading(false);
+        }
+    };
+    
+    // 2. ANG IYONG EFFECT: Tatawagin na lang nito ang nilabas na function sa unang load ng page
+    useEffect(() => {
         fetchUserData();
     }, []);
-
+    
     // 2. MAGLAGAY NG ISANG EFFECT PARA I-SYNC ANG FORM DATA KAPAG NATAPOS NA MAG-LOAD ANG USER DATA
     useEffect(() => {
         if (userData && profileManager.resetForm) {
