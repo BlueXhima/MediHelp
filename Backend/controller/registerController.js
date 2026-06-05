@@ -22,7 +22,7 @@ exports.registerUser = async (req, res) => {
         const normalizedEmail = Email.toLowerCase().trim();
         
         // 2. Check if email already exists
-        const [rows] = await dbconnection.query('SELECT Email FROM users WHERE Email = ?', [Email]);
+        const [rows] = await dbconnection.query('SELECT Email FROM users WHERE Email = ?', [normalizedEmail]);
         if (rows.length > 0) {
             return res.status(400).json({ message: 'Email is already registered.' });
         }
