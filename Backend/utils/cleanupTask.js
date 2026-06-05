@@ -9,7 +9,7 @@ cron.schedule('0 0 * * *', async () => {
         const [result] = await dbconnection.query(`
             DELETE FROM users 
             WHERE isVerified = 0 
-            AND TIMESTAMP(created_date, created_time) < NOW() - INTERVAL 24 HOUR
+            AND TIMESTAMP(Created_Date, Created_Time) < NOW() - INTERVAL 24 HOUR
         `);
         
         console.log(`Cleanup finished. Removed ${result.affectedRows} junk accounts.`);
