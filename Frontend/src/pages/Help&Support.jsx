@@ -162,7 +162,7 @@ const HelpSupport = () => {
                                         >
                                             <FileText size={16} className="text-primary mt-0.5 shrink-0" />
                                             <div className="min-w-0">
-                                                <h4 className="text-lg font-bold text-foreground/90 group-hover:text-primary transition-colors truncate">{faq.q}</h4>
+                                                <h4 className="text-md font-bold text-foreground/90 group-hover:text-primary transition-colors truncate">{faq.q}</h4>
                                                 <p className="text-[12px] text-foreground/50 truncate mt-0.5">{faq.a}</p>
                                             </div>
                                         </div>
