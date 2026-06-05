@@ -1,5 +1,3 @@
-// Frontend/src/App.jsx
-
 import React, { useState } from 'react'
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import ToastMessage from './components/ToastMessage';
@@ -27,9 +25,13 @@ import Features from './pages/Features';
 import Documentation from './pages/Documentation';
 import DocumentDetails from './pages/template/DocumentDetails';
 
+// Accessibility Tool
+import AccessibilityMenu from './components/AccessibilityMenu';
+
 // Main Page of the System
 import ChatPage from './pages/ChatPage';
 
+// 404 not found 
 import NotFound from './pages/error/NotFound';
 
 // Protected or Private Import Routes
@@ -46,57 +48,63 @@ import ArticlePage from './pages/ArticlePage';
 function App() {
   return (
     <BrowserRouter>
-      
-      <Routes>
-        {/* Redirect mula sa root path papuntang landing page */}
-        <Route path="/" element={<Navigate to="/landingpage" replace />} />
-        <Route path="/landingpage" element={<LandingPage />} />
-        <Route path="/contact-support" element={<ContactSupport />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/features" element={<Features />} />
+      {/* Dito ang global container. 
+        Importante: Ang AccessibilityMenu at Modals ay dapat nasa labas 
+        ng zoomable-content para hindi sila ma-scale.
+      */}
+      <div className="zoomable-content">
+        <Routes>
+          {/* Redirect mula sa root path papuntang landing page */}
+          <Route path="/" element={<Navigate to="/landingpage" replace />} />
+          <Route path="/landingpage" element={<LandingPage />} />
+          <Route path="/contact-support" element={<ContactSupport />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/features" element={<Features />} />
 
-        <Route path="/documentation" element={<Documentation />} />
-        <Route path="/documentation/:slug" element={<DocumentDetails />} />
+          <Route path="/documentation" element={<Documentation />} />
+          <Route path="/documentation/:slug" element={<DocumentDetails />} />
 
-        {/* Shared ito para sa Guest at User kaya labas ito sa ProtectedRoute */}
-        <Route path="/voice-assistant" element={<ChatPage />} />
+          {/* Shared ito para sa Guest at User kaya labas ito sa ProtectedRoute */}
+          <Route path="/voice-assistant" element={<ChatPage />} />
 
-        {/* LEARN SCOPE ROUTES */}
-        <Route path="/learn" element={<Learn />} />
-        <Route path="/learn/article-viewer/:topicId" element={<LearnTemplate />} />
+          {/* LEARN SCOPE ROUTES */}
+          <Route path="/learn" element={<Learn />} />
+          <Route path="/learn/article-viewer/:topicId" element={<LearnTemplate />} />
 
-        {/* HELP & SUPPORT MATRIX ROUTES */}
-        <Route path="/help-support" element={<HelpSupport />} />
-        <Route path="/help-support/all-faqs" element={<AllFAQs />} />
-        <Route path="/help-support/faq/:id" element={<HelpArticleDetail />} />
+          {/* HELP & SUPPORT MATRIX ROUTES */}
+          <Route path="/help-support" element={<HelpSupport />} />
+          <Route path="/help-support/faq/:id" element={<HelpArticleDetail />} />
+          <Route path="/help-support/all-faqs" element={<AllFAQs />} />
 
-        {/* AUTH GATEWAY CORES */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/otp" element={<OTP />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+          {/* AUTH GATEWAY CORES */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/otp" element={<OTP />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        <Route path="/admin-gateway" element={<AdminLogin />} />
+          <Route path="/admin-gateway" element={<AdminLogin />} />
 
-        {/* Protected or Private Routes - Admin Scope */}
-        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-          <Route path="/admin/*" element={<AdminDashboard />} />
-        </Route>
+          {/* Protected or Private Routes - Admin Scope */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin/*" element={<AdminDashboard />} />
+          </Route>
 
-        {/* Protected or Private Routes - User Scope */}
-        <Route element={<ProtectedRoute allowedRoles={['user']} />}>
-          <Route path="/dashboard/nearby-hospital" element={<NearbyHospitalMap />} />
+          {/* Protected or Private Routes - User Scope */}
+          <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+            <Route path="/dashboard/nearby-hospital" element={<NearbyHospitalMap />} />
 
-          <Route path="/dashboard/:tabName?" element={<Dashboard />} />
-          <Route path="/dashboard/library/article/:id" element={<ArticlePage />} />
-          <Route path="/dashboard/settings" element={<Settings />} />
-        </Route>
+            <Route path="/dashboard/:tabName?" element={<Dashboard />} />
+            <Route path="/dashboard/library/article/:id" element={<ArticlePage />} />
+            <Route path="/dashboard/settings" element={<Settings />} />
+          </Route>
 
-        {/* CATCH-ALL: Opsyonal, para sa mga 404 pages */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* CATCH-ALL: Opsyonal, para sa mga 404 pages */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
 
+      <AccessibilityMenu />
       <ToastMessage />
     </BrowserRouter>
   )
