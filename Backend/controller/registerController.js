@@ -51,7 +51,7 @@ exports.registerUser = async (req, res) => {
                     Messages: [
                         {
                             From: {
-                                Email: "medihelp241::GMAIL_MARKER::gmail.com", // Eksaktong tugma sa active sender address mo
+                                Email: "medihelp241@gmail.com", // Eksaktong tugma sa active sender address mo
                                 Name: "MediHelp Support"
                             },
                             To: [
