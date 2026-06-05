@@ -91,9 +91,9 @@ const NearbyHospitalMap = () => {
                 params: { query } // Ipapasa ni axios ito bilang ?query=...
             });
             
-            if (!res.ok) {
-                if (res.status === 429) return; // Handle too many requests
-                throw new Error(`Server error: ${res.status}`);
+            if (!response.ok) {
+                if (response.status === 429) return; // Handle too many requests
+                throw new Error(`Server error: ${response.status}`);
             }
 
             const data = await response.json();
@@ -126,7 +126,8 @@ const NearbyHospitalMap = () => {
             
             setHospitals(formatted);
         } catch (e) { 
-            console.error("Fetch error details:", e.message); 
+            // Gamitin ang e.response para sa server errors (Axios specific)
+            console.error("Fetch error details:", e.response?.data?.error || e.message);
         }
     };
 
