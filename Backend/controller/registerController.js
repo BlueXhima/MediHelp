@@ -35,16 +35,10 @@ exports.registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(Password + pepper, 10);
         const roleID = 2; // Default user role
         const otp = generateOTP();
-        const expiresAt = Date.now() + 1 * 60 * 1000; // 1 minute from now
-
-        // 4. STORE OTP FIRST (I-save muna bago mag-send para iwas error sa verification mamaya)
-        otpStore.set(normalizedEmail, {
-            otp,
-            expiresAt
-        });
+        const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minute from now
 
         try {
-            // 5. TAMA: Pagpapadala ng OTP gamit ang iyong bagong Google Apps Script Service
+            // 4. Pagpapadala ng OTP gamit ang iyong bagong Google Apps Script Service
             await sendEmailViaGoogle(
                 normalizedEmail,
                 "Verify Your MediHelp Account",
@@ -61,11 +55,17 @@ exports.registerUser = async (req, res) => {
                 `
             );
             
-            // 6. Insert to Database
+            // 5. Insert to Database
             await dbconnection.query(
                 'INSERT INTO users (FirstName, LastName, Email, Password, RoleID, isVerified, Created_Date, Created_Time) VALUES (?, ?, ?, ?, ?, 0, CURDATE(), CURTIME())',
                 [FirstName, LastName, Email, hashedPassword, roleID]
             );
+
+            // 6. STORE OTP FIRST (I-save muna bago mag-send para iwas error sa verification mamaya)
+            otpStore.set(normalizedEmail, {
+                otp,
+                expiresAt
+            });
 
             res.status(201).json({ 
                 message: 'User registered successfully. Please verify your email.',
