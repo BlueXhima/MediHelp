@@ -60,26 +60,26 @@ const NearbyHospitalMap = () => {
     const fetchHospitals = async (lat, lon, type = activeCategory) => {
         if (!lat || !lon) return;
 
-        let categoryQuery = `node["amenity"="${type}"](around:5000, ${lat}, ${lon});
-                        way["amenity"="${type}"](around:5000, ${lat}, ${lon});
-                        rel["amenity"="${type}"](around:5000, ${lat}, ${lon});`;
+        let categoryQuery = `node["amenity"="${type}"](around:3000, ${lat}, ${lon});
+                        way["amenity"="${type}"](around:3000, ${lat}, ${lon});
+                        rel["amenity"="${type}"](around:3000, ${lat}, ${lon});`;
 
         if (type === 'pharmacy') {
-            categoryQuery += `node["shop"="pharmacy"](around:5000, ${lat}, ${lon});
-                            node["healthcare"="pharmacy"](around:5000, ${lat}, ${lon});
-                            rel["shop"="pharmacy"](around:5000, ${lat}, ${lon});`;
+            categoryQuery += `node["shop"="pharmacy"](around:3000, ${lat}, ${lon});
+                            node["healthcare"="pharmacy"](around:3000, ${lat}, ${lon});
+                            rel["shop"="pharmacy"](around:3000, ${lat}, ${lon});`;
         }
 
         if (type === 'doctors' || type === 'clinic') {
-            categoryQuery += `node["healthcare"="${type}"](around:5000, ${lat}, ${lon});
-                            way["healthcare"="${type}"](around:5000, ${lat}, ${lon});
-                            rel["healthcare"="${type}"](around:5000, ${lat}, ${lon});`;
+            categoryQuery += `node["healthcare"="${type}"](around:3000, ${lat}, ${lon});
+                            way["healthcare"="${type}"](around:3000, ${lat}, ${lon});
+                            rel["healthcare"="${type}"](around:3000, ${lat}, ${lon});`;
         }
 
         if (type === 'hospital') {
-            categoryQuery += `node["healthcare"="hospital"](around:5000, ${lat}, ${lon});
-                            way["healthcare"="hospital"](around:5000, ${lat}, ${lon});
-                            rel["healthcare"="hospital"](around:5000, ${lat}, ${lon});`;
+            categoryQuery += `node["healthcare"="hospital"](around:3000, ${lat}, ${lon});
+                            way["healthcare"="hospital"](around:3000, ${lat}, ${lon});
+                            rel["healthcare"="hospital"](around:3000, ${lat}, ${lon});`;
         }
 
         const query = `[out:json][timeout:60];(${categoryQuery});out center;`;
