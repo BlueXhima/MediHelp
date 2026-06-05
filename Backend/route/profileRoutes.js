@@ -10,7 +10,7 @@ const emergencyController = require('../controller/emergencyContactController');
 
 // Multer Setup
 const storage = multer.diskStorage({
-    destination: '/uploads',
+    destination: 'uploads/',
     filename: (req, file, cb) => {
         cb(null, `pfp-${Date.now()}${path.extname(file.originalname)}`);
     }
