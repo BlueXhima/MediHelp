@@ -83,7 +83,7 @@ const Overview = ({ onViewChange }) => {
                         size="lg"
                         leadingIcon={Mic}
                         className="shadow-none hover:shadow-primary/10"
-                        onClick={() => console.log("Start Voice Query")}
+                        onClick={() => navigate('/voice-assistant')}
                     >
                         Start Voice Query
                     </Button>
