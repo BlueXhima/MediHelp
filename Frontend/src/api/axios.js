@@ -14,7 +14,7 @@ const api = axios.create({
 });
 
 // I-LOG NATIN PARA MAKITA NATIN SA BROWSER CONSOLE KUNG ANO ANG NABABASA NIYA
-console.log("Current API Base URL is:", API_BASE_URL); // DONE
+// console.log("Current API Base URL is:", API_BASE_URL); // DONE
 
 // Interceptor para sa Response
 api.interceptors.response.use(
