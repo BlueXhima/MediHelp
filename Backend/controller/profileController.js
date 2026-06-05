@@ -155,7 +155,10 @@ exports.updateFullProfile = async (req, res) => {
                 oldImagePath = path.join(__dirname, '..', 'uploads', filename);
             }
 
-            finalImageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            // Babasahin nito kung HTTPS ang orihinal na request bago pumasok sa proxy gateway
+            const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+            finalImageUrl = `${protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            
             await connection.query(
                 'UPDATE users SET profile_picture = ?, Updated_Date = CURDATE(), Updated_Time = CURTIME() WHERE UserID = ?', 
                 [finalImageUrl, userId]
