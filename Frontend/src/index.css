@@ -60,6 +60,22 @@
         /* Apply background and text globally with smooth transition[cite: 11] */
         @apply bg-background text-foreground font-sans transition-colors duration-300;
         font-feature-settings: "rlig" 1, "calt" 1;
+        font-family: var(--font-family);
+        line-height: var(--line-spacing);
+        text-align: var(--text-align);
+        margin: 0;
+        zoom: var(--text-zoom, 1);
+        overflow-x: hidden;
+    }
+
+    .zoomable-content {
+        transition: transform 0.2s ease;
+        transform-origin: top left; /* Mas madaling i-manage kaysa sa center */
+        /* transform: scale(var(--text-zoom, 1)); */
+    }
+
+    p {
+        margin-bottom: var(--para-spacing);
     }
 }
 
