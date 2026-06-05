@@ -119,7 +119,7 @@ exports.verifyOtp = async (req, res) => {
         if (otpData.isEmailChange && otpData.oldEmail) {
             await dbconnection.query(
                 'UPDATE users SET Email = ?, isVerified = 1 WHERE Email = ?',
-                [normalizedEmail , otpData.oldEmail]
+                [normalizedEmail, otpData.oldEmail.toLowerCase().trim()]
             );
         } else {
             // Kung normal registration, i-verify lang ang kasalukuyang email
