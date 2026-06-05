@@ -84,10 +84,13 @@ const NearbyHospitalMap = () => {
         const query = `[out:json][timeout:60];(${categoryQuery});out center;`;
         
         try {
-            // Ginamit ang AllOrigins RAW Proxy para lumusot ang map data sa CORS block ng Vercel production site
-            const proxyUrl = "https://allorigins.win";
-            const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            // 1. TAMA: Isang beses lang dapat i-encode ang raw Overpass query param
+            const overpassUrl = `https://overpass-api.de{encodeURIComponent(query)}`;
 
+            // 2. TAMA: Ang AllOrigins RAW API link (May /raw?url= at hinding-hindi na magdidikit ng sabog)
+            const proxyUrl = "https://allorigins.win";
+
+            // Pinagsama sila gamit ang nag-iisang encoding wrapper para malinis ang basag na strings
             const res = await fetch(`${proxyUrl}${encodeURIComponent(overpassUrl)}`);
             
             if (!res.ok) {
