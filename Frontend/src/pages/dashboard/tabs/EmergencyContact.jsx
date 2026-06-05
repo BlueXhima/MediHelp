@@ -23,28 +23,42 @@ const EmergencyContact = ({ isEditing, emergencyManager, onNearbyHospitalClick }
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {contacts.map(contact => (
-                        <div key={contact.id} className="bg-card border border-border/60 p-5 rounded-2xl flex justify-between items-center card-hover">
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <h5 className="font-bold text-foreground text-base tracking-tight">{contact.name}</h5>
-                                    <span className="text-slate-400 text-xs font-semibold">({contact.relationship})</span>
-                                    {Number(contact.isPrimary) === 1 && (
-                                        <span className="flex items-center gap-0.5 text-[8px] font-black tracking-widest bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-full uppercase"><Star size={8} fill="currentColor"/> Primary</span>
+                    {contacts.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {contacts.map(contact => (
+                                <div key={contact.id} className="bg-card border border-border/60 p-5 rounded-2xl flex justify-between items-center card-hover">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <h5 className="font-bold text-foreground text-base tracking-tight">{contact.name}</h5>
+                                            <span className="text-slate-400 text-xs font-semibold">({contact.relationship})</span>
+                                            {Number(contact.isPrimary) === 1 && (
+                                                <span className="flex items-center gap-0.5 text-[8px] font-black tracking-widest bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-full uppercase">
+                                                    <Star size={8} fill="currentColor"/> Primary
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-slate-500">
+                                            <span className="flex items-center gap-1.5"><Phone size={12} className="text-slate-400" /> {contact.phone}</span>
+                                            {contact.email && <span className="flex items-center gap-1.5"><Mail size={12} className="text-slate-400" /> {contact.email}</span>}
+                                        </div>
+                                    </div>
+                                    {isEditing && Number(contact.isPrimary) !== 1 && (
+                                        <button onClick={() => handleRemoveContact(contact.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-all duration-200">
+                                            <Trash2 size={16} />
+                                        </button>
                                     )}
                                 </div>
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-slate-500">
-                                    <span className="flex items-center gap-1.5"><Phone size={12} className="text-slate-400" /> {contact.phone}</span>
-                                    {contact.email && <span className="flex items-center gap-1.5"><Mail size={12} className="text-slate-400" /> {contact.email}</span>}
-                                </div>
-                            </div>
-                            {isEditing && !Number(contact.isPrimary) && (
-                                <button onClick={() => handleRemoveContact(contact.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-all duration-200">
-                                    <Trash2 size={16} />
-                                </button>
-                            )}
+                            ))}
                         </div>
-                    ))}
+                    ) : (
+                        /* Minimalist Empty State Wrapper Container */
+                        <div className="border border-dashed border-border/60 rounded-2xl p-8 text-center flex flex-col items-center justify-center bg-card/20 animate-in fade-in duration-200">
+                            <p className="text-sm font-bold text-foreground/80 mb-1">No emergency contacts listed</p>
+                            <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+                                Please add an emergency connection profile to secure quick access during system alerts.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {isEditing && (
