@@ -21,6 +21,7 @@ const sopRoutes = require('./route/sopRoutes');
 const infographicRoutes = require('./route/infographicRoutes');
 const contactSupportRoutes = require('./route/contactRoutes');
 const translateRoutes = require('./route/translateRoutes');
+const hospitalRoutes = require('./route/hospitalRoutes');
 const userDetailsRoutes = require('./controller/userDetailController');
 
 const verifyToken = require('./middleware/auth');
@@ -68,6 +69,7 @@ app.use('/api/sop', sopRoutes);
 app.use('/api/infographics', infographicRoutes);
 app.use('/api', contactSupportRoutes);
 app.use('/api', translateRoutes);
+app.use('/api', hospitalRoutes);
 
 // Protected Routes (Dadaan muna sa verifyToken bago ma-access)
 // Ang lahat ng nasa loob ng userDetailsRoutes at profileRoutes ay ligtas na ngayon
