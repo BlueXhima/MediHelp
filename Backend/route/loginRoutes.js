@@ -12,7 +12,7 @@ const { googleLogin } = require('../controller/googleLoginController');
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 20, // Taasan para hindi maunahan ang frontend countdown
-    message: { error: "Too many login attempts. Try again later." }
+    message: { error: "Too many login attempts. Try again later." },
     validate: { xForwardedForHeader: false }
 });
 
